@@ -1,0 +1,19 @@
+parameters:
+
+services:
+    syrup.componentbundle.listener.exception:
+        class: Syrup\ComponentBundle\Listener\SyrupExceptionListener
+        arguments: [@logger]
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
+    syrup.componentbundle.listener.controller:
+        class: Syrup\ComponentBundle\Listener\SyrupControllerListener
+        tags:
+            - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
+    syrup.component_factory:
+        class: Syrup\ComponentBundle\Component\ComponentFactory
+        arguments: [@logger, @doctrine, %components%]
+    syrup.monolog.json_formatter:
+        class: Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter
+        arguments: [%app_name%]
+

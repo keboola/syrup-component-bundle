@@ -1,0 +1,25 @@
+{
+	"name": "syrup/component-bundle",
+	"type": "symfony-bundle",
+	"description": "Syrup ComponentBundle",
+	"keywords": [],
+	"authors": [
+		{
+			"name": "Miroslav Čillík",
+			"email": "miro@keboola.com"
+		}
+	],
+	"require": {
+		"php": ">=5.3.5",
+		"symfony/symfony": "2.1.*",
+		"doctrine/doctrine-bundle": "1.0.*",
+		"doctrine/orm": ">=2.2.3,<2.4-dev",
+		"symfony/monolog-bundle": "2.1.*",
+		"keboola/storage-api-client": "2.5.6",
+		"keboola/csv": "1.0.*"
+	},
+	"autoload": {
+		"psr-0": { "Syrup\\ComponentBundle": "" }
+	},
+	"target-dir": "Syrup/ComponentBundle"
+}

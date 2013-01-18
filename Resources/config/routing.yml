@@ -1,0 +1,3 @@
+syrup_component_api:
+    pattern:  /{componentName}/run
+    defaults: { _controller: SyrupComponentBundle:Api:run, _format: json }
