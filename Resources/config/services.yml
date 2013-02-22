@@ -1,4 +1,10 @@
 parameters:
+    uploader:
+        aws-access-key: AKIAJJKM4R26QUNBFPTA
+        aws-secret-key: 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
+        s3-upload-path: keboola-logs/debug-files
+        bitly-login:    petrsimecek
+        bitly-api-key:  R_35ed95e18188c58f7b42787f358857ea
 
 services:
     syrup.componentbundle.listener.exception:
