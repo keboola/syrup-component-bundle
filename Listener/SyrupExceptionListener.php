@@ -26,12 +26,16 @@ class SyrupExceptionListener
 		// You get the exception object from the received event
 		$exception = $event->getException();
 
+		$exceptionId = 'syrup-' . md5(microtime());
+
 		// Customize your response object to display the exception details
 		$response = new Response();
 		$response->setContent(json_encode(array(
 			'status'    => 'error',
+			'error'     => 'Application error',
+			'code'      => $exception->getCode(),
 			'message'   => $exception->getMessage(),
-			'code'      => $exception->getCode()
+			'exceptionId'   => $exceptionId
 		)));
 
 		// HttpExceptionInterface is a special type of exception that
@@ -49,6 +53,12 @@ class SyrupExceptionListener
 		$event->setResponse($response);
 
 		// Log exception
-		$this->_logger->err($exception->getMessage(), array("exception" => $exception));
+		$this->_logger->err(
+			$exception->getMessage(),
+			array(
+				'exception'     => $exception,
+				'exceptionId'   => $exceptionId,
+			)
+		);
 	}
 }

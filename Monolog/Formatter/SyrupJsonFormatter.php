@@ -72,6 +72,10 @@ class SyrupJsonFormatter extends JsonFormatter
 	 */
 	public function formatBatch(array $records)
 	{
-		return json_encode($records);
+		$newRecords = array();
+		foreach($records as $record) {
+			$newRecords[] = json_decode($this->format($record), true);
+		}
+		return json_encode($newRecords);
 	}
 }
