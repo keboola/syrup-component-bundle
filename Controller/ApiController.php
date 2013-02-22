@@ -29,6 +29,7 @@ class ApiController extends ContainerAware
 
 	/**
 	 * @param string $componentName
+	 * @throws \Exception
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
 	public function runAction($componentName)
@@ -41,6 +42,7 @@ class ApiController extends ContainerAware
 		    throw new \Exception("Only POST method is allowed.");
 	    }
 
+	    $this->container->get('syrup.monolog.json_formatter')->setComponentName($componentName);
 	    $component = $this->container->get('syrup.component_factory')->get($this->_storageApi, $componentName);
 	    $component->run(json_decode($request->getContent(), true));
 
