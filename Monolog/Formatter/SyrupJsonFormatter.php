@@ -8,6 +8,7 @@
 namespace Syrup\ComponentBundle\Monolog\Formatter;
 
 use Monolog\Formatter\JsonFormatter;
+use Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader;
 
 class SyrupJsonFormatter extends JsonFormatter
 {
@@ -16,7 +17,12 @@ class SyrupJsonFormatter extends JsonFormatter
 	protected $_componentName = '';
 	protected $_logData;
 
-	public function __construct($appName)
+	/**
+	 * @var SyrupS3Uploader
+	 */
+	protected $_uploader;
+
+	public function __construct($appName, $uploader)
 	{
 		$this->_appName = $appName;
 		$this->_runId = $appName . '-';
@@ -24,6 +30,7 @@ class SyrupJsonFormatter extends JsonFormatter
 			$this->_runId .= $this->_componentName . '-';
 		}
 		$this->_runId .= md5(microtime());
+		$this->_uploader = $uploader;
 	}
 
 	public function setComponentName($name)
@@ -45,6 +52,13 @@ class SyrupJsonFormatter extends JsonFormatter
 		$record['component']    = $this->_componentName;
 		$record['priority']     = $record['level_name'];
 		$record['user']         = $this->_logData;
+		$record['pid']          = getmypid();
+
+		if (isset($record['context']['exception'])) {
+			$e = $record['context']['exception'];
+			$serialized = var_export(json_encode((array) $e), true);
+			$record['attachment'] = $this->_uploader->uploadString('exception', $serialized);
+		}
 
 		unset($record['level_name']);
 		unset($record['level']);

@@ -28,6 +28,8 @@ class DummyExtractor extends Component
 			array('4', 'j', 'k', 'l'),
 		);
 
+		throw new \Exception("Oooops, something went wrong");
+
 		$table = new Table($this->_storageApi, 'in.c-main.test');
 
 		$table->setFromArray($data, $hasHeader = true);

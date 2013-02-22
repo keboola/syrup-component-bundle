@@ -49,6 +49,6 @@ class SyrupExceptionListener
 		$event->setResponse($response);
 
 		// Log exception
-		$this->_logger->err($exception->getMessage());
+		$this->_logger->err($exception->getMessage(), array("exception" => $exception));
 	}
 }

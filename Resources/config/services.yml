@@ -13,7 +13,10 @@ services:
     syrup.component_factory:
         class: Syrup\ComponentBundle\Component\ComponentFactory
         arguments: [@logger, @doctrine, %components%]
+    syrup.monolog.s3_uploader:
+        class: Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader
+        arguments: [%uploader%]
     syrup.monolog.json_formatter:
         class: Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter
-        arguments: [%app_name%]
+        arguments: [%app_name%, @syrup.monolog.s3_uploader]
 
