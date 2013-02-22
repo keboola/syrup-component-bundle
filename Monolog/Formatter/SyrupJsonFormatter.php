@@ -8,6 +8,7 @@
 namespace Syrup\ComponentBundle\Monolog\Formatter;
 
 use Monolog\Formatter\JsonFormatter;
+use Monolog\Logger;
 use Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader;
 
 class SyrupJsonFormatter extends JsonFormatter
@@ -53,6 +54,10 @@ class SyrupJsonFormatter extends JsonFormatter
 		$record['priority']     = $record['level_name'];
 		$record['user']         = $this->_logData;
 		$record['pid']          = getmypid();
+
+		if ($record['level_name'] == Logger::ERROR) {
+			$record['error'] = 'Application error';
+		}
 
 		if (isset($record['context']['exception'])) {
 			$e = $record['context']['exception'];
