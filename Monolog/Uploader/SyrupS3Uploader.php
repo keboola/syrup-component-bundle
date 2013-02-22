@@ -8,9 +8,10 @@
 
 namespace Syrup\ComponentBundle\Monolog\Uploader;
 
+use Aws\S3\Enum\CannedAcl;
 use Aws\S3\S3Client;
 use Aws\Common\Aws;
-use Aws\Common\Enum\Region;
+use Guzzle\Http\Client;
 
 class SyrupS3Uploader
 {
@@ -36,7 +37,7 @@ class SyrupS3Uploader
 		$s3FileName = $this->_fileUniquePrefix() . $name;
 		$s3Path = $this->_config['s3-upload-path'] . '/' . $s3FileName;
 
-		$this->_s3->putObject($s3Path, array(
+		$this->_s3->putObject(array(
 			'Bucket' => $this->_config['s3-upload-path'],
 			'Key'    => $s3FileName,
 			'Body'   => $content,
@@ -59,7 +60,7 @@ class SyrupS3Uploader
 
 	protected function _shortenUrl($url)
 	{
-		$client = new \Guzzle\Http\Client(
+		$client = new Client(
 			'http://api.bitly.com/v3',
 			array(
 				'request.params' => array(
@@ -88,8 +89,8 @@ class SyrupS3Uploader
 	protected function _getS3()
 	{
 		$s3 = S3Client::factory(array(
-			$this->_config['aws-access-key'],
-			$this->_config['aws-secret-key']
+			'key' => $this->_config['aws-access-key'],
+			'secret' => $this->_config['aws-secret-key']
 		));
 
 		return $s3;
