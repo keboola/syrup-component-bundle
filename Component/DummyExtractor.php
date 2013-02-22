@@ -28,7 +28,9 @@ class DummyExtractor extends Component
 			array('4', 'j', 'k', 'l'),
 		);
 
-		throw new \Exception("Oooops, something went wrong");
+		if (isset($params['error']) && $params['error'] == 1) {
+			throw new \Exception("Oooops, something went wrong");
+		}
 
 		$table = new Table($this->_storageApi, 'in.c-main.test');
 
