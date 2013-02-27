@@ -61,6 +61,7 @@ class SyrupJsonFormatter extends JsonFormatter
 
 		if (isset($record['context']['exception'])) {
 			$e = $record['context']['exception'];
+			unset($record['context']['exception']);
 			$serialized = var_export(json_encode((array) $e), true);
 			$record['attachment'] = $this->_uploader->uploadString('exception', $serialized);
 		}
