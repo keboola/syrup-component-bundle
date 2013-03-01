@@ -17,7 +17,6 @@ class SyrupJsonFormatter extends JsonFormatter
 {
 	protected $_appName;
 	protected $_runId = '';
-	protected $_exceptionId;
 	protected $_componentName = '';
 
 	/**
@@ -91,7 +90,7 @@ class SyrupJsonFormatter extends JsonFormatter
 		}
 
 		if (isset($record['context']['exceptionId'])) {
-			$record['exceptionId']  = $this->_exceptionId;
+			$record['exceptionId'] = $record['context']['exceptionId'];
 			unset($record['context']['exceptionId']);
 		}
 
@@ -100,7 +99,7 @@ class SyrupJsonFormatter extends JsonFormatter
 		unset($record['channel']);
 
 		// Log to SAPI events
-		$this->_logToSapi($record['priority'], $record['message'], $e);
+		$this->_logToSapi($record, $e);
 
 		return json_encode($record);
 	}
@@ -117,21 +116,21 @@ class SyrupJsonFormatter extends JsonFormatter
 		return json_encode($newRecords);
 	}
 
-	protected function _logToSapi($priority, $message, $e)
+	protected function _logToSapi($record, $e)
 	{
 		$sapiEvent = new Event();
 		$sapiEvent->setComponent($this->_componentName);
-		$sapiEvent->setMessage($message);
+		$sapiEvent->setMessage($record['message']);
 		$sapiEvent->setRunId($this->_runId);
 		$sapiEvent->setResults(array(
-			'exceptionId' => $this->_exceptionId
+			'exceptionId' => $record['exceptionId']
 		));
 
 		if ($e != null) {
 			$sapiEvent->setDescription($e->getMessage());
 		}
 
-		switch($priority) {
+		switch($record['priority']) {
 			case Logger::ERROR:
 				$type = Event::TYPE_ERROR;
 				break;
