@@ -9,6 +9,12 @@
 			"email": "miro@keboola.com"
 		}
 	],
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "git@bitbucket.org:keboola/syrup-development-bundle.git"
+		}
+	],
 	"require": {
 		"php": ">=5.3.5",
 		"keboola/storage-api-client": "2.6.*",
@@ -17,10 +23,7 @@
 		"aws/aws-sdk-php": "2.*"
 	},
 	"require-dev": {
-		"symfony/symfony": "2.1.*",
-		"doctrine/doctrine-bundle": "1.0.*",
-		"doctrine/orm": ">=2.2.3,<2.4-dev",
-		"symfony/monolog-bundle": "2.1.*"
+		"syrup/development-bundle": "1.0.8"
 	},
 	"minimum-stability": "dev",
 	"autoload": {
