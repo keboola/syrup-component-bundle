@@ -27,14 +27,14 @@ class ApiController extends ContainerAware
 			}
 			$this->_storageApi = new Client($request->headers->get('X-StorageApi-Token'), $url);
 			$this->container->set('storageApi', $this->_storageApi);
-			$this->container->get('syrup.monolog.json_formatter')->setLogData($this->_storageApi->getLogData());
+
 			$kbcRunId = $this->_storageApi->generateId();
 			if ($request->headers->has('X-KBC-RunId')) {
 				$kbcRunId = $request->headers->get('X-KBC-RunId');
 			}
-			$this->container->get('syrup.monolog.json_formatter')->setRunId($kbcRunId);
 
-			$this->container->get('syrup.componentbundle.listener.exception')->setStorageApiClient($this->_storageApi);
+			$this->container->get('syrup.monolog.json_formatter')->setRunId($kbcRunId);
+			$this->container->get('syrup.monolog.json_formatter')->setStorageApiClient($this->_storageApi);
 
 		} else {
 			throw new HttpException('Missing StorageAPI token.');
