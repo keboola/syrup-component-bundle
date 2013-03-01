@@ -39,6 +39,11 @@ class SyrupExceptionListener
 		$this->_formatter = $formatter;
 	}
 
+	public function setStorageApiClient($client)
+	{
+		$this->_sapiClient = $client;
+	}
+
 	public function onKernelException(GetResponseForExceptionEvent $event)
 	{
 		// You get the exception object from the received event
