@@ -22,10 +22,6 @@ class SyrupExceptionListener
 	 */
 	protected $_logger;
 
-	protected $_appName;
-
-	protected $_componentName;
-
 	protected $_formatter;
 
 	/**
@@ -90,7 +86,7 @@ class SyrupExceptionListener
 
 		// Log to SAPI events
 		$sapiEvent = new Event();
-		$sapiEvent->setComponent($this->_componentName);
+		$sapiEvent->setComponent($this->_formatter->getComponentName());
 		$sapiEvent->setMessage("Error occured.");
 		$sapiEvent->setDescription($exception->getMessage());
 		$sapiEvent->setRunId($this->_formatter->getRunId());
