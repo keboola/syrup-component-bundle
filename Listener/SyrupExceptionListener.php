@@ -7,6 +7,8 @@
  */
 namespace Syrup\ComponentBundle\Listener;
 
+use Keboola\StorageApi\Client;
+use Keboola\StorageApi\Event;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -25,6 +27,11 @@ class SyrupExceptionListener
 	protected $_componentName;
 
 	protected $_formatter;
+
+	/**
+	 * @var Client
+	 */
+	protected $_sapiClient;
 
 	public function __construct(Logger $logger, SyrupJsonFormatter $formatter)
 	{
@@ -64,22 +71,27 @@ class SyrupExceptionListener
 		$event->setResponse($response);
 
 		// Log exception
+		$method = 'warn';
 		if ($response->getStatusCode() >= 500) {
-			$this->_logger->err(
-				$exception->getMessage(),
-				array(
-					'exception'     => $exception,
-					'exceptionId'   => $exceptionId,
-				)
-			);
-		} else {
-			$this->_logger->warn(
-				$exception->getMessage(),
-				array(
-					'exception'     => $exception,
-					'exceptionId'   => $exceptionId,
-				)
-			);
+			$method = 'err';
 		}
+		$this->_logger->$method(
+			$exception->getMessage(),
+			array(
+				'exception'     => $exception,
+				'exceptionId'   => $exceptionId,
+			)
+		);
+
+		// Log to SAPI events
+		$sapiEvent = new Event();
+		$sapiEvent->setComponent($this->_componentName);
+		$sapiEvent->setMessage("Error occured.");
+		$sapiEvent->setDescription($exception->getMessage());
+		$sapiEvent->setRunId($this->_formatter->getRunId());
+		$type = ($method=='err')?Event::TYPE_ERROR:Event::TYPE_WARN;
+		$sapiEvent->setType($type);
+
+		$this->_sapiClient->createEvent($sapiEvent);
 	}
 }
