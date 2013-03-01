@@ -73,12 +73,15 @@ class SyrupJsonFormatter extends JsonFormatter
 		$record['app']          = $this->_appName;
 		$record['component']    = $this->_componentName;
 		$record['priority']     = $record['level_name'];
-		$record['user']         = $this->_sapi->getLogData();
 		$record['pid']          = getmypid();
 		$record['runId']        = $this->_runId;
 
 		if ($record['level_name'] == Logger::ERROR) {
 			$record['error'] = 'Application error';
+		}
+
+		if ($this->_sapi != null) {
+			$record['user'] = $this->_sapi->getLogData();
 		}
 
 		$e = null;
@@ -95,11 +98,12 @@ class SyrupJsonFormatter extends JsonFormatter
 		}
 
 		unset($record['level_name']);
-		unset($record['level']);
 		unset($record['channel']);
 
 		// Log to SAPI events
-		$this->_logToSapi($record, $e);
+		if ($record['level'] != Logger::DEBUG && $this->_sapi != null) {
+			$this->_logToSapi($record, $e);
+		}
 
 		return json_encode($record);
 	}
@@ -122,16 +126,22 @@ class SyrupJsonFormatter extends JsonFormatter
 		$sapiEvent->setComponent($this->_componentName);
 		$sapiEvent->setMessage($record['message']);
 		$sapiEvent->setRunId($this->_runId);
-		$sapiEvent->setResults(array(
-			'exceptionId' => $record['exceptionId']
-		));
 
 		if ($e != null) {
 			$sapiEvent->setDescription($e->getMessage());
 		}
 
-		switch($record['priority']) {
+		if (isset($record['exceptionId'])) {
+			$sapiEvent->setResults(array(
+				'exceptionId' => $record['exceptionId']
+			));
+		}
+
+		switch($record['level']) {
 			case Logger::ERROR:
+			case Logger::CRITICAL:
+			case Logger::EMERGENCY:
+			case Logger::ALERT:
 				$type = Event::TYPE_ERROR;
 				break;
 			case Logger::WARNING:
@@ -139,11 +149,12 @@ class SyrupJsonFormatter extends JsonFormatter
 				$type = Event::TYPE_WARN;
 				break;
 			case Logger::INFO:
+			default:
 				$type = Event::TYPE_INFO;
 				break;
 		}
 
 		$sapiEvent->setType($type);
-		$this->_sapiClient->createEvent($sapiEvent);
+		$this->_sapi->createEvent($sapiEvent);
 	}
 }
