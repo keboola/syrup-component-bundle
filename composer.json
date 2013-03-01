@@ -12,6 +12,7 @@
 	"require": {
 		"php": ">=5.3.5",
 		"keboola/storage-api-client": "2.6.*",
+		"guzzle/guzzle": "3.0.*",
 		"keboola/csv": "1.0.*",
 		"aws/aws-sdk-php": "2.*"
 	},
