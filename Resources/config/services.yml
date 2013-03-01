@@ -12,6 +12,7 @@ services:
         arguments: [@logger]
         tags:
             - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
+            - { name: monolog.logger, channel: %app_name%}
     syrup.componentbundle.listener.controller:
         class: Syrup\ComponentBundle\Listener\SyrupControllerListener
         tags:
@@ -19,6 +20,8 @@ services:
     syrup.component_factory:
         class: Syrup\ComponentBundle\Component\ComponentFactory
         arguments: [@logger, @doctrine, %components%]
+        tags:
+            - { name: monolog.logger, channel: %app_name%}
     syrup.monolog.s3_uploader:
         class: Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader
         arguments: [%uploader%]

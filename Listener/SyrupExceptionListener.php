@@ -14,6 +14,9 @@ use Monolog\Logger;
 
 class SyrupExceptionListener
 {
+	/**
+	 * @var \Monolog\Logger
+	 */
 	protected $_logger;
 
 	public function __construct(Logger $logger)
