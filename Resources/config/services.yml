@@ -9,7 +9,7 @@ parameters:
 services:
     syrup.componentbundle.listener.exception:
         class: Syrup\ComponentBundle\Listener\SyrupExceptionListener
-        arguments: [@logger]
+        arguments: [@logger, %app_name%]
         tags:
             - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
     syrup.componentbundle.listener.controller:

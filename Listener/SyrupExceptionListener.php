@@ -19,9 +19,12 @@ class SyrupExceptionListener
 	 */
 	protected $_logger;
 
-	public function __construct(Logger $logger)
+	protected $_appName;
+
+	public function __construct(Logger $logger, $appName)
 	{
 		$this->_logger = $logger;
+		$this->_appName = $appName;
 	}
 
 	public function onKernelException(GetResponseForExceptionEvent $event)
@@ -29,7 +32,7 @@ class SyrupExceptionListener
 		// You get the exception object from the received event
 		$exception = $event->getException();
 
-		$exceptionId = 'syrup-' . md5(microtime());
+		$exceptionId = $this->_appName . '-' . md5(microtime());
 
 		// Customize your response object to display the exception details
 		$response = new Response();
