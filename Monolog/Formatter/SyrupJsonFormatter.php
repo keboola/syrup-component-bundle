@@ -106,7 +106,9 @@ class SyrupJsonFormatter extends JsonFormatter
 		}
 
 		// Log to SAPI events
-		if ($record['level'] != Logger::DEBUG && $this->_sapi != null) {
+		if ($record['level'] != Logger::DEBUG
+			&& $record['level'] != Logger::CRITICAL
+			&& $this->_sapi != null) {
 			$this->_logToSapi($record, $e);
 		}
 

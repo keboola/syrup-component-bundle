@@ -80,7 +80,7 @@ class Component implements ComponentInterface
 	/**
 	 * @param null $params - parameters passed from API call
 	 */
-	public function run($params = null)
+	public function run($params)
 	{
 		$this->_log->debug("Component " . $this->_prefix . "-" . $this->_name . " started.");
 		$timestart = microtime(true);
@@ -97,7 +97,7 @@ class Component implements ComponentInterface
 		}
 
 		$duration = microtime(true) - $timestart;
-		$this->_log->info("Component: " . $this->_name . " finished. Duration: " . $duration);
+		$this->_log->debug("Component: " . $this->_name . " finished. Duration: " . $duration);
 	}
 
 	/**
@@ -129,10 +129,16 @@ class Component implements ComponentInterface
 	 */
 	public function getConfig()
 	{
-		if ($this->_storageApi->bucketExists('sys.c-' . $this->_prefix . '-' . $this->_name)) {
-			return Reader::read('sys.c-' . $this->_prefix . '-' . $this->_name);
+		if ($this->_storageApi->bucketExists('sys.c-' . $this->getFullName())) {
+			return Reader::read('sys.c-' . $this->getFullName());
 		} else {
 			return array();
 		}
 	}
+
+	public function getFullName()
+	{
+		return $this->_prefix . '_' . $this->_name;
+	}
+
 }

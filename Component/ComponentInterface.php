@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\Container;
 
 interface ComponentInterface
 {
-	public function run();
+	public function run($params);
 
 	/**
 	 * @param Container $container
