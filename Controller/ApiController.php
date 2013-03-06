@@ -58,6 +58,7 @@ class ApiController extends ContainerAware
 
 	    $this->container->get('syrup.monolog.json_formatter')->setComponentName($componentName);
 	    $component = $this->container->get('syrup.component_factory')->get($this->_storageApi, $componentName);
+	    $component->setContainer($this->container);
 	    $component->run(json_decode($request->getContent(), true));
 
 	    $duration = microtime(true) - $timestart;

@@ -12,7 +12,15 @@ namespace Syrup\ComponentBundle\Component;
 /**
  * All interfaces should implement ComponentInterface
  */
+use Symfony\Component\DependencyInjection\Container;
+
 interface ComponentInterface
 {
 	public function run();
+
+	/**
+	 * @param Container $container
+	 * @return mixed
+	 */
+	public function setContainer($container);
 }
