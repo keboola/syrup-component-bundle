@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Keboola\StorageApi\Client;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Keboola\StorageApi\Event as SapiEvent;
 
 class ApiController extends ContainerAware
 {
@@ -43,23 +44,26 @@ class ApiController extends ContainerAware
 
 	/**
 	 * @param string $componentName
-	 * @throws \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException
+	 * @param string $actionName
+	 * @throws \Symfony\Component\HttpKernel\Exception\HttpException
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
-	public function runAction($componentName)
+	public function runAction($componentName, $actionName)
     {
 	    set_time_limit(3600*3);
 	    $timestart = microtime(true);
 
 	    $request = $this->getRequest();
-	    if ($request->getMethod() != 'POST') {
-		    throw new MethodNotAllowedHttpException("Only POST method is allowed.");
-	    }
 
 	    $this->container->get('syrup.monolog.json_formatter')->setComponentName($componentName);
 	    $component = $this->container->get('syrup.component_factory')->get($this->_storageApi, $componentName);
 	    $component->setContainer($this->container);
-	    $component->run(json_decode($request->getContent(), true));
+
+	    if (!method_exists($component, $actionName)) {
+		    throw new HttpException(400, "Component $componentName doesn't have action $actionName");
+	    }
+
+	    $component->$actionName(json_decode($request->getContent(), true));
 
 	    $duration = microtime(true) - $timestart;
 
@@ -67,6 +71,9 @@ class ApiController extends ContainerAware
 		    'status'    => 'ok',
 		    'duration'  => $duration
 	    )));
+
+	    // Create Success event in SAPI
+	    $this->_sendSuccessEventToSapi('Action "'.$actionName.'" finished. Duration: ' . $duration, $componentName);
 
 	    return $response;
     }
@@ -77,6 +84,17 @@ class ApiController extends ContainerAware
 	public function getRequest()
 	{
 		return $this->container->get('request');
+	}
+
+	protected function _sendSuccessEventToSapi($message, $componentName)
+	{
+		$sapiEvent = new SapiEvent();
+		$sapiEvent->setComponent($componentName);
+		$sapiEvent->setMessage($message);
+		$sapiEvent->setRunId($this->container->get('syrup.monolog.json_formatter')->getRunId());
+		$sapiEvent->setType(SapiEvent::TYPE_SUCCESS);
+
+		$this->_storageApi->createEvent($sapiEvent);
 	}
 
 }

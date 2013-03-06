@@ -1,3 +1,5 @@
 syrup_component_api:
-    pattern:  /{componentName}/run
+    pattern:  /{componentName}/{actionName}
     defaults: { _controller: SyrupComponentBundle:Api:run, _format: json }
+    requirements:
+        _method:  POST
