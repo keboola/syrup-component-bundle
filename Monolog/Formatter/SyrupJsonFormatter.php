@@ -9,6 +9,7 @@ namespace Syrup\ComponentBundle\Monolog\Formatter;
 
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Logger;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Event;
@@ -76,8 +77,13 @@ class SyrupJsonFormatter extends JsonFormatter
 		$record['pid']          = getmypid();
 		$record['runId']        = $this->_runId;
 
-		if ($record['level_name'] == Logger::ERROR) {
-			$record['error'] = 'Application error';
+		switch($record['level']) {
+			case Logger::ERROR:
+				$record['error'] = 'User error';
+				break;
+			case Logger::CRITICAL:
+				$record['error'] = 'Application error';
+				break;
 		}
 
 		if ($this->_sapi != null) {
@@ -85,10 +91,12 @@ class SyrupJsonFormatter extends JsonFormatter
 		}
 
 		$e = null;
+
+		// Upload exception trace to S3
 		if (isset($record['context']['exception'])) {
 			$e = $record['context']['exception'];
 			unset($record['context']['exception']);
-			$serialized = var_export(json_encode((array) $e), true);
+			$serialized = json_encode((array) $e);
 			$record['attachment'] = $this->_uploader->uploadString('exception', $serialized);
 		}
 
@@ -97,13 +105,12 @@ class SyrupJsonFormatter extends JsonFormatter
 			unset($record['context']['exceptionId']);
 		}
 
-		unset($record['level_name']);
-		unset($record['channel']);
-
 		// Log to SAPI events
 		if ($record['level'] != Logger::DEBUG && $this->_sapi != null) {
 			$this->_logToSapi($record, $e);
 		}
+
+		unset($record['level_name']);
 
 		return json_encode($record);
 	}
@@ -117,7 +124,7 @@ class SyrupJsonFormatter extends JsonFormatter
 		foreach($records as $record) {
 			$newRecords[] = json_decode($this->format($record), true);
 		}
-		return json_encode($newRecords);
+		return json_encode($records);
 	}
 
 	protected function _logToSapi($record, $e)

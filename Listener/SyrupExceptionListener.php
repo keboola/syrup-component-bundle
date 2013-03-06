@@ -36,23 +36,30 @@ class SyrupExceptionListener
 
 		// Customize your response object to display the exception details
 		$response = new Response();
-		$response->setContent(json_encode(array(
+		$content = array(
 			'status'    => 'error',
 			'error'     => 'Application error',
 			'code'      => $exception->getCode(),
 			'message'   => $exception->getMessage(),
 			'exceptionId'   => $exceptionId,
 			'runId'     => $this->_formatter->getRunId()
-		)));
+		);
 
 		// HttpExceptionInterface is a special type of exception that
 		// holds status code and header details
 		if ($exception instanceof HttpExceptionInterface) {
 			$response->setStatusCode($exception->getStatusCode());
 			$response->headers->replace($exception->getHeaders());
+
+			if ($exception->getStatusCode() < 500) {
+				$content['error'] = 'User error';
+			}
+
 		} else {
 			$response->setStatusCode(500);
 		}
+
+		$response->setContent(json_encode($content));
 
 		$response->headers->set('Content-Type', 'application/json');
 
@@ -60,9 +67,9 @@ class SyrupExceptionListener
 		$event->setResponse($response);
 
 		// Log exception
-		$method = 'warn';
+		$method = 'error';
 		if ($response->getStatusCode() >= 500) {
-			$method = 'err';
+			$method = 'critical';
 		}
 		$this->_logger->$method(
 			$exception->getMessage(),

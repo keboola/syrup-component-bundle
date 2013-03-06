@@ -8,6 +8,7 @@
 
 namespace Syrup\ComponentBundle\Component;
 
+use Symfony\Component\DependencyInjection\Container;
 use Syrup\ComponentBundle\Component\ComponentInterface;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Config\Reader;
@@ -17,6 +18,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Component implements ComponentInterface
 {
+	/**
+	 * @var Container
+	 */
+	public $_container;
+
 	/**
 	 * @var \Keboola\StorageApi\Client
 	 */
@@ -64,6 +70,11 @@ class Component implements ComponentInterface
 	public function setConnection($db)
 	{
 		$this->_db = $db;
+	}
+
+	public function setContainer($container)
+	{
+		$this->_container = $container;
 	}
 
 	/**

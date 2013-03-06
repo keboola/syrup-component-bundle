@@ -9,6 +9,7 @@
 
 namespace Syrup\ComponentBundle\Component;
 
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use \Syrup\ComponentBundle\Component\Component;
 use Keboola\StorageApi\Table;
 
@@ -30,6 +31,18 @@ class DummyExtractor extends Component
 
 		if (isset($params['error']) && $params['error'] == 1) {
 			throw new \Exception("Oooops, something went wrong");
+		}
+
+		if (isset($params['userError']) && $params['userError'] == 1) {
+			throw new HttpException(400, "User Exception occured");
+		}
+
+		if (isset($params['fatalError']) && $params['fatalError'] == 1) {
+
+			$foo = new NonExistingClass();
+			$foo->bar();
+
+			//throw new FatalErrorException("Holy shit, something fatal happend!");
 		}
 
 		$table = new Table($this->_storageApi, 'in.c-main.test');

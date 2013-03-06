@@ -23,9 +23,22 @@
 		"aws/aws-sdk-php": "2.*"
 	},
 	"require-dev": {
-		"syrup/development-bundle": "1.0.8"
+		"syrup/development-bundle": ">=1.0.8"
 	},
-	"minimum-stability": "dev",
+	"scripts": {
+		"post-install-cmd": [
+			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/syrup/development-bundle/app"
+		],
+		"post-update-cmd": [
+			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/syrup/development-bundle/app"
+		]
+	},
+	"minimum-stability": "alpha",
+	"extra": {
+		"branch-alias": {
+			"dev-master": "2.2-dev"
+		}
+	},
 	"autoload": {
 		"psr-0": { "Syrup\\ComponentBundle": "" }
 	},
