@@ -73,7 +73,14 @@ class ApiController extends ContainerAware
 			    break;
 			case 'POST':
 		    case 'PUT':
-		        $params = json_decode($request->getContent(), true);
+		        $body = $request->getContent();
+				if (!empty($body)) {
+					$arr = json_decode($body, true);
+					if (null == $arr || !is_array($arr)) {
+						throw new HttpException(400, "Bad JSON format of request body");
+					}
+					$params = $arr;
+				}
 			    break;
 	    }
 
