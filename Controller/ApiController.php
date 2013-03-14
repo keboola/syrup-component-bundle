@@ -59,11 +59,25 @@ class ApiController extends ContainerAware
 	    $component = $this->container->get('syrup.component_factory')->get($this->_storageApi, $componentName);
 	    $component->setContainer($this->container);
 
+	    $actionName = $this->camelize($actionName);
+
 	    if (!method_exists($component, $actionName)) {
 		    throw new HttpException(400, "Component $componentName doesn't have action $actionName");
 	    }
 
-	    $component->$actionName(json_decode($request->getContent(), true));
+	    $params = array();
+	    switch ($request->getMethod()) {
+		    case 'GET':
+		    case 'DELETE':
+			    $params = $request->query->all();
+			    break;
+			case 'POST':
+		    case 'PUT':
+		        $params = json_decode($request->getContent(), true);
+			    break;
+	    }
+
+	    $component->$actionName($params);
 
 	    $duration = microtime(true) - $timestart;
 
@@ -95,6 +109,20 @@ class ApiController extends ContainerAware
 		$sapiEvent->setType(SapiEvent::TYPE_SUCCESS);
 
 		$this->_storageApi->createEvent($sapiEvent);
+	}
+
+	public function camelize($value)
+	{
+		if(!is_string($value)) {
+			return $value;
+		}
+
+		$chunks = explode('-', $value);
+		$ucfirsted = array_map(function($s) {
+			return ucfirst($s);
+		}, $chunks);
+
+		return lcfirst(implode('', $ucfirsted));
 	}
 
 }
