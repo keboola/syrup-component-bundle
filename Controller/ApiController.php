@@ -76,7 +76,8 @@ class ApiController extends ContainerAware
 		        $body = $request->getContent();
 				if (!empty($body)) {
 					$arr = json_decode($body, true);
-					if (null == $arr || !is_array($arr)) {
+
+					if (null === $arr || !is_array($arr)) {
 						throw new HttpException(400, "Bad JSON format of request body");
 					}
 					$params = $arr;
