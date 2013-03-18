@@ -138,7 +138,7 @@ class Component implements ComponentInterface
 
 	public function getFullName()
 	{
-		return $this->_prefix . '_' . $this->_name;
+		return $this->_prefix . '-' . $this->_name;
 	}
 
 }
