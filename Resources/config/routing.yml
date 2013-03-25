@@ -1,4 +1,5 @@
-syrup_component_api:
+syrup_component_api_action:
     pattern:  /{componentName}/{actionName}
-    defaults: { _controller: SyrupComponentBundle:Api:run, _format: json }
+    defaults: { _controller: SyrupComponentBundle:Api:run, actionName: info, _format: json }
+
 

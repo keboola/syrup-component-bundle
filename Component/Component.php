@@ -79,8 +79,9 @@ class Component implements ComponentInterface
 
 	/**
 	 * @param null $params - parameters passed from API call
+	 * @return mixed
 	 */
-	public function run($params)
+	public function postRun($params)
 	{
 		$this->_log->debug("Component " . $this->_prefix . "-" . $this->_name . " started.");
 		$timestart = microtime(true);
@@ -88,7 +89,7 @@ class Component implements ComponentInterface
 		$config = $this->getConfig();
 
 		// $result should be instance of Table or array of Table objects
-		$this->_process($config, $params);
+		$response = $this->_process($config, $params);
 
 		if (!empty($this->_results)) {
 			foreach ($this->_results as $table) {
@@ -98,6 +99,8 @@ class Component implements ComponentInterface
 
 		$duration = microtime(true) - $timestart;
 		$this->_log->debug("Component: " . $this->_name . " finished. Duration: " . $duration);
+
+		return $response;
 	}
 
 	/**

@@ -18,6 +18,16 @@ class DummyExtractor extends Component
 	protected $_name = 'dummy';
 	protected $_prefix = 'ex';
 
+	public function info($params)
+	{
+		return array(
+			'info'  => array(
+				'component' => $this->getFullName(),
+				'documentation' => 'url to documentation'
+			)
+		);
+	}
+
 	protected function _process($config, $params)
 	{
 		// Get some data
@@ -49,6 +59,10 @@ class DummyExtractor extends Component
 
 		$table->setFromArray($data, $hasHeader = true);
 
-		return $table;
+		$this->_results = array($table);
+
+		return array(
+			'table' => $table->getName()
+		);
 	}
 }

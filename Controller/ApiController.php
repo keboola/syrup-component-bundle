@@ -54,19 +54,24 @@ class ApiController extends ContainerAware
 	    $timestart = microtime(true);
 
 	    $request = $this->getRequest();
+	    $params = array();
+	    $method = $request->getMethod();
 
 	    $this->container->get('syrup.monolog.json_formatter')->setComponentName($componentName);
 	    $component = $this->container->get('syrup.component_factory')->get($this->_storageApi, $componentName);
 	    $component->setContainer($this->container);
 
-	    $actionName = $this->camelize($actionName);
+	    $funcName = strtolower($method) . ucfirst($this->camelize($actionName));
 
-	    if (!method_exists($component, $actionName)) {
-		    throw new HttpException(400, "Component $componentName doesn't have action $actionName");
+	    if (!method_exists($component, $funcName)) {
+		    $funcName2 = $this->camelize($actionName);
+		    if (!method_exists($component, $funcName2)) {
+			    throw new HttpException(400, "Component $componentName doesn't have function $funcName or $funcName2");
+		    }
+		    $funcName = $funcName2;
 	    }
 
-	    $params = array();
-	    switch ($request->getMethod()) {
+	    switch ($method) {
 		    case 'GET':
 		    case 'DELETE':
 			    $params = $request->query->all();
@@ -85,14 +90,20 @@ class ApiController extends ContainerAware
 			    break;
 	    }
 
-	    $component->$actionName($params);
+	    $componentResponse = $component->$funcName($params);
 
 	    $duration = microtime(true) - $timestart;
 
-	    $response = new Response(json_encode(array(
+	    $responseBody = array(
 		    'status'    => 'ok',
 		    'duration'  => $duration
-	    )));
+	    );
+
+	    if (null != $componentResponse) {
+		    $responseBody = array_merge($componentResponse, $responseBody);
+	    }
+
+	    $response = new Response(json_encode($responseBody));
 
 	    // Create Success event in SAPI
 	    $this->_sendSuccessEventToSapi('Action "'.$actionName.'" finished. Duration: ' . $duration, $componentName);
