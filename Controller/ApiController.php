@@ -29,11 +29,13 @@ class ApiController extends ContainerAware
 			$this->_storageApi = new Client($request->headers->get('X-StorageApi-Token'), $url);
 			$this->container->set('storageApi', $this->_storageApi);
 
-			$kbcRunId = $this->_storageApi->generateId();
 			if ($request->headers->has('X-KBC-RunId')) {
 				$kbcRunId = $request->headers->get('X-KBC-RunId');
+			} else {
+				$kbcRunId = $this->_storageApi->generateId();
 			}
 
+			$this->_storageApi->setRunId($kbcRunId);
 			$this->container->get('syrup.monolog.json_formatter')->setRunId($kbcRunId);
 			$this->container->get('syrup.monolog.json_formatter')->setStorageApiClient($this->_storageApi);
 
