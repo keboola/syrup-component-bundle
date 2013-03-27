@@ -47,7 +47,7 @@ class ApiController extends ContainerAware
 			$this->container->get('syrup.monolog.json_formatter')->setStorageApiClient($this->_storageApi);
 
 		} else {
-			throw new HttpException('Missing StorageAPI token.');
+			throw new HttpException('Missing StorageAPI token.', 400);
 		}
 	}
 
