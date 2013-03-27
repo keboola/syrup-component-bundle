@@ -3,6 +3,7 @@
 namespace Syrup\ComponentBundle\Controller;
 
 use Symfony\Component\DependencyInjection\ContainerAware;
+use Symfony\Component\Form\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Keboola\StorageApi\Client;
@@ -23,9 +24,17 @@ class ApiController extends ContainerAware
 
 		if ($request->headers->has('X-StorageApi-Token')) {
 			$url = null;
+
+			try {
+				$url = $this->container->getParameter('storageApi.url');
+			} catch (\Exception $e) {
+				// storageApi.url not defined in config - do nothing
+			}
+
 			if ($request->headers->has('X-StorageApi-Url')) {
 				$url = $request->headers->get('X-StorageApi-Url');
 			}
+
 			$this->_storageApi = new Client($request->headers->get('X-StorageApi-Token'), $url);
 			$this->container->set('storageApi', $this->_storageApi);
 
