@@ -10,9 +10,11 @@
          stopOnFailure="false"
          syntaxCheck="false"
          bootstrap="vendor/autoload.php">
-
+	<php>
+		<server name="PARAMETERS_FILE" value="parameters.yml" />
+	</php>
     <testsuites>
-        <testsuite name="SlevomatBundle for the Syrup Framework">
+        <testsuite name="Syrup Framework">
             <directory>Tests</directory>
         </testsuite>
     </testsuites>
