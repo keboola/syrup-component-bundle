@@ -32,6 +32,32 @@ class SyrupS3Uploader
 		$this->_s3 = $this->_getS3();
 	}
 
+	/**
+	 * @param string $filePath Path to File
+	 * @param string $contentType Content Type
+	 * @return string
+	 * @throws \Exception
+	 */
+	public function uploadFile($filePath, $contentType = 'text/plain')
+	{
+		$name = basename($filePath);
+		$fp = fopen($filePath, 'r');
+		if (!$fp) {
+			throw new \Exception('File not found');
+		}
+
+		$result = $this->uploadString($name, $fp, $contentType);
+		fclose($fp);
+
+		return $result;
+	}
+
+	/**
+	 * @param string $name File Name
+	 * @param string $content File Content
+	 * @param string $contentType Content Type
+	 * @return string
+	 */
 	public function uploadString($name, $content, $contentType = 'text/plain')
 	{
 		$s3FileName = $this->_fileUniquePrefix() . $name;
@@ -60,27 +86,18 @@ class SyrupS3Uploader
 
 	protected function _shortenUrl($url)
 	{
-		$client = new Client(
-			'http://api.bitly.com/v3',
-			array(
-				'request.params' => array(
-					'login'     => $this->_config['bitly-login'],
-					'apiKey'    => $this->_config['bitly-api-key'],
-					'longUrl'   => $url,
-					'format'    => 'json'
-				)
-			)
-		);
-		$request = $client->get('shorten');
+		$client = new Client('https://api-ssl.bitly.com');
+		$apiUrl = sprintf('shorten?login=%s&apiKey=%s&longUrl=%s&format=json', $this->_config['bitly-login'], $this->_config['bitly-api-key'], $url);
+		$request = $client->get($apiUrl);
 		$response = $request->send();
 
 		$body = $response->json();
 
-		if (!isset($body['data']) || !isset($body['data']['url'])) {
+		if (!isset($body['results']) || !isset($body['results'][$url]['shortUrl'])) {
 			throw new \Exception('Bit.ly url not returned');
 		}
 
-		return $body['data']['url'];
+		return $body['results'][$url]['shortUrl'];
 	}
 
 	/**
