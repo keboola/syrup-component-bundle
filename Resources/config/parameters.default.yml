@@ -1,0 +1,7 @@
+parameters:
+
+    uploader.aws-access-key:
+    uploader.aws-secret-key:
+    uploader.s3-upload-path: keboola-tests/s3uploader-test
+    uploader.bitly-login:
+    uploader.bitly-api-key:
