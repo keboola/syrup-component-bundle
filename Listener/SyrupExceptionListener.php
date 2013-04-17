@@ -11,6 +11,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Monolog\Logger;
+use Syrup\ComponentBundle\Exception\SyrupExceptionInterface;
 use Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter;
 
 class SyrupExceptionListener
@@ -44,6 +45,11 @@ class SyrupExceptionListener
 			'exceptionId'   => $exceptionId,
 			'runId'     => $this->_formatter->getRunId()
 		);
+
+		// SyrupExceptionInterface holds additional data
+		if ($exception instanceof SyrupExceptionInterface) {
+			$content['data'] = $exception->getData();
+		}
 
 		// HttpExceptionInterface is a special type of exception that
 		// holds status code and header details
