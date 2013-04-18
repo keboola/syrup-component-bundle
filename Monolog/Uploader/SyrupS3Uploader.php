@@ -35,10 +35,11 @@ class SyrupS3Uploader
 	/**
 	 * @param string $filePath Path to File
 	 * @param string $contentType Content Type
+	 * @param bool $shortenUrl
 	 * @return string
 	 * @throws \Exception
 	 */
-	public function uploadFile($filePath, $contentType = 'text/plain')
+	public function uploadFile($filePath, $contentType = 'text/plain', $shortenUrl = true)
 	{
 		$name = basename($filePath);
 		$fp = fopen($filePath, 'r');
@@ -46,7 +47,7 @@ class SyrupS3Uploader
 			throw new \Exception('File not found');
 		}
 
-		$result = $this->uploadString($name, $fp, $contentType);
+		$result = $this->uploadString($name, $fp, $contentType, $shortenUrl);
 		fclose($fp);
 
 		return $result;
@@ -56,9 +57,10 @@ class SyrupS3Uploader
 	 * @param string $name File Name
 	 * @param string $content File Content
 	 * @param string $contentType Content Type
+	 * @param bool $shortenUrl
 	 * @return string
 	 */
-	public function uploadString($name, $content, $contentType = 'text/plain')
+	public function uploadString($name, $content, $contentType = 'text/plain', $shortenUrl = true)
 	{
 		$s3FileName = $this->_fileUniquePrefix() . $name;
 		$s3Path = $this->_config['s3-upload-path'] . '/' . $s3FileName;
@@ -72,9 +74,13 @@ class SyrupS3Uploader
 		));
 		$url = 'https://s3.amazonaws.com/' . $s3Path;
 
-		try {
-			return $this->_shortenUrl($url);
-		} catch (\Exception $e) {
+		if ($shortenUrl) {
+			try {
+				return $this->_shortenUrl($url);
+			} catch (\Exception $e) {
+				return $url;
+			}
+		} else {
 			return $url;
 		}
 	}
