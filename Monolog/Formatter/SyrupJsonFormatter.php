@@ -94,10 +94,13 @@ class SyrupJsonFormatter extends JsonFormatter
 
 		// Upload exception trace to S3
 		if (isset($record['context']['exception'])) {
+			/** @var \Exception $e */
 			$e = $record['context']['exception'];
 			unset($record['context']['exception']);
-			$serialized = json_encode((array) $e);
-			$record['attachment'] = $this->_uploader->uploadString('exception', $serialized);
+			if ($e instanceof \Exception) {
+				$serialized = $e->__toString();
+				$record['attachment'] = $this->_uploader->uploadString('exception', $serialized);
+			}
 		}
 
 		if (isset($record['context']['exceptionId'])) {
