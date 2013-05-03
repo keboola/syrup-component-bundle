@@ -22,6 +22,16 @@ class ApiController extends ContainerAware
 	{
 		$request = $this->getRequest();
 
+		if ($request->getMethod() == "OPTIONS") {
+			$response = new Response();
+			$response->headers->set('Access-Control-Allow-Origin', '*');
+			$response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+			$response->headers->set('Access-Control-Allow-Headers', 'content-type, x-requested-with, x-requested-by, x-storageapi-url, x-storageapi-token, x-kbc-runid');
+			$response->headers->set('Access-Control-Max-Age', '86400');
+			$response->send();
+			die;
+		}
+
 		if ($request->headers->has('X-StorageApi-Token')) {
 			$url = null;
 
@@ -115,6 +125,7 @@ class ApiController extends ContainerAware
 	    }
 
 	    $response = new Response(json_encode($responseBody));
+		$response->headers->set('Access-Control-Allow-Origin', '*');
 
 	    // Create Success event in SAPI
 	    $this->_sendSuccessEventToSapi('Action "'.$actionName.'" finished. Duration: ' . $duration, $componentName);
