@@ -48,7 +48,9 @@ class SyrupS3Uploader
 		}
 
 		$result = $this->uploadString($name, $fp, $contentType, $shortenUrl);
-		fclose($fp);
+		if (is_resource($fp)) {
+			fclose($fp);
+		}
 
 		return $result;
 	}
