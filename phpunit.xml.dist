@@ -10,11 +10,11 @@
          stopOnFailure="false"
          syntaxCheck="false"
          bootstrap="vendor/autoload.php">
-	<php>
-		<server name="PARAMETERS_FILE" value="parameters.yml" />
-	</php>
+    <php>
+        <server name="KERNEL_DIR" value="vendor/syrup/development-bundle/app/" />
+    </php>
     <testsuites>
-        <testsuite name="Syrup Framework">
+        <testsuite name="Syrup Component Bundle Tests">
             <directory>Tests</directory>
         </testsuite>
     </testsuites>
