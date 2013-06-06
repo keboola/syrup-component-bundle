@@ -68,6 +68,7 @@ class SyrupExceptionListener
 		$response->setContent(json_encode($content));
 
 		$response->headers->set('Content-Type', 'application/json');
+		$response->headers->set('Access-Control-Allow-Origin', '*');
 
 		// Send the modified response object to the event
 		$event->setResponse($response);
