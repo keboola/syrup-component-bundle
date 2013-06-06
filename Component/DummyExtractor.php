@@ -51,11 +51,14 @@ class DummyExtractor extends Component
 
 			$foo = new NonExistingClass();
 			$foo->bar();
-
-			//throw new FatalErrorException("Holy shit, something fatal happend!");
 		}
 
-		$table = new Table($this->_storageApi, 'in.c-main.test');
+		$outTable = 'in.c-test.dummy';
+		if (isset($params['outputTable'])) {
+			$outTable = $params['outputTable'];
+		}
+
+		$table = new Table($this->_storageApi, $outTable);
 
 		$table->setFromArray($data, $hasHeader = true);
 
