@@ -56,17 +56,20 @@ class Application extends BaseApplication {
 			$statusCode = parent::run($input, $output);
 		} catch (\Exception $e) {
 
+			$message = sprintf(
+				'%s: %s (uncaught exception) at %s line %s while running console command `%s`',
+				get_class($e),
+				$e->getMessage(),
+				$e->getFile(),
+				$e->getLine(),
+				$this->getCommandName($input)
+			);
+
+			echo $message;
+
 			/** @var $logger LoggerInterface */
 			$logger = $this->getKernel()->getContainer()->get('logger');
 
-//			$message = sprintf(
-//				'%s: %s (uncaught exception) at %s line %s while running console command `%s`',
-//				get_class($e),
-//				$e->getMessage(),
-//				$e->getFile(),
-//				$e->getLine(),
-//				$this->getCommandName($input)
-//			);
 			$logger->critical(
 				$e->getMessage(),
 				array(
