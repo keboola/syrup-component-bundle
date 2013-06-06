@@ -16,10 +16,14 @@ class SyrupControllerListener
 	{
 		if (HttpKernelInterface::MASTER_REQUEST === $event->getRequestType()) {
 			$controllers = $event->getController();
-			if(is_array($controllers)) {
+			if (is_array($controllers)) {
 				$controller = $controllers[0];
 
-				if(is_object($controller) && method_exists($controller, 'preExecute')) {
+				if (
+					is_object($controller)
+					&& method_exists($controller, 'preExecute')
+					&& $event->getRequest()->getMethod() != 'OPTIONS'
+				) {
 					$controller->preExecute();
 				}
 			}

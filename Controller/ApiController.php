@@ -22,16 +22,6 @@ class ApiController extends ContainerAware
 	{
 		$request = $this->getRequest();
 
-		if ($request->getMethod() == "OPTIONS") {
-			$response = new Response();
-			$response->headers->set('Access-Control-Allow-Origin', '*');
-			$response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-			$response->headers->set('Access-Control-Allow-Headers', 'content-type, x-requested-with, x-requested-by, x-storageapi-url, x-storageapi-token, x-kbc-runid');
-			$response->headers->set('Access-Control-Max-Age', '86400');
-			$response->send();
-			die;
-		}
-
 		if ($request->headers->has('X-StorageApi-Token')) {
 			$url = null;
 
@@ -59,7 +49,7 @@ class ApiController extends ContainerAware
 			$this->container->get('syrup.monolog.json_formatter')->setStorageApiClient($this->_storageApi);
 
 		} else {
-			throw new HttpException('Missing StorageAPI token.', 400);
+			throw new HttpException(400, 'Missing StorageAPI token.');
 		}
 	}
 
@@ -132,6 +122,20 @@ class ApiController extends ContainerAware
 
 	    return $response;
     }
+
+	public function optionsAction($params)
+	{
+		$response = new Response();
+		$response->headers->set('Accept', 'application/json');
+		$response->headers->set('Access-Control-Allow-Origin', '*');
+		$response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+		$response->headers->set('Access-Control-Allow-Headers', 'content-type, x-requested-with, x-requested-by, x-storageapi-url, x-storageapi-token, x-kbc-runid');
+		$response->headers->set('Access-Control-Max-Age', '86400');
+		$response->headers->set('Content-Type', 'application/json');
+		$response->send();
+
+		return $response;
+	}
 
 	/**
 	 * @return Request
