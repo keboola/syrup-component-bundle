@@ -1,6 +1,7 @@
 {
 	"name": "syrup/component-bundle",
 	"type": "symfony-bundle",
+	"license": "MIT",
 	"description": "Syrup ComponentBundle",
 	"keywords": [],
 	"authors": [
@@ -17,27 +18,32 @@
 	],
 	"require": {
 		"php": ">=5.3.5",
-		"keboola/storage-api-client": "2.6.*",
+		"keboola/storage-api-client": ">=2.8.8,<2.9.0",
 		"guzzle/guzzle": ">=3.0.0",
-		"keboola/csv": "1.0.*",
+		"keboola/csv": "1.1.*",
 		"aws/aws-sdk-php": "2.*"
 	},
 	"require-dev": {
-		"syrup/development-bundle": ">=1.0.8",
+		"syrup/development-bundle": ">=1.1.1",
 		"phpunit/phpunit": "3.7.*"
 	},
 	"scripts": {
 		"post-install-cmd": [
+			"Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
 			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/syrup/development-bundle/app"
 		],
 		"post-update-cmd": [
 			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/syrup/development-bundle/app"
 		]
 	},
-	"minimum-stability": "alpha",
+	"minimum-stability": "stable",
 	"extra": {
+		"incenteev-parameters": {
+			"keep-outdated": true,
+			"file": "vendor/syrup/development-bundle/app/config/parameters.yml"
+		},
 		"branch-alias": {
-			"dev-master": "2.2-dev"
+			"dev-master": "2.3-dev"
 		}
 	},
 	"autoload": {
