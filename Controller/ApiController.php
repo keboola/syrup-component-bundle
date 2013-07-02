@@ -10,6 +10,7 @@ use Keboola\StorageApi\Client;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Keboola\StorageApi\Event as SapiEvent;
+use Syrup\ComponentBundle\Component\Component;
 
 class ApiController extends ContainerAware
 {
@@ -18,36 +19,54 @@ class ApiController extends ContainerAware
 	 */
 	protected $_storageApi;
 
+	protected function initStorageApi(Request $request)
+	{
+		$url = null;
+
+		try {
+			$url = $this->container->getParameter('storageApi.url');
+		} catch (\Exception $e) {
+			// storageApi.url not defined in config - do nothing
+		}
+
+		if ($request->headers->has('X-StorageApi-Url')) {
+			$url = $request->headers->get('X-StorageApi-Url');
+		}
+
+		$this->_storageApi = new Client($request->headers->get('X-StorageApi-Token'), $url);
+		$this->container->set('storageApi', $this->_storageApi);
+
+		if ($request->headers->has('X-KBC-RunId')) {
+			$kbcRunId = $request->headers->get('X-KBC-RunId');
+		} else {
+			$kbcRunId = $this->_storageApi->generateId();
+		}
+
+		$this->_storageApi->setRunId($kbcRunId);
+		$this->container->get('syrup.monolog.json_formatter')->setRunId($kbcRunId);
+		$this->container->get('syrup.monolog.json_formatter')->setStorageApiClient($this->_storageApi);
+	}
+
+	protected function initSharedConfig($componentName)
+	{
+		$components = $this->container->getParameter('components');
+		if (isset($components[$componentName]['shared_sapi']['token'])) {
+			$token = $components[$componentName]['shared_sapi']['token'];
+			$url = null;
+			if (isset($components[$componentName]['shared_sapi']['url'])) {
+				$url = $components[$componentName]['shared_sapi']['url'];
+			}
+			$sharedSapi = new Client($token, $url);
+			$this->container->set('shared_sapi', $sharedSapi);
+		}
+	}
+
 	public function preExecute()
 	{
 		$request = $this->getRequest();
 
 		if ($request->headers->has('X-StorageApi-Token')) {
-			$url = null;
-
-			try {
-				$url = $this->container->getParameter('storageApi.url');
-			} catch (\Exception $e) {
-				// storageApi.url not defined in config - do nothing
-			}
-
-			if ($request->headers->has('X-StorageApi-Url')) {
-				$url = $request->headers->get('X-StorageApi-Url');
-			}
-
-			$this->_storageApi = new Client($request->headers->get('X-StorageApi-Token'), $url);
-			$this->container->set('storageApi', $this->_storageApi);
-
-			if ($request->headers->has('X-KBC-RunId')) {
-				$kbcRunId = $request->headers->get('X-KBC-RunId');
-			} else {
-				$kbcRunId = $this->_storageApi->generateId();
-			}
-
-			$this->_storageApi->setRunId($kbcRunId);
-			$this->container->get('syrup.monolog.json_formatter')->setRunId($kbcRunId);
-			$this->container->get('syrup.monolog.json_formatter')->setStorageApiClient($this->_storageApi);
-
+			$this->initStorageApi($request);
 		} else {
 			throw new HttpException(400, 'Missing StorageAPI token.');
 		}
@@ -68,7 +87,10 @@ class ApiController extends ContainerAware
 	    $params = array();
 	    $method = $request->getMethod();
 
+	    $this->initSharedConfig($componentName);
+
 	    $this->container->get('syrup.monolog.json_formatter')->setComponentName($componentName);
+	    /** @var Component $component */
 	    $component = $this->container->get('syrup.component_factory')->get($this->_storageApi, $componentName);
 	    $component->setContainer($this->container);
 
