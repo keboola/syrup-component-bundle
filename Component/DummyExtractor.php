@@ -31,9 +31,6 @@ class DummyExtractor extends Component
 
 	protected function _process($config, $params)
 	{
-		/** @var Client $sharedSapi */
-		$sharedSapi = $this->_container->get('shared_sapi');
-
 		// Get some data
 		$data = array(
 			array('id', 'col1', 'col2', 'col3'),
