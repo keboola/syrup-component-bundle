@@ -67,7 +67,7 @@ class Application extends BaseApplication
 				$e->getLine(),
 				$this->getCommandName($input)
 			);
-			$logger->crit($message);
+			$logger->critical($message);
 
 			if ($output instanceof ConsoleOutputInterface) {
 				$this->renderException($e, $output->getErrorOutput());
