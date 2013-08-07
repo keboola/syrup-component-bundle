@@ -63,6 +63,7 @@ class SyrupExceptionListener
 
 		} else {
 			$response->setStatusCode(500);
+			$content['message'] = 'Contact support@keboola.com and attach this exception id.';
 		}
 
 		$response->setContent(json_encode($content));
