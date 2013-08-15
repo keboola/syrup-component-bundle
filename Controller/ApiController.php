@@ -11,6 +11,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Keboola\StorageApi\Event as SapiEvent;
 use Syrup\ComponentBundle\Component\Component;
+use Syrup\ComponentBundle\Filesystem\Temp;
 
 class ApiController extends ContainerAware
 {
@@ -61,6 +62,12 @@ class ApiController extends ContainerAware
 		}
 	}
 
+	protected function initFilesystem(Component $component)
+	{
+		$temp = new Temp($component);
+		$this->container->set('filesystem_temp', $temp);
+	}
+
 	public function preExecute()
 	{
 		$request = $this->getRequest();
@@ -92,6 +99,9 @@ class ApiController extends ContainerAware
 	    $this->container->get('syrup.monolog.json_formatter')->setComponentName($componentName);
 	    /** @var Component $component */
 	    $component = $this->container->get('syrup.component_factory')->get($this->_storageApi, $componentName);
+
+	    $this->initFilesystem($component);
+
 	    $component->setContainer($this->container);
 
 	    $funcName = strtolower($method) . ucfirst($this->camelize($actionName));
