@@ -132,7 +132,7 @@ class SyrupJsonFormatter extends JsonFormatter
 		return json_encode($records);
 	}
 
-	protected function _logToSapi($record, \Exception $e)
+	protected function _logToSapi($record, $e = null)
 	{
 		$sapiEvent = new Event();
 		$sapiEvent->setComponent($this->_componentName);
