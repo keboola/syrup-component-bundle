@@ -25,4 +25,10 @@ services:
     syrup.monolog.json_formatter:
         class: Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter
         arguments: [%app_name%, @syrup.monolog.s3_uploader]
+    syrup.routing_loader:
+        class: Syrup\ComponentBundle\Routing\Loader
+        arguments: [%components%]
+        tags:
+            - { name: routing.loader }
+
 
