@@ -11,6 +11,8 @@ namespace Syrup\ComponentBundle\Routing;
 use Symfony\Component\Config\Loader\Loader as BaseLoader;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Routing\Loader\YamlFileLoader;
+use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 class Loader extends BaseLoader
@@ -34,7 +36,7 @@ class Loader extends BaseLoader
 	{
 		$collection = new RouteCollection();
 
-		foreach ($this->components as $component) {
+		foreach ($this->components as $componentName => $component) {
 
 			if (!isset($component['bundle'])) {
 				continue;
@@ -44,7 +46,15 @@ class Loader extends BaseLoader
 			$resource = '@' . $bundleClassName . '/Resources/config/routing.yml';
 			$type = 'yaml';
 
+			/** @var RouteCollection $importedRoutes */
 			$importedRoutes = $this->import($resource, $type);
+
+			foreach ($importedRoutes as $route) {
+				/** @var Route $route */
+				if (!strstr($route->getPath(), $componentName)) {
+					$route->setPath('/'. $componentName . $route->getPath());
+				}
+			}
 
 			$collection->addCollection($importedRoutes);
 		}
