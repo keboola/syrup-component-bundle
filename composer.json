@@ -14,10 +14,6 @@
 		{
 			"type": "vcs",
 			"url": "git@bitbucket.org:keboola/syrup-development-bundle.git"
-		},
-		{
-		        "type": "vcs",
-			"url": "git@bitbucket.org:keboola/keboola-provisioning-bundle.git"
 		}
 	],
 	"require": {
@@ -25,8 +21,7 @@
 		"keboola/storage-api-client": ">=2.8.8,<2.9.0",
 		"guzzle/guzzle": ">=3.0.0",
 		"keboola/csv": "1.1.*",
-		"aws/aws-sdk-php": "2.*",
-		"keboola/transformation-provisioning-bundle": "~0.0.1"
+		"aws/aws-sdk-php": "2.*"
 	},
 	"require-dev": {
 		"syrup/development-bundle": ">=1.1.1",
