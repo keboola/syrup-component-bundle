@@ -139,7 +139,7 @@ class SyrupJsonFormatter extends JsonFormatter
 		$sapiEvent->setMessage($record['message']);
 		$sapiEvent->setRunId($this->_runId);
 
-		if ($e != null) {
+		if ($e instanceof \Exception) {
 			$sapiEvent->setDescription($e->getMessage());
 		}
 
