@@ -14,7 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 
 class ComponentCommand extends ContainerAwareCommand
 {
-    protected $componentName;
+    protected $componentName = "abstract";
 
     protected $temp;
 
@@ -52,9 +52,6 @@ class ComponentCommand extends ContainerAwareCommand
 
     protected function configure()
     {
-        if (empty($this->componentName)) {
-            throw new \Exception("Missing component name", 500);
-        }
         $this->initSharedConfig($this->componentName);
 
 
