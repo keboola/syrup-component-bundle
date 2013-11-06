@@ -30,5 +30,6 @@ services:
         arguments: [%components%]
         tags:
             - { name: routing.loader }
-
-
+    syrup.temp_factory:
+        class: Syrup\ComponentBundle\Filesystem\TempServiceFactory
+        arguments: [%components%]
