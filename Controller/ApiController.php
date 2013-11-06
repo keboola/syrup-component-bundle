@@ -94,6 +94,7 @@ class ApiController extends ContainerAware
 	    $params = array();
 	    $method = $request->getMethod();
 
+        //@TODO refactor shared config to Config object
 	    $this->initSharedConfig($componentName);
 
 	    $this->container->get('syrup.monolog.json_formatter')->setComponentName($componentName);

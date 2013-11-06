@@ -30,15 +30,10 @@ class Temp
 	 */
 	private $files = array();
 
-	/**
-	 * Get path to temp directory
-	 *
-	 * @return string
-	 */
-	private function getTmpPath()
-	{
-		return sys_get_temp_dir() . "/" . $this->component->getFullName();
-	}
+    /**
+     * @var bool
+     */
+    protected $preserve = false;
 
 	/**
 	 * Constructor
@@ -47,7 +42,7 @@ class Temp
 	 *
 	 * @param Component $component
 	 */
-	function __construct(Component $component)
+	public function __construct(Component $component)
 	{
 		$this->filesystem = new Filesystem();
 		$this->component = $component;
@@ -56,6 +51,25 @@ class Temp
 			$this->filesystem->mkdir($this->getTmpPath(), 0770);
 		}
 	}
+
+    /**
+     * If preserve is set to true, temporary files will not be deleted in destructor
+     *
+     */
+    public function setPreserve($value)
+    {
+        $this->preserve = $value;
+    }
+
+    /**
+     * Get path to temp directory
+     *
+     * @return string
+     */
+    private function getTmpPath()
+    {
+        return sys_get_temp_dir() . "/" . $this->component->getFullName();
+    }
 
 	/**
 	 * Create empty file in TMP directory
@@ -92,10 +106,12 @@ class Temp
 	 */
 	function __destruct()
 	{
-		foreach ($this->files AS $fileInfo) {
-			if (file_exists($fileInfo) && is_file($fileInfo)) {
-				unlink($fileInfo);
-			}
-		}
+        if (!$this->preserve) {
+            foreach ($this->files AS $fileInfo) {
+                if (file_exists($fileInfo) && is_file($fileInfo)) {
+                    unlink($fileInfo);
+                }
+            }
+        }
 	}
 }

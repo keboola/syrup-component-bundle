@@ -14,6 +14,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use \Syrup\ComponentBundle\Component\Component;
 use Keboola\StorageApi\Table;
 use Syrup\ComponentBundle\Filesystem\Temp;
+use Syrup\ComponentBundle\Filesystem\TempService;
 
 class DummyExtractor extends Component
 {
