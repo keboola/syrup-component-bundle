@@ -12,7 +12,7 @@ namespace Syrup\ComponentBundle\Command;
 use Keboola\StorageApi\Client;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 
-class ComponentCommand extends ContainerAwareCommand
+abstract class ComponentCommand extends ContainerAwareCommand
 {
     protected $componentName = "abstract";
 
@@ -20,19 +20,22 @@ class ComponentCommand extends ContainerAwareCommand
 
     /**
      * @TODO: refactor to use COnfig Object
-     * @param $componentName
+     * @throws \Exception
+     * @internal param $componentName
+     * @return \Keboola\StorageApi\Client
      */
-    protected function initSharedConfig($componentName)
+    protected function getSharedConfig()
     {
         $components = $this->getContainer()->getParameter('components');
-        if (isset($components[$componentName]['shared_sapi']['token'])) {
-            $token = $components[$componentName]['shared_sapi']['token'];
+        if (isset($components[$this->componentName]['shared_sapi']['token'])) {
+            $token = $components[$this->componentName]['shared_sapi']['token'];
             $url = null;
-            if (isset($components[$componentName]['shared_sapi']['url'])) {
-                $url = $components[$componentName]['shared_sapi']['url'];
+            if (isset($components[$this->componentName]['shared_sapi']['url'])) {
+                $url = $components[$this->componentName]['shared_sapi']['url'];
             }
-            $sharedSapi = new Client($token, $url);
-            $this->getContainer()->set('shared_sapi', $sharedSapi);
+            return new Client($token, $url);
+        } else {
+            throw new \Exception("Shared Config not configured for this component " . $this->componentName, 400);
         }
     }
 
@@ -48,13 +51,6 @@ class ComponentCommand extends ContainerAwareCommand
         }
 
         return $this->temp;
-    }
-
-    protected function configure()
-    {
-        $this->initSharedConfig($this->componentName);
-
-
     }
 
 } 
