@@ -33,3 +33,6 @@ services:
     syrup.temp_factory:
         class: Syrup\ComponentBundle\Filesystem\TempServiceFactory
         arguments: [%components%]
+    storageApi:
+        class: Keboola\StorageApi\Client
+        arguments: [%storageApi.test.token%]

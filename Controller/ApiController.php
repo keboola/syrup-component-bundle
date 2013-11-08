@@ -35,7 +35,7 @@ class ApiController extends ContainerAware
 		}
 
 		$this->_storageApi = new Client($request->headers->get('X-StorageApi-Token'), $url);
-		$this->container->set('storageApi', $this->_storageApi);
+        $this->container->set('storageApi', $this->_storageApi);
 
 		if ($request->headers->has('X-KBC-RunId')) {
 			$kbcRunId = $request->headers->get('X-KBC-RunId');
