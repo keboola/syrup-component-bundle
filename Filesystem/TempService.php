@@ -59,7 +59,7 @@ class TempService
      *
      * @return string
      */
-    private function getTmpPath()
+    public function getTmpPath()
     {
         return sys_get_temp_dir() . "/" . $this->prefix;
     }
