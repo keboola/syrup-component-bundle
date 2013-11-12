@@ -57,7 +57,7 @@ class Component implements ComponentInterface
     /**
      * @var TempService
      */
-    protected $_temp;
+    private $_temp;
 
     /**
 	 * @param \Keboola\StorageApi\Client $storageApi
