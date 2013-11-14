@@ -51,7 +51,6 @@ class DummyExtractor extends Component
 		}
 
 		if (isset($params['fatalError']) && $params['fatalError'] == 1) {
-
 			$foo = new NonExistingClass();
 			$foo->bar();
 		}
