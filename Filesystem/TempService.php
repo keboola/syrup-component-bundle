@@ -34,6 +34,11 @@ class TempService
 	 */
 	protected $tmpRunFolder;
 
+	/**
+	 * @var Bool
+	 */
+	protected $preserveRunFolder = false;
+
     public function __construct($prefix = '')
     {
         $this->prefix = $prefix;
@@ -44,6 +49,14 @@ class TempService
             $this->filesystem->mkdir($this->tmpRunFolder);
         }
     }
+
+	/**
+	 * @param bool $value
+	 */
+	public function setPreserveRunFolder($value)
+	{
+		$this->preserveRunFolder = $value;
+	}
 
     /**
      * Get path to temp directory
@@ -127,16 +140,21 @@ class TempService
      */
     function __destruct()
     {
-        $preserveRunFolder = false;
+        $preserveRunFolder = $this->preserveRunFolder;
+
+	    $fs = new Filesystem();
 
         foreach ($this->files as $file) {
+	        if ($file['preserve']) {
+		        $preserveRunFolder = true;
+	        }
             if (file_exists($file['file']) && is_file($file['file']) && !$file['preserve']) {
-                unlink($file['file']);
+                $fs->remove($file['file']);
             }
         }
 
 	    if (!$preserveRunFolder) {
-		    rmdir($this->tmpRunFolder);
+		    $fs->remove($this->tmpRunFolder);
 	    }
 
     }
