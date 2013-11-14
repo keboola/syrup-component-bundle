@@ -135,7 +135,7 @@ class ApiController extends ContainerAware
 	    }
 
 	    $componentResponse = $component->$funcName($params);
-	    
+
 	    if ($componentResponse instanceof Response) {
 		    return $componentResponse;
 	    }
