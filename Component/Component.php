@@ -9,18 +9,20 @@
 namespace Syrup\ComponentBundle\Component;
 
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Syrup\ComponentBundle\Component\ComponentInterface;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Config\Reader;
 use Keboola\StorageApi\Table;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\HttpFoundation\Response;
+use Syrup\ComponentBundle\Filesystem\Temp;
 use Syrup\ComponentBundle\Filesystem\TempService;
 
 class Component implements ComponentInterface
 {
 	/**
-	 * @var Container
+	 * @var ContainerInterface
 	 */
 	public $_container;
 
@@ -73,15 +75,24 @@ class Component implements ComponentInterface
 
 	/**
 	 * @param Connection $db
+	 * @return $this
 	 */
 	public function setConnection($db)
 	{
 		$this->_db = $db;
+
+		return $this;
 	}
 
+	/**
+	 * @param ContainerInterface $container
+	 * @return $this
+	 */
 	public function setContainer($container)
 	{
 		$this->_container = $container;
+
+		return $this;
 	}
 
 	/**
@@ -90,9 +101,6 @@ class Component implements ComponentInterface
 	 */
 	public function postRun($params)
 	{
-		$this->_log->debug("Component " . $this->_prefix . "-" . $this->_name . " started.");
-		$timestart = microtime(true);
-
 		$config = $this->getConfig();
 
 		// $result should be instance of Table or array of Table objects
@@ -103,9 +111,6 @@ class Component implements ComponentInterface
 				$this->_saveTable($table);
 			}
 		}
-
-		$duration = microtime(true) - $timestart;
-		$this->_log->debug("Component: " . $this->_name . " finished. Duration: " . $duration);
 
 		return $response;
 	}

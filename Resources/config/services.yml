@@ -14,8 +14,10 @@ services:
             - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
     syrup.componentbundle.listener.controller:
         class: Syrup\ComponentBundle\Listener\SyrupControllerListener
+        arguments: [@logger]
         tags:
             - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
+            - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
     syrup.component_factory:
         class: Syrup\ComponentBundle\Component\ComponentFactory
         arguments: [@logger, @doctrine, %components%]
@@ -33,6 +35,9 @@ services:
     syrup.temp_factory:
         class: Syrup\ComponentBundle\Filesystem\TempServiceFactory
         arguments: [%components%]
-    storageApi:
+    storage_api:
         class: Keboola\StorageApi\Client
-        arguments: [%storageApi.test.token%]
+        arguments: [%storage_api.test.token%] #TODO: refactor to optional argument
+    syrup.shared_sapi:
+        class: Syrup\ComponentBundle\Service\SharedSapi\SharedSapi
+        arguments: [%shared_sapi.token%]

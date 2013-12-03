@@ -7,11 +7,23 @@
  */
 namespace Syrup\ComponentBundle\Listener;
 
+use Monolog\Logger;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class SyrupControllerListener
 {
+	/**
+	 * @var Logger
+	 */
+	protected $logger;
+
+	public function __construct(Logger $logger)
+	{
+		$this->logger = $logger;
+	}
+
 	public function onKernelController(FilterControllerEvent $event)
 	{
 		if (HttpKernelInterface::MASTER_REQUEST === $event->getRequestType()) {
@@ -28,5 +40,16 @@ class SyrupControllerListener
 				}
 			}
 		}
+	}
+
+	public function onKernelResponse(FilterResponseEvent $event)
+	{
+		$request = $event->getRequest();
+
+		$pathInfo = explode('/', $request->getPathInfo());
+		$componentName = $pathInfo[0];
+		$actionName = $pathInfo[1];
+
+		$this->logger->info('Component ' . $componentName . ' finished action ' . $actionName);
 	}
 }

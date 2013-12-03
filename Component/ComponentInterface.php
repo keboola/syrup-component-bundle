@@ -12,14 +12,14 @@ namespace Syrup\ComponentBundle\Component;
 /**
  * All interfaces should implement ComponentInterface
  */
-use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 interface ComponentInterface
 {
 	public function postRun($params);
 
 	/**
-	 * @param Container $container
+	 * @param ContainerInterface $container
 	 * @return mixed
 	 */
 	public function setContainer($container);
