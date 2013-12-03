@@ -2,23 +2,27 @@
 
 namespace Syrup\ComponentBundle\Controller;
 
+use Symfony\Bridge\Monolog\Logger;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\Form\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Keboola\StorageApi\Client;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Keboola\StorageApi\Event as SapiEvent;
 use Syrup\ComponentBundle\Component\Component;
+use Syrup\ComponentBundle\Component\ComponentFactory;
 use Syrup\ComponentBundle\Filesystem\Temp;
+use Syrup\ComponentBundle\Service\SharedSapi\jobEvent;
+use Syrup\ComponentBundle\Service\SharedSapi\SharedSapi;
 
 class ApiController extends ContainerAware
 {
-	/**
-	 * @var Client
-	 */
-	protected $_storageApi;
+	/** @var Client */
+	protected $storageApi;
+
+	/** @var Component */
+	protected $component;
 
 	protected function initStorageApi(Request $request)
 	{
@@ -34,37 +38,23 @@ class ApiController extends ContainerAware
 			$url = $request->headers->get('X-StorageApi-Url');
 		}
 
-		$this->_storageApi = new Client($request->headers->get('X-StorageApi-Token'), $url);
-        $this->container->set('storageApi', $this->_storageApi);
+		$this->storageApi = new Client($request->headers->get('X-StorageApi-Token'), $url);
+        $this->container->set('storageApi', $this->storageApi);
 
 		if ($request->headers->has('X-KBC-RunId')) {
 			$kbcRunId = $request->headers->get('X-KBC-RunId');
 		} else {
-			$kbcRunId = $this->_storageApi->generateId();
+			$kbcRunId = $this->storageApi->generateId();
 		}
 
-		$this->_storageApi->setRunId($kbcRunId);
+		$this->storageApi->setRunId($kbcRunId);
 		$this->container->get('syrup.monolog.json_formatter')->setRunId($kbcRunId);
-		$this->container->get('syrup.monolog.json_formatter')->setStorageApiClient($this->_storageApi);
+		$this->container->get('syrup.monolog.json_formatter')->setStorageApiClient($this->storageApi);
 	}
 
-	protected function initSharedConfig($componentName)
+	protected function initFilesystem()
 	{
-		$components = $this->container->getParameter('components');
-		if (isset($components[$componentName]['shared_sapi']['token'])) {
-			$token = $components[$componentName]['shared_sapi']['token'];
-			$url = null;
-			if (isset($components[$componentName]['shared_sapi']['url'])) {
-				$url = $components[$componentName]['shared_sapi']['url'];
-			}
-			$sharedSapi = new Client($token, $url);
-			$this->container->set('shared_sapi', $sharedSapi);
-		}
-	}
-
-	protected function initFilesystem(Component $component)
-	{
-		$temp = new Temp($component);
+		$temp = new Temp($this->component);
 		$this->container->set('filesystem_temp', $temp);
 	}
 
@@ -77,6 +67,28 @@ class ApiController extends ContainerAware
 		} else {
 			throw new HttpException(400, 'Missing StorageAPI token.');
 		}
+
+		$pathInfo = explode('/', $request->getPathInfo());
+		$componentName = $pathInfo[1];
+		$actionName = $pathInfo[2];
+
+		$this->container->get('syrup.monolog.json_formatter')->setComponentName($componentName);
+
+		// $this->initSharedConfig($componentName);
+
+		/** @var ComponentFactory $componentFactory */
+		$componentFactory = $this->container->get('syrup.component_factory');
+		$this->component = $componentFactory->get($this->storageApi, $componentName);
+
+
+		//@TODO remove in future
+		$this->initFilesystem();
+
+		$this->component->setContainer($this->container);
+
+		/** @var Logger $logger */
+		$logger = $this->container->get('logger');
+		$logger->info('Component ' . $componentName . ' started action ' . $actionName);
 	}
 
 	/**
@@ -94,22 +106,11 @@ class ApiController extends ContainerAware
 	    $params = array();
 	    $method = $request->getMethod();
 
-        //@TODO refactor shared config to Config object
-	    $this->initSharedConfig($componentName);
-
-	    $this->container->get('syrup.monolog.json_formatter')->setComponentName($componentName);
-	    /** @var Component $component */
-	    $component = $this->container->get('syrup.component_factory')->get($this->_storageApi, $componentName);
-
-	    $this->initFilesystem($component);
-
-	    $component->setContainer($this->container);
-
 	    $funcName = strtolower($method) . ucfirst($this->camelize($actionName));
 
-	    if (!method_exists($component, $funcName)) {
+	    if (!method_exists($this->component, $funcName)) {
 		    $funcName2 = $this->camelize($actionName);
-		    if (!method_exists($component, $funcName2)) {
+		    if (!method_exists($this->component, $funcName2)) {
 			    throw new HttpException(400, "Component $componentName doesn't have function $funcName or $funcName2");
 		    }
 		    $funcName = $funcName2;
@@ -134,28 +135,34 @@ class ApiController extends ContainerAware
 			    break;
 	    }
 
-	    $componentResponse = $component->$funcName($params);
+	    $componentResponse = $this->component->$funcName($params);
+
+	    $status = 'ok';
+	    $timeend = microtime(true);
+	    $duration = $timeend - $timestart;
 
 	    if ($componentResponse instanceof Response) {
-		    return $componentResponse;
+		    $response = $componentResponse;
+		    $status = ($response->getStatusCode() == 200) ? 'ok' : 'error';
+	    } else {
+		    $responseBody = array(
+			    'status'    => isset($componentResponse['status']) ? $componentResponse['status'] : $status,
+			    'duration'  => $duration
+		    );
+
+		    if (null != $componentResponse) {
+			    $responseBody = array_merge($componentResponse, $responseBody);
+		    }
+
+		    $response = new Response(json_encode($responseBody));
+		    $response->headers->set('Access-Control-Allow-Origin', '*');
 	    }
-
-	    $duration = microtime(true) - $timestart;
-
-	    $responseBody = array(
-		    'status'    => 'ok',
-		    'duration'  => $duration
-	    );
-
-	    if (null != $componentResponse) {
-		    $responseBody = array_merge($componentResponse, $responseBody);
-	    }
-
-	    $response = new Response(json_encode($responseBody));
-		$response->headers->set('Access-Control-Allow-Origin', '*');
 
 	    // Create Success event in SAPI
-	    $this->_sendSuccessEventToSapi('Action "'.$actionName.'" finished. Duration: ' . $duration, $componentName);
+	    $this->sendEventToSapi(SapiEvent::TYPE_SUCCESS, 'Action "'.$actionName.'" finished. Duration: ' . $duration, $componentName);
+
+	    // Log to Shared SAPI
+	    $this->logToSharedSapi($actionName, $status, $timestart, $timeend, json_encode($params));
 
 	    return $response;
     }
@@ -182,15 +189,50 @@ class ApiController extends ContainerAware
 		return $this->container->get('request');
 	}
 
-	protected function _sendSuccessEventToSapi($message, $componentName)
+	protected function sendEventToSapi($type, $message, $componentName)
 	{
 		$sapiEvent = new SapiEvent();
 		$sapiEvent->setComponent($componentName);
 		$sapiEvent->setMessage($message);
 		$sapiEvent->setRunId($this->container->get('syrup.monolog.json_formatter')->getRunId());
-		$sapiEvent->setType(SapiEvent::TYPE_SUCCESS);
+		$sapiEvent->setType($type);
 
-		$this->_storageApi->createEvent($sapiEvent);
+		$this->storageApi->createEvent($sapiEvent);
+	}
+
+	/**
+	 * @param String $actionName
+	 * @param String $status
+	 * @param Int $startTime
+	 * @param Int $endTime
+	 * @param String $params
+	 */
+	protected function logToSharedSapi($actionName, $status, $startTime, $endTime, $params)
+	{
+		$logData = $this->storageApi->getLogData();
+
+		$ssEvent = new JobEvent(array(
+			'component' => $this->component->getFullName(),
+			'action'    => $actionName,
+			'url'       => $this->getRequest()->getUri(),
+			'token'     => $this->storageApi->getTokenString(),
+			'tokenId'   => $logData['id'],
+			'tokenDesc' => $logData['description'],
+			'tokenOwnerName'    => $logData['owner']['name'],
+			'status'    => $status,
+			'startTime' => $startTime,
+			'endTime'   => $endTime,
+			'request'   => $params
+	    ));
+		$this->getSharedSapi()->log($ssEvent);
+	}
+
+	/**
+	 * @return SharedSapi
+	 */
+	protected function getSharedSapi()
+	{
+		return $this->container->get('syrup.shared_sapi');
 	}
 
 	public function camelize($value)
