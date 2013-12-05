@@ -29,7 +29,7 @@ class ApiController extends ContainerAware
 		$url = null;
 
 		try {
-			$url = $this->container->getParameter('storageApi.url');
+			$url = $this->container->getParameter('storage_api.url');
 		} catch (\Exception $e) {
 			// storageApi.url not defined in config - do nothing
 		}
@@ -39,7 +39,7 @@ class ApiController extends ContainerAware
 		}
 
 		$this->storageApi = new Client($request->headers->get('X-StorageApi-Token'), $url);
-        $this->container->set('storageApi', $this->storageApi);
+        $this->container->set('storage_api', $this->storageApi);
 
 		if ($request->headers->has('X-KBC-RunId')) {
 			$kbcRunId = $request->headers->get('X-KBC-RunId');
