@@ -159,7 +159,7 @@ class Component implements ComponentInterface
     protected function getTemp()
     {
         if ($this->_temp == null) {
-            $this->_temp = $this->_container->get('syrup.temp_factory')->get($this->getFullName());
+            $this->_temp = $this->_container->get('syrup.temp_service');
         }
 
         return $this->_temp;

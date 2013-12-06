@@ -4,7 +4,6 @@ namespace Syrup\ComponentBundle\Controller;
 
 use Symfony\Bridge\Monolog\Logger;
 use Symfony\Component\DependencyInjection\ContainerAware;
-use Symfony\Component\Form\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Keboola\StorageApi\Client;
@@ -13,8 +12,9 @@ use Keboola\StorageApi\Event as SapiEvent;
 use Syrup\ComponentBundle\Component\Component;
 use Syrup\ComponentBundle\Component\ComponentFactory;
 use Syrup\ComponentBundle\Filesystem\Temp;
+use Syrup\ComponentBundle\Filesystem\TempService;
 use Syrup\ComponentBundle\Service\SharedSapi\jobEvent;
-use Syrup\ComponentBundle\Service\SharedSapi\SharedSapi;
+use Syrup\ComponentBundle\Service\SharedSapi\SharedSapiService;
 
 class ApiController extends ContainerAware
 {
@@ -24,71 +24,73 @@ class ApiController extends ContainerAware
 	/** @var Component */
 	protected $component;
 
-	protected function initStorageApi(Request $request)
+	/** @var Logger */
+	protected $logger;
+
+	/** @var TempService */
+	protected $temp;
+
+	protected function initStorageApi()
 	{
-		$url = null;
-
-		try {
-			$url = $this->container->getParameter('storage_api.url');
-		} catch (\Exception $e) {
-			// storageApi.url not defined in config - do nothing
-		}
-
-		if ($request->headers->has('X-StorageApi-Url')) {
-			$url = $request->headers->get('X-StorageApi-Url');
-		}
-
-		$this->storageApi = new Client($request->headers->get('X-StorageApi-Token'), $url);
-        $this->container->set('storage_api', $this->storageApi);
-
-		if ($request->headers->has('X-KBC-RunId')) {
-			$kbcRunId = $request->headers->get('X-KBC-RunId');
-		} else {
-			$kbcRunId = $this->storageApi->generateId();
-		}
-
-		$this->storageApi->setRunId($kbcRunId);
-		$this->container->get('syrup.monolog.json_formatter')->setRunId($kbcRunId);
-		$this->container->get('syrup.monolog.json_formatter')->setStorageApiClient($this->storageApi);
+		$this->storageApi = $this->container->get('storage_api')->getClient();
 	}
 
+	/**
+	 * @deprecated - will be removed in 1.4.0, use TempService instead
+	 */
 	protected function initFilesystem()
 	{
 		$temp = new Temp($this->component);
 		$this->container->set('filesystem_temp', $temp);
 	}
 
+	/**
+	 * @param $componentName
+	 * @TODO refactor using Request object in container in Symfony 2.4
+	 */
+	protected function initComponent($componentName)
+	{
+		/** @var ComponentFactory $componentFactory */
+		$componentFactory = $this->container->get('syrup.component_factory');
+		$this->component = $componentFactory->get($this->storageApi, $componentName);
+		$this->component->setContainer($this->container);
+	}
+
+	protected function initTempService()
+	{
+		$this->temp = $this->container->get('syrup.temp_factory')->get($this->component->getFullName());
+		$this->container->set('syrup.temp_service', $this->temp);
+	}
+
+	/**
+	 * @TODO refactor using Request object in container in Symfony 2.4
+	 */
+	protected function initLogger()
+	{
+		$this->container->get('syrup.monolog.json_formatter')->setComponentName($this->component->getFullName());
+		$this->logger = $this->container->get('logger');
+	}
+
 	public function preExecute()
 	{
 		$request = $this->getRequest();
-
-		if ($request->headers->has('X-StorageApi-Token')) {
-			$this->initStorageApi($request);
-		} else {
-			throw new HttpException(400, 'Missing StorageAPI token.');
-		}
 
 		$pathInfo = explode('/', $request->getPathInfo());
 		$componentName = $pathInfo[1];
 		$actionName = $pathInfo[2];
 
-		$this->container->get('syrup.monolog.json_formatter')->setComponentName($componentName);
+		$this->initStorageApi();
 
-		// $this->initSharedConfig($componentName);
+		$this->initComponent($componentName);
 
-		/** @var ComponentFactory $componentFactory */
-		$componentFactory = $this->container->get('syrup.component_factory');
-		$this->component = $componentFactory->get($this->storageApi, $componentName);
+		$this->initLogger();
 
+		$this->initTempService();
 
-		//@TODO remove in future
+		//@TODO remove in 1.4.0
 		$this->initFilesystem();
 
-		$this->component->setContainer($this->container);
-
-		/** @var Logger $logger */
-		$logger = $this->container->get('logger');
-		$logger->info('Component ' . $componentName . ' started action ' . $actionName);
+		$this->logger->info('Component ' . $componentName . ' started action ' . $actionName);
 	}
 
 	/**
@@ -228,7 +230,7 @@ class ApiController extends ContainerAware
 	}
 
 	/**
-	 * @return SharedSapi
+	 * @return SharedSapiService
 	 */
 	protected function getSharedSapi()
 	{
