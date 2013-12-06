@@ -11,7 +11,7 @@ namespace Syrup\ComponentBundle\Service\SharedSapi;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Table;
 
-class SharedSapi
+class SharedSapiService
 {
 	/** @var Client */
 	protected $client;

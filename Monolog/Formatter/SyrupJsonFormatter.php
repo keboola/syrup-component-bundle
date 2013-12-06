@@ -9,61 +9,71 @@ namespace Syrup\ComponentBundle\Monolog\Formatter;
 
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Logger;
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Event;
+use Syrup\ComponentBundle\Service\StorageApi\StorageApiService;
 
 class SyrupJsonFormatter extends JsonFormatter
 {
-	protected $_appName;
-	protected $_runId = '';
-	protected $_componentName = '';
+	protected $appName;
+
+	protected $componentName = '';
+
+	/** @deprecated - will be removed in 1.4.0 */
+	protected $runId;
+
+	/** @var Client */
+	protected $storageApi;
+
+	/** @var StorageApiService */
+	protected $storageApiService;
+
+	/** @var SyrupS3Uploader */
+	protected $uploader;
 
 	/**
-	 * @var Client
+	 * @param String            $appName
+	 * @param SyrupS3Uploader   $uploader
+	 * @param StorageApiService $storageApiService
 	 */
-	protected $_sapi;
-
-	/**
-	 * @var SyrupS3Uploader
-	 */
-	protected $_uploader;
-
-	public function __construct($appName, $uploader)
+	public function __construct($appName, SyrupS3Uploader $uploader, StorageApiService $storageApiService)
 	{
-		$this->_appName = $appName;
-		$this->_uploader = $uploader;
+		$this->appName = $appName;
+		$this->uploader = $uploader;
+		$this->storageApiService = $storageApiService;
 	}
 
 	public function setComponentName($name)
 	{
-		$this->_componentName = $name;
+		$this->componentName = $name;
 	}
 
 	public function getComponentName()
 	{
-		return $this->_componentName;
+		return $this->componentName;
 	}
 
 	public function getAppName()
 	{
-		return $this->_appName;
+		return $this->appName;
 	}
 
+	/** @deprecated - will be removed in 1.4.0 */
 	public function setRunId($id)
 	{
-		$this->_runId = $id;
+		$this->runId = $id;
 	}
 
 	public function getRunId()
 	{
-		return $this->_runId;
+		return $this->storageApi->getRunId();
 	}
 
-	public function setStorageApiClient($client)
+	/** @deprecated - will be removed in 1.4.0 - set SAPI client in constructor */
+	public function setStorageApiClient(Client $storageApi)
 	{
-		$this->_sapi = $client;
+		$this->storageApi = $storageApi;
 	}
 
 	/**
@@ -71,11 +81,13 @@ class SyrupJsonFormatter extends JsonFormatter
 	 */
 	public function format(array $record)
 	{
-		$record['app']          = $this->_appName;
-		$record['component']    = $this->_componentName;
+		$this->storageApi = $this->storageApiService->getClient();
+
+		$record['app']          = $this->appName;
+		$record['component']    = $this->componentName;
 		$record['priority']     = $record['level_name'];
 		$record['pid']          = getmypid();
-		$record['runId']        = $this->_runId;
+		$record['runId']        = $this->storageApi->getRunId();
 
 		switch($record['level']) {
 			case Logger::ERROR:
@@ -86,8 +98,8 @@ class SyrupJsonFormatter extends JsonFormatter
 				break;
 		}
 
-		if ($this->_sapi != null) {
-			$record['user'] = $this->_sapi->getLogData();
+		if ($this->storageApi != null) {
+			$record['user'] = $this->storageApi->getLogData();
 		}
 
 		$e = null;
@@ -99,7 +111,7 @@ class SyrupJsonFormatter extends JsonFormatter
 			unset($record['context']['exception']);
 			if ($e instanceof \Exception) {
 				$serialized = $e->__toString();
-				$record['attachment'] = $this->_uploader->uploadString('exception', $serialized);
+				$record['attachment'] = $this->uploader->uploadString('exception', $serialized);
 			}
 		}
 
@@ -109,9 +121,12 @@ class SyrupJsonFormatter extends JsonFormatter
 		}
 
 		// Log to SAPI events
-		if ($record['level'] != Logger::DEBUG
+		if (
+			$record['level'] != Logger::DEBUG
 			&& $record['level'] != Logger::CRITICAL
-			&& $this->_sapi != null) {
+			&& $this->storageApi != null
+			&& $this->componentName != null
+		) {
 			$this->_logToSapi($record, $e);
 		}
 
@@ -135,9 +150,9 @@ class SyrupJsonFormatter extends JsonFormatter
 	protected function _logToSapi($record, $e = null)
 	{
 		$sapiEvent = new Event();
-		$sapiEvent->setComponent($this->_componentName);
+		$sapiEvent->setComponent($this->componentName);
 		$sapiEvent->setMessage($record['message']);
-		$sapiEvent->setRunId($this->_runId);
+		$sapiEvent->setRunId($this->storageApi->getRunId());
 
 		if ($e instanceof \Exception) {
 			$sapiEvent->setDescription($e->getMessage());
@@ -167,6 +182,6 @@ class SyrupJsonFormatter extends JsonFormatter
 		}
 
 		$sapiEvent->setType($type);
-		$this->_sapi->createEvent($sapiEvent);
+		$this->storageApi->createEvent($sapiEvent);
 	}
 }
