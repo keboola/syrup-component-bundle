@@ -10,6 +10,7 @@ namespace Syrup\ComponentBundle\Service\StorageApi;
 
 use Keboola\StorageApi\Client;
 use Symfony\Component\HttpFoundation\Request;
+use Syrup\ComponentBundle\Exception\NoRequestException;
 use Syrup\ComponentBundle\Exception\SyrupComponentException;
 
 class StorageApiService
@@ -36,7 +37,7 @@ class StorageApiService
 	{
 		if ($this->client == null) {
 			if ($this->request == null) {
-				throw new SyrupComponentException(500, "Request not set");
+				throw new NoRequestException();
 			}
 
 			if (!$this->request->headers->has('X-StorageApi-Token')) {

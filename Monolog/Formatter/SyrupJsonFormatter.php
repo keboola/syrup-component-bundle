@@ -9,6 +9,8 @@ namespace Syrup\ComponentBundle\Monolog\Formatter;
 
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Logger;
+use Syrup\ComponentBundle\Exception\NoRequestException;
+use Syrup\ComponentBundle\Exception\SyrupComponentException;
 use Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Event;
@@ -81,13 +83,19 @@ class SyrupJsonFormatter extends JsonFormatter
 	 */
 	public function format(array $record)
 	{
-		$this->storageApi = $this->storageApiService->getClient();
+		if ($this->storageApi == null) {
+			try {
+				$this->storageApi = $this->storageApiService->getClient();
+			} catch (NoRequestException $e) {
+
+			}
+		}
 
 		$record['app']          = $this->appName;
 		$record['component']    = $this->componentName;
 		$record['priority']     = $record['level_name'];
 		$record['pid']          = getmypid();
-		$record['runId']        = $this->storageApi->getRunId();
+		$record['runId']        = ($this->storageApi == null) ? 'not set' : $this->storageApi->getRunId();
 
 		switch($record['level']) {
 			case Logger::ERROR:
