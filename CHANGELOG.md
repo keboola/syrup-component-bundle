@@ -1,15 +1,17 @@
 ## 1.3.2
- * [Refactoring] JsonFormatter - StorageApi is now set through DI and some minor changes
- * [Refactoring] TempService - is now initialized in ApiController and not in Component - component gets this service through container
- * [Deprecation] Syrup\ComponentBundle\Filesystem\Temp class is now deprecated and will be removed in 1.4.0 in favor of Syrup\ComponentBundle\Filesystem\TempService
+ * [Refactoring]    JsonFormatter - StorageApi is now set through DI and some minor changes
+ * [Refactoring]    TempService - is now initialized in ApiController and not in Component - component gets this service through container
+ * [BC break]       In Service Container "storage_api" key now holds instance of Syrup\ComponentBundle\Service\StorageApi\StorageApiService wich is wrapper service for Storage API Client
+ * [Deprecation]    Syrup\ComponentBundle\Filesystem\Temp class is now deprecated and will be removed in 1.4.0 in favor of Syrup\ComponentBundle\Filesystem\TempService
 
 ## 1.3.1
- * [Fix] storageApi -> storage_api in ApiController
+ * [Fix]    storageApi -> storage_api in ApiController
 
 ## 1.3.0
- * [Feature] Logging to Shared SAPI
- * [Refactoring] ApiController - Initialization of services now happens in preExecute() method in favour of custom routing and controllers
- * [Refactoring] ApiController::$_storageApi -> ApiController::$storageApi
+ * [Feature]        Logging to Shared SAPI
+ * [Refactoring]    ApiController - Initialization of services now happens in preExecute() method in favour of custom routing and controllers
+ * [BC break]       ApiController::$_storageApi -> ApiController::$storageApi
+ * [BC break]       In paramters.yml - storageApi.url renamed to storage_api.url, storageApi.test.url renamed to storage_api.test.url
 
 =====================================================================
 
