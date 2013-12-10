@@ -89,7 +89,7 @@ class SyrupJsonFormatter extends JsonFormatter
 		if ($this->storageApi == null) {
 			try {
 				$this->storageApi = $this->storageApiService->getClient();
-			} catch (NoRequestException $e) {
+			} catch (SyrupComponentException $e) {
 
 			}
 		}
