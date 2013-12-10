@@ -69,6 +69,9 @@ class SyrupJsonFormatter extends JsonFormatter
 
 	public function getRunId()
 	{
+		if ($this->storageApi == null) {
+			return 'not set';
+		}
 		return $this->storageApi->getRunId();
 	}
 
@@ -95,7 +98,7 @@ class SyrupJsonFormatter extends JsonFormatter
 		$record['component']    = $this->componentName;
 		$record['priority']     = $record['level_name'];
 		$record['pid']          = getmypid();
-		$record['runId']        = ($this->storageApi == null) ? 'not set' : $this->storageApi->getRunId();
+		$record['runId']        = $this->getRunId();
 
 		switch($record['level']) {
 			case Logger::ERROR:
