@@ -52,6 +52,6 @@ class SyrupControllerListener
 			$actionName = $pathInfo[2];
 
 			$this->logger->info('Component ' . $componentName . ' finished action ' . $actionName);
-		}		
+		}
 	}
 }
