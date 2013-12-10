@@ -47,9 +47,11 @@ class SyrupControllerListener
 		$request = $event->getRequest();
 
 		$pathInfo = explode('/', $request->getPathInfo());
-		$componentName = $pathInfo[1];
-		$actionName = $pathInfo[2];
+		if (count($pathInfo) >= 3) {
+			$componentName = $pathInfo[1];
+			$actionName = $pathInfo[2];
 
-		$this->logger->info('Component ' . $componentName . ' finished action ' . $actionName);
+			$this->logger->info('Component ' . $componentName . ' finished action ' . $actionName);
+		}		
 	}
 }
