@@ -1,3 +1,9 @@
+## 1.3.4
+ * [Fix]    Better handling of exception codes and logging
+
+## 1.3.3
+ * [Fix]    Fixed JsonFormatter and ControllerListener - so they don't strictly depends on SAPI token
+
 ## 1.3.2
  * [Refactoring]    JsonFormatter - StorageApi is now set through DI and some minor changes
  * [Refactoring]    TempService - is now initialized in ApiController and not in Component - component gets this service through container
