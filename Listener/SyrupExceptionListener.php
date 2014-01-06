@@ -37,13 +37,20 @@ class SyrupExceptionListener
 
 		// Customize your response object to display the exception details
 		$response = new Response();
-		$response->setStatusCode(500);
+		$code = ($exception->getCode() < 300 || $exception->getCode() >= 600) ? 500 : $exception->getCode();
+
+		// HttpExceptionInterface is a special type of exception that
+		// holds status code and header details
+		if ($exception instanceof HttpExceptionInterface) {
+			$code = $exception->getStatusCode();
+			$response->headers->replace($exception->getHeaders());
+		}
 
 		$content = array(
 			'status'    => 'error',
-			'error'     => ($exception->getCode() < 500) ? 'User error' : 'Application error',
-			'code'      => $exception->getCode(),
-			'message'   => ($exception->getCode() < 500) ? $exception->getMessage() : 'Contact support@keboola.com and attach this exception id.',
+			'error'     => ($code < 500) ? 'User error' : 'Application error',
+			'code'      => $code,
+			'message'   => ($code < 500) ? $exception->getMessage() : 'Contact support@keboola.com and attach this exception id.',
 			'exceptionId'   => $exceptionId,
 			'runId'     => $this->_formatter->getRunId()
 		);
@@ -53,14 +60,8 @@ class SyrupExceptionListener
 			$content['data'] = $exception->getData();
 		}
 
-		// HttpExceptionInterface is a special type of exception that
-		// holds status code and header details
-		if ($exception instanceof HttpExceptionInterface) {
-			$response->setStatusCode($exception->getStatusCode());
-			$response->headers->replace($exception->getHeaders());
-		}
-
 		$response->setContent(json_encode($content));
+		$response->setStatusCode($code);
 		$response->headers->set('Content-Type', 'application/json');
 		$response->headers->set('Access-Control-Allow-Origin', '*');
 
@@ -69,7 +70,7 @@ class SyrupExceptionListener
 
 		// Log exception
 		$method = 'error';
-		if ($exception->getCode() >= 500) {
+		if ($code >= 500) {
 			$method = 'critical';
 		}
 		$this->_logger->$method(
