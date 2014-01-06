@@ -16,9 +16,9 @@ class SharedSapiService
 	/** @var Client */
 	protected $client;
 
-	public function __construct($token)
+	public function __construct($token, $url)
 	{
-		$this->client = new Client($token, null, 'Syrup');
+		$this->client = new Client($token, $url, 'Syrup');
 	}
 
 	public function log(Event $event)
