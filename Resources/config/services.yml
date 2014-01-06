@@ -42,4 +42,4 @@ services:
             - [setRequest, ['@?request=']]
     syrup.shared_sapi:
         class: Syrup\ComponentBundle\Service\SharedSapi\SharedSapiService
-        arguments: [%shared_sapi.token%]
+        arguments: [%shared_sapi.token%, %shared_sapi.url%]
