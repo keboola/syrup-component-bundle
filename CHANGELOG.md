@@ -1,5 +1,6 @@
 ## 1.3.4
  * [Fix]    Better handling of exception codes and logging
+ * [Fix]    Configurable SharedSapiService SAPI url
 
 ## 1.3.3
  * [Fix]    Fixed JsonFormatter and ControllerListener - so they don't strictly depends on SAPI token
