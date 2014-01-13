@@ -61,6 +61,11 @@ class Component implements ComponentInterface
      */
     private $_temp;
 
+	/**
+	 * @var Client
+	 */
+	protected $_sharedSapi;
+
     /**
 	 * @param \Keboola\StorageApi\Client $storageApi
 	 * @param \Monolog\Logger $log
@@ -91,6 +96,17 @@ class Component implements ComponentInterface
 	public function setContainer($container)
 	{
 		$this->_container = $container;
+
+		return $this;
+	}
+
+	/**
+	 * @param Client $sharedSapi
+	 * @return $this
+	 */
+	public function setSharedSapi(Client $sharedSapi)
+	{
+		$this->_sharedSapi = $sharedSapi;
 
 		return $this;
 	}
