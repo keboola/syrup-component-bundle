@@ -20,13 +20,13 @@ class jobEvent extends Event
 
 	protected $url;
 
-	protected $token;
+	protected $projectId;
+
+	protected $projectName;
 
 	protected $tokenId;
 
 	protected $tokenDesc;
-
-	protected $tokenOwnerName;
 
 	protected $status;
 
@@ -37,8 +37,8 @@ class jobEvent extends Event
 	protected $request;
 
 	protected $header = array(
-		'id', 'component', 'action', 'url', 'token', 'tokenId',
-		'tokenDesc', 'tokenOwnerName', 'status', 'startTime', 'endTime', 'request'
+		'id', 'component', 'action', 'url', 'projectId', 'projectName', 'tokenId',
+		'tokenDesc', 'status', 'startTime', 'endTime', 'request'
 	);
 
 	public function __construct($data = array())
@@ -86,9 +86,14 @@ class jobEvent extends Event
 		$this->url = $url;
 	}
 
-	public function setToken($token)
+	public function setProjectId($id)
 	{
-		$this->token = $token;
+		$this->projectId = $id;
+	}
+
+	public function setProjectName($name)
+	{
+		$this->projectName = $name;
 	}
 
 	public function setTokenId($tokenId)
@@ -99,11 +104,6 @@ class jobEvent extends Event
 	public function setTokenDesc($tokenDesc)
 	{
 		$this->tokenDesc = $tokenDesc;
-	}
-
-	public function setTokenOwner($tokenOwner)
-	{
-		$this->tokenOwnerName = $tokenOwner;
 	}
 
 	public function setStatus($status)

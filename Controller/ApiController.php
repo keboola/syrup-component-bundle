@@ -217,16 +217,24 @@ class ApiController extends ContainerAware
 			'component' => $this->component->getFullName(),
 			'action'    => $actionName,
 			'url'       => $this->getRequest()->getUri(),
-			'token'     => $this->storageApi->getTokenString(),
+			'projectId' => $logData['owner']['id'],
+			'projectName'    => $logData['owner']['name'],
 			'tokenId'   => $logData['id'],
 			'tokenDesc' => $logData['description'],
-			'tokenOwnerName'    => $logData['owner']['name'],
 			'status'    => $status,
 			'startTime' => $startTime,
 			'endTime'   => $endTime,
 			'request'   => $params
 	    ));
-		$this->getSharedSapi()->log($ssEvent);
+
+		try {
+			$this->getSharedSapi()->log($ssEvent);
+		} catch (\Exception $e) {
+			$this->logger->warning("Error while logging into Shared SAPI", array(
+				"message"   => $e->getMessage(),
+				"exception" => $e->getTraceAsString()
+			));
+		}
 	}
 
 	/**
