@@ -1,5 +1,9 @@
+## 1.3.6
+ * [Refactoring]    method getPostJson() added to ApiController so it can be easily used in child classes
+ * [Feature]        Added UserException and ApplicationException classes
+
 ## 1.3.5
- * [Refactoring]            SharedSapi is now configurable for each component inidvidualy
+ * [Refactoring]    SharedSapi is now configurable for each component inidvidualy
  * [Refactoring]    Changed structure of Syrup Shared Sapi log
 
 ## 1.3.4

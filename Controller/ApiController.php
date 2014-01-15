@@ -125,15 +125,7 @@ class ApiController extends ContainerAware
 			    break;
 			case 'POST':
 		    case 'PUT':
-		        $body = $request->getContent();
-				if (!empty($body) && !is_null($body) && $body != 'null') {
-					$arr = json_decode($body, true);
-
-					if (null === $arr || !is_array($arr)) {
-						throw new HttpException(400, "Bad JSON format of request body - " . var_export($body, true));
-					}
-					$params = $arr;
-				}
+		        $params = $this->getPostJson($request);
 			    break;
 	    }
 
@@ -257,6 +249,29 @@ class ApiController extends ContainerAware
 		}, $chunks);
 
 		return lcfirst(implode('', $ucfirsted));
+	}
+
+	/**
+	 * Extracts POST data in JSON from request
+	 *
+	 * @param \Symfony\Component\HttpFoundation\Request $request
+	 * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+	 * @return array
+	 */
+	protected function getPostJson(Request $request)
+	{
+		$return = array();
+		$body = $request->getContent();
+
+		if (!empty($body) && !is_null($body) && $body != 'null') {
+			$return = json_decode($body, true);
+
+			if (null === $return || !is_array($return)) {
+				throw new HttpException(400, "Bad JSON format of request body");
+			}
+		}
+
+		return $return;
 	}
 
 }
