@@ -152,11 +152,13 @@ class ApiController extends ContainerAware
 		    $response->headers->set('Access-Control-Allow-Origin', '*');
 	    }
 
-	    // Create Success event in SAPI
-	    $this->sendEventToSapi(SapiEvent::TYPE_SUCCESS, 'Action "'.$actionName.'" finished. Duration: ' . $duration, $componentName);
+	    if ($actionName == 'run') {
+		    // Create Success event in SAPI
+		    $this->sendEventToSapi(SapiEvent::TYPE_SUCCESS, 'Action "'.$actionName.'" finished. Duration: ' . $duration, $componentName);
 
-	    // Log to Shared SAPI
-	    $this->logToSharedSapi($actionName, $status, $timestart, $timeend, json_encode($params));
+		    // Log to Shared SAPI
+		    $this->logToSharedSapi($actionName, $status, $timestart, $timeend, json_encode($params));
+	    }
 
 	    return $response;
     }
