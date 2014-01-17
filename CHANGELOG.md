@@ -1,3 +1,6 @@
+## 1.3.7
+ * [Refactoring]    Only 'run' action of a component is now logged into SAPI and SharedSapi
+
 ## 1.3.6
  * [Refactoring]    method getPostJson() added to ApiController so it can be easily used in child classes
  * [Feature]        Added UserException and ApplicationException classes
