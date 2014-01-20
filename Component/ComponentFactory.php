@@ -70,6 +70,8 @@ class ComponentFactory
 		/** @var Component $component */
 		$component = new $className($storageApi, $this->logger);
 
+		//@TODO: move these to container, not to component, so they are available in the whole bundle, not just from component
+
 		// DB
 		if (isset($componentConfig['db'])) {
 			$component->setConnection($this->dbal->getConnection($componentConfig['db']));
@@ -83,11 +85,6 @@ class ComponentFactory
 				$url = $componentConfig['shared_sapi']['url'];
 			}
 			$component->setSharedSapi(new Client($token, $url, $componentName));
-		}
-
-		// Encryption
-		if (isset($componentConfig['encryption_key'])) {
-			$component->setEncryptor(new AesEncryptor($componentConfig['encryption_key']));
 		}
 
 		return $component;
