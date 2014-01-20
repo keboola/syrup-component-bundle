@@ -65,9 +65,11 @@ class BaseController extends Controller
 
 	protected function initEncryptor($componentName)
 	{
-		$componentConfig = $this->container->getParameter('components.' . $componentName);
-		if (isset($componentConfig['encryption_key'])) {
-			$this->container->set('syrup.encryptor', new AesEncryptor($componentConfig['encryption_key']));
+		$componentsConfigs = $this->container->getParameter('components');
+		$config = $componentsConfigs[$componentName];
+
+		if (isset($config['encryption_key'])) {
+			$this->container->set('syrup.encryptor', new AesEncryptor($config['encryption_key']));
 		}
 	}
 
