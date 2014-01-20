@@ -8,6 +8,7 @@
 
 namespace Syrup\ComponentBundle\Component;
 
+use Keboola\Encryption\AesEncryptor;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Syrup\ComponentBundle\Component\ComponentInterface;
@@ -66,6 +67,11 @@ class Component implements ComponentInterface
 	 */
 	protected $_sharedSapi;
 
+	/**
+	 * @var AesEncryptor
+	 */
+	protected $_encryptor;
+
     /**
 	 * @param \Keboola\StorageApi\Client $storageApi
 	 * @param \Monolog\Logger $log
@@ -109,6 +115,11 @@ class Component implements ComponentInterface
 		$this->_sharedSapi = $sharedSapi;
 
 		return $this;
+	}
+
+	public function setEncryptor(AesEncryptor $encryptor)
+	{
+		$this->_encryptor = $encryptor;
 	}
 
 	/**
