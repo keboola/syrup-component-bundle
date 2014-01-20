@@ -10,18 +10,14 @@
 			"email": "miro@keboola.com"
 		}
 	],
-	"repositories": [
-		{
-			"type": "vcs",
-			"url": "git@bitbucket.org:keboola/syrup-development-bundle.git"
-		}
-	],
+	"repositories": [],
 	"require": {
 		"php": ">=5.3.5",
 		"keboola/storage-api-client": ">=2.8.8,<2.9.0",
 		"guzzle/guzzle": ">=3.0.0",
 		"keboola/csv": "1.1.*",
-		"aws/aws-sdk-php": "2.*"
+		"aws/aws-sdk-php": "2.*",
+		"keboola/php-encryption": "~0.2.0"
 	},
 	"require-dev": {
 		"syrup/development-bundle": ">=1.1.1",
