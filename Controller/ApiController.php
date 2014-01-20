@@ -4,6 +4,7 @@ namespace Syrup\ComponentBundle\Controller;
 
 use Symfony\Bridge\Monolog\Logger;
 use Symfony\Component\DependencyInjection\ContainerAware;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Keboola\StorageApi\Client;
@@ -16,19 +17,10 @@ use Syrup\ComponentBundle\Filesystem\TempService;
 use Syrup\ComponentBundle\Service\SharedSapi\jobEvent;
 use Syrup\ComponentBundle\Service\SharedSapi\SharedSapiService;
 
-class ApiController extends ContainerAware
+class ApiController extends BaseController
 {
 	/** @var Client */
 	protected $storageApi;
-
-	/** @var Component */
-	protected $component;
-
-	/** @var Logger */
-	protected $logger;
-
-	/** @var TempService */
-	protected $temp;
 
 	protected function initStorageApi()
 	{
@@ -38,59 +30,32 @@ class ApiController extends ContainerAware
 	/**
 	 * @deprecated - will be removed in 1.4.0, use TempService instead
 	 */
-	protected function initFilesystem()
+	protected function initFilesystem(Component $component)
 	{
-		$temp = new Temp($this->component);
+		$temp = new Temp($component);
 		$this->container->set('filesystem_temp', $temp);
 	}
 
 	/**
-	 * @param $componentName
 	 * @TODO refactor using Request object in container in Symfony 2.4
 	 */
-	protected function initComponent($componentName)
+	protected function initComponent(Client $storageApi, $componentName)
 	{
 		/** @var ComponentFactory $componentFactory */
 		$componentFactory = $this->container->get('syrup.component_factory');
-		$this->component = $componentFactory->get($this->storageApi, $componentName);
+		$this->component = $componentFactory->get($storageApi, $componentName);
 		$this->component->setContainer($this->container);
-	}
-
-	protected function initTempService()
-	{
-		$this->temp = $this->container->get('syrup.temp_factory')->get($this->component->getFullName());
-		$this->container->set('syrup.temp_service', $this->temp);
-	}
-
-	/**
-	 * @TODO refactor using Request object in container in Symfony 2.4
-	 */
-	protected function initLogger()
-	{
-		$this->container->get('syrup.monolog.json_formatter')->setComponentName($this->component->getFullName());
-		$this->logger = $this->container->get('logger');
 	}
 
 	public function preExecute()
 	{
-		$request = $this->getRequest();
-
-		$pathInfo = explode('/', $request->getPathInfo());
-		$componentName = $pathInfo[1];
-		$actionName = $pathInfo[2];
+		parent::preExecute();
 
 		$this->initStorageApi();
-
-		$this->initComponent($componentName);
-
-		$this->initLogger();
-
-		$this->initTempService();
+		$this->initComponent($this->storageApi, $this->componentName);
 
 		//@TODO remove in 1.4.0
-		$this->initFilesystem();
-
-		$this->logger->info('Component ' . $componentName . ' started action ' . $actionName);
+		$this->initFilesystem($this->component);
 	}
 
 	/**
@@ -148,8 +113,7 @@ class ApiController extends ContainerAware
 			    $responseBody = array_merge($componentResponse, $responseBody);
 		    }
 
-		    $response = new Response(json_encode($responseBody));
-		    $response->headers->set('Access-Control-Allow-Origin', '*');
+		    $response = $this->createJsonResponse($responseBody);
 	    }
 
 	    if ($actionName == 'run') {
@@ -175,14 +139,6 @@ class ApiController extends ContainerAware
 		$response->send();
 
 		return $response;
-	}
-
-	/**
-	 * @return Request
-	 */
-	public function getRequest()
-	{
-		return $this->container->get('request');
 	}
 
 	protected function sendEventToSapi($type, $message, $componentName)
@@ -251,29 +207,6 @@ class ApiController extends ContainerAware
 		}, $chunks);
 
 		return lcfirst(implode('', $ucfirsted));
-	}
-
-	/**
-	 * Extracts POST data in JSON from request
-	 *
-	 * @param \Symfony\Component\HttpFoundation\Request $request
-	 * @throws \Symfony\Component\HttpKernel\Exception\HttpException
-	 * @return array
-	 */
-	protected function getPostJson(Request $request)
-	{
-		$return = array();
-		$body = $request->getContent();
-
-		if (!empty($body) && !is_null($body) && $body != 'null') {
-			$return = json_decode($body, true);
-
-			if (null === $return || !is_array($return)) {
-				throw new HttpException(400, "Bad JSON format of request body");
-			}
-		}
-
-		return $return;
 	}
 
 }
