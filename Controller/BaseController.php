@@ -53,24 +53,20 @@ class BaseController extends Controller
 
 	protected function initTempService($componentName)
 	{
-		$this->temp = $this->container->get('syrup.temp_factory')->get($componentName);
+		$this->temp = $this->get('syrup.temp_factory')->get($componentName);
 		$this->container->set('syrup.temp_service', $this->temp);
 	}
 
 	protected function initLogger($componentName)
 	{
-		$this->container->get('syrup.monolog.json_formatter')->setComponentName($componentName);
+		$this->get('syrup.monolog.json_formatter')->setComponentName($componentName);
 		$this->logger = $this->container->get('logger');
 	}
 
+	// @TODO refactor these using Request in container
 	protected function initEncryptor($componentName)
 	{
-		$componentsConfigs = $this->container->getParameter('components');
-		$config = $componentsConfigs[$componentName];
-
-		if (isset($config['encryption_key'])) {
-			$this->container->set('syrup.encryptor', new AesEncryptor($config['encryption_key']));
-		}
+		$this->container->set('syrup.encryptor', $this->get('syrup.encryptor_factory')->get($componentName));
 	}
 
 	public function createResponse($content = '', $status = '200', $headers = array())

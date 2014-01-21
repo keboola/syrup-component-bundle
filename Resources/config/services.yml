@@ -43,3 +43,6 @@ services:
     syrup.shared_sapi:
         class: Syrup\ComponentBundle\Service\SharedSapi\SharedSapiService
         arguments: [%shared_sapi.token%, %shared_sapi.url%]
+    syrup.encryptor_factory:
+        class: Syrup\ComponentBundle\Service\Encryption\EncryptorFactory
+        arguments: [%components%]
