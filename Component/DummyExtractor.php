@@ -56,16 +56,6 @@ class DummyExtractor extends Component
 			$foo->bar();
 		}
 
-		/** @var Encryptor $encryptor */
-		$encryptor = $this->_container->get('syrup.encryptor');
-
-		$encrypted = $encryptor->encrypt("something");
-
-		$decrypted = $encryptor->decrypt($encrypted);
-
-		var_dump($encrypted);
-		var_dump($decrypted); die;
-
 		$outTable = 'in.c-test.dummy';
 		if (isset($params['outputTable'])) {
 			$outTable = $params['outputTable'];

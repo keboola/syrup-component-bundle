@@ -24,11 +24,11 @@ class EncryptorFactory
 	{
 		$config = $this->componentsConfig[$componentName];
 
-		if (!isset($config['encryption_key'])) {
-			throw new ApplicationException("Encryption Key was not set in configuration for component '" . $componentName . "'");
+		if (isset($config['encryption_key'])) {
+			return new Encryptor($config['encryption_key']);
 		}
 
-		return new Encryptor($config['encryption_key']);
+		return null;
 	}
 
 } 
