@@ -1,5 +1,5 @@
 ## 1.3.7
- * [Feature]        Encryption class available in component (each component can configure it in parameters.yml)
+ * [Feature]        Encryption class available in container (each component can set an 'encryption_key' it in parameters.yml) read more in documentation
 
 ## 1.3.6
  * [Refactoring]    Only 'run' action of a component is now logged into SAPI and SharedSapi
