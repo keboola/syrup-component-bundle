@@ -15,6 +15,7 @@ use \Syrup\ComponentBundle\Component\Component;
 use Keboola\StorageApi\Table;
 use Syrup\ComponentBundle\Filesystem\Temp;
 use Syrup\ComponentBundle\Filesystem\TempService;
+use Syrup\ComponentBundle\Service\Encryption\Encryptor;
 
 class DummyExtractor extends Component
 {
@@ -54,6 +55,16 @@ class DummyExtractor extends Component
 			$foo = new NonExistingClass();
 			$foo->bar();
 		}
+
+		/** @var Encryptor $encryptor */
+		$encryptor = $this->_container->get('syrup.encryptor');
+
+		$encrypted = $encryptor->encrypt("something");
+
+		$decrypted = $encryptor->decrypt($encrypted);
+
+		var_dump($encrypted);
+		var_dump($decrypted); die;
 
 		$outTable = 'in.c-test.dummy';
 		if (isset($params['outputTable'])) {
