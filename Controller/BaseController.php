@@ -71,14 +71,18 @@ class BaseController extends Controller
 
 	public function createResponse($content = '', $status = '200', $headers = array())
 	{
-		$headers[] = array('Access-Control-Allow-Origin' => '*');
+		if (!isset($headers['Access-Control-Allow-Origin'])) {
+			$headers['Access-Control-Allow-Origin'] = '*';
+		}
 		return new Response($content, $status, $headers);
 
 	}
 
 	public function createJsonResponse(array $data, $status = '200', $headers = array())
 	{
-		$headers[] = array('Access-Control-Allow-Origin' => '*');
+		if (!isset($headers['Access-Control-Allow-Origin'])) {
+			$headers['Access-Control-Allow-Origin'] = '*';
+		}
 		return new JsonResponse($data, $status, $headers);
 	}
 
