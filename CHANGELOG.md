@@ -1,3 +1,6 @@
+## 1.3.9
+ * [Feature]        Added Utitliy class with some common useful functions - converting of encoding and other text transformations
+
 ## 1.3.8
  * [Refactoring]    ApplicationException and UserException now accepts a parameter with previous exception
 
