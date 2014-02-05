@@ -10,8 +10,8 @@ namespace Syrup\ComponentBundle\Exception;
 
 class ApplicationException extends SyrupComponentException
 {
-	public function __construct($message)
+	public function __construct($message, $previous = null)
 	{
-		parent::__construct(500, 'Application error: ' . $message);
+		parent::__construct(500, 'Application error: ' . $message, $previous);
 	}
 } 
