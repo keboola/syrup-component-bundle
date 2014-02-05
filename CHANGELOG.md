@@ -1,3 +1,6 @@
+## 1.3.8
+ * [Refactoring]    ApplicationException and UserException now accepts a parameter with previous exception
+
 ## 1.3.7
  * [Feature]        Encryption class available in container (each component can set an 'encryption_key' it in parameters.yml) read more in documentation
  * [Refactoring]    Added BaseController, which implements basic functionality without StorageApi token requirement

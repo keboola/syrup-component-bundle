@@ -10,8 +10,8 @@ namespace Syrup\ComponentBundle\Exception;
 
 class UserException extends SyrupComponentException
 {
-	public function __construct($message)
+	public function __construct($message, $previous = null)
 	{
-		parent::__construct(400, 'User error: ' . $message);
+		parent::__construct(400, 'User error: ' . $message, $previous);
 	}
 } 
