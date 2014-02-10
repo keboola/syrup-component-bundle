@@ -44,11 +44,15 @@ class TempService
         $this->prefix = $prefix;
         $this->filesystem = new Filesystem();
 	    $this->tmpRunFolder = $this->getTmpPath();
-
-        if (!file_exists($this->tmpRunFolder) && !is_dir($this->tmpRunFolder)) {
-            $this->filesystem->mkdir($this->tmpRunFolder);
-        }
     }
+
+	public function initRunFolder()
+	{
+		clearstatcache();
+		if (!file_exists($this->tmpRunFolder) && !is_dir($this->tmpRunFolder)) {
+			$this->filesystem->mkdir($this->tmpRunFolder);
+		}
+	}
 
 	/**
 	 * @param bool $value
@@ -69,7 +73,7 @@ class TempService
 	    if (!empty($this->prefix)) {
 		    $tmpDir .= "/" . $this->prefix;
 	    }
-	    $tmpDir .= "/" . uniqid("run-");
+	    $tmpDir .= "/" . uniqid("run-", true);
         return $tmpDir;
     }
 
@@ -93,6 +97,8 @@ class TempService
 	 */
     public function createTmpFile($suffix = null, $preserve = false)
     {
+	    $this->initRunFolder();
+
         $file = uniqid();
 
         if ($suffix) {
@@ -121,6 +127,8 @@ class TempService
 	 */
 	public function createFile($fileName, $preserve = false)
 	{
+		$this->initRunFolder();
+
 		$fileInfo = new \SplFileInfo($this->tmpRunFolder . '/' . $fileName);
 
 		$this->filesystem->touch($fileInfo);
