@@ -48,7 +48,9 @@ class BaseController extends Controller
 		$this->initTempService($this->componentName);
 		$this->initEncryptor($this->componentName);
 
-		$this->logger->info('Component ' . $this->componentName . ' started action ' . $actionName);
+		$this->logger->info('Component ' . $this->componentName . ' started action ' . $actionName, array(
+			'method'    => $request->getMethod()
+		));
 	}
 
 	protected function initTempService($componentName)
