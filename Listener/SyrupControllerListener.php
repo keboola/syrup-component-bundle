@@ -8,9 +8,11 @@
 namespace Syrup\ComponentBundle\Listener;
 
 use Monolog\Logger;
+use Symfony\Component\BrowserKit\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Syrup\ComponentBundle\Exception\UserException;
 
 class SyrupControllerListener
 {
@@ -51,7 +53,16 @@ class SyrupControllerListener
 			$componentName = $pathInfo[1];
 			$actionName = $pathInfo[2];
 
-			$this->logger->info('Component ' . $componentName . ' finished action ' . $actionName);
+			if ($request->isMethod('POST') || $request->isMethod('PUT')) {
+				$params = $request->getContent();
+			} else {
+				$params = $request->query->all();
+			}
+
+			$this->logger->info('Component ' . $componentName . ' finished action ' . $actionName, array(
+				'method'    => $request->getMethod(),
+				'params'    => $params
+			));
 		}
 	}
 }

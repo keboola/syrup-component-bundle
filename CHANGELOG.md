@@ -1,3 +1,9 @@
+## 1.3.11
+ * [Feature]    Logging info message "component start" and "component finish" enhanced with http method and params information
+
+## 1.3.10
+ * [Fix]    TempService added clearstatcache to prevent errors when creating tmp run folder
+
 ## 1.3.9
  * [Feature]        Added Utitliy class with some common useful functions - converting of encoding and other text transformations
 
