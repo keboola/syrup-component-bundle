@@ -80,19 +80,12 @@ class BaseController extends Controller
 
 	public function createResponse($content = '', $status = '200', $headers = array())
 	{
-		if (!isset($headers['Access-Control-Allow-Origin'])) {
-			$headers['Access-Control-Allow-Origin'] = '*';
-		}
-		return new Response($content, $status, $headers);
-
+		return new Response($content, $status, $headers = $this->corsHeaders($headers));
 	}
 
 	public function createJsonResponse(array $data, $status = '200', $headers = array())
 	{
-		if (!isset($headers['Access-Control-Allow-Origin'])) {
-			$headers['Access-Control-Allow-Origin'] = '*';
-		}
-		return new JsonResponse($data, $status, $headers);
+		return new JsonResponse($data, $status, $headers = $this->corsHeaders($headers));
 	}
 
 	/**
@@ -117,4 +110,13 @@ class BaseController extends Controller
 		return $return;
 	}
 
-} 
+	protected function corsHeaders($headers)
+	{
+		$headers['Access-Control-Allow-Origin'] = '*';
+		$headers['Access-Control-Allow-Methods'] = '*';
+		$headers['Access-Control-Allow-Headers'] = '*';
+
+		return $headers;
+	}
+
+}
