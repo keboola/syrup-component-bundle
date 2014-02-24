@@ -1,7 +1,11 @@
 <?php
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpFoundation\Response;
+namespace Syrup\ComponentBundle\Tests\Controller;
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Client;
+use Syrup\ComponentBundle\Controller\ApiController;
+use Syrup\ComponentBundle\Test\WebTestCase;
 
 /**
  * ApiControllerTest.php
@@ -12,68 +16,50 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ApiControllerTest extends WebTestCase
 {
-	const DATA_BUCKET_ID = 'in.c-test';
+	/** @var Client */
+	static $client;
 
-	/**
-	 * @var \Keboola\StorageApi\Client
-	 */
-	protected static $storageApi;
+	/** @var ApiController */
+	protected $controller;
 
-	/**
-	 * @var \Symfony\Bundle\FrameworkBundle\Client
-	 */
-	protected static $client;
+	protected $componentName = 'ex-dummy';
 
-	public static function setUpBeforeClass()
+	public function setUp()
 	{
 		self::$client = static::createClient();
 		$container = self::$client->getContainer();
-		self::$client->setServerParameters(array(
-			'HTTP_X-StorageApi-Token' => $container->getParameter('storageApi.test.token')
-		));
 
-		self::$storageApi = new \Keboola\StorageApi\Client($container->getParameter('storageApi.test.token'),
-			self::$client->getContainer()->getParameter('storageApi.url'));
+		$request = Request::create('/ex-dummy/run', 'POST');
+		$request->headers->set('X-StorageApi-Token', $container->getParameter('storage_api.test.token'));
 
-		// Clear test environment
-		if (self::$storageApi->bucketExists(self::DATA_BUCKET_ID)) {
-			$bucketInfo = self::$storageApi->getBucket(self::DATA_BUCKET_ID);
-			foreach ($bucketInfo['tables'] as $table) {
-				self::$storageApi->dropTable($table['id']);
-			}
-			self::$storageApi->dropBucket(self::DATA_BUCKET_ID);
-		}
+		$container->enterScope('request');
+		$container->set('request', $request);
+
+		$this->controller = new ApiController();
+		$this->controller->setContainer($container);
 	}
 
-	public function testDummyRun()
+	public function testInitStorageApi()
 	{
-		self::$storageApi->createBucket('test', 'in', 'Syrup Tests data bucket');
-		self::$client->request('POST', '/ex-dummy/run');
-
-		/** @var Response $response */
-		$response = self::$client->getResponse();
-		$content = json_decode($response->getContent(), true);
-
-		$this->assertEquals($response->getStatusCode(), 200);
-		$this->assertArrayHasKey('status', $content);
-		$this->assertArrayHasKey('duration', $content);
-		$this->assertEquals('ok', $content['status']);
-
-		// Data uploaded?
-		$data = array(
-			array('1', 'a', 'b', 'c'),
-			array('2', 'd', 'e', 'f'),
-			array('3', 'g', 'h', 'i'),
-			array('4', 'j', 'k', 'l'),
-		);
-
-		$result = self::$storageApi->exportTable('in.c-test.dummy');
-
-		$table = new \Keboola\StorageApi\Table(self::$storageApi, 'in.c-test.dummy');
-		$table->setFromString($result, ',', '"', true);
-
-		$this->assertEquals($data, $table->getData());
+		$this->invokeMethod($this->controller, 'initStorageApi');
+		$sapiClient = static::readAttribute($this->controller, 'storageApi');
+		$this->assertInstanceOf('Keboola\StorageApi\Client', $sapiClient);
 	}
 
+	public function testInitComponent()
+	{
+		$this->invokeMethod($this->controller, 'initStorageApi');
+		$sapiClient = static::readAttribute($this->controller, 'storageApi');
+		$this->invokeMethod($this->controller, 'initComponent', array($sapiClient, $this->componentName));
+		$component = static::readAttribute($this->controller, 'component');
 
+		$this->assertInstanceOf('Syrup\ComponentBundle\Component\DummyExtractor', $component);
+	}
+
+	public function testGetSharedSapi()
+	{
+		$sharedSapi = $this->invokeMethod($this->controller, 'getSharedSapi');
+
+		$this->assertInstanceOf('Syrup\ComponentBundle\Service\SharedSapi\SharedSapiService', $sharedSapi);
+	}
 }
