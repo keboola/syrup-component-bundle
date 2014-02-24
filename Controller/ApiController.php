@@ -2,10 +2,6 @@
 
 namespace Syrup\ComponentBundle\Controller;
 
-use Symfony\Bridge\Monolog\Logger;
-use Symfony\Component\DependencyInjection\ContainerAware;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Keboola\StorageApi\Client;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -13,7 +9,6 @@ use Keboola\StorageApi\Event as SapiEvent;
 use Syrup\ComponentBundle\Component\Component;
 use Syrup\ComponentBundle\Component\ComponentFactory;
 use Syrup\ComponentBundle\Filesystem\Temp;
-use Syrup\ComponentBundle\Filesystem\TempService;
 use Syrup\ComponentBundle\Service\SharedSapi\jobEvent;
 use Syrup\ComponentBundle\Service\SharedSapi\SharedSapiService;
 

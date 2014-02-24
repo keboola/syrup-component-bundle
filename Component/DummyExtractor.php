@@ -9,9 +9,8 @@
 
 namespace Syrup\ComponentBundle\Component;
 
-use Keboola\StorageApi\Client;
+use Keboola\StorageApi\ClientException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use \Syrup\ComponentBundle\Component\Component;
 use Keboola\StorageApi\Table;
 
 class DummyExtractor extends Component
@@ -53,13 +52,29 @@ class DummyExtractor extends Component
 			$foo->bar();
 		}
 
-		$outTable = 'in.c-test.dummy';
+		try {
+			$this->_storageApi->createBucket($this->getFullName(), 'in', 'Data bucket for Dummy Extractor');
+		} catch (ClientException $e) {
+			// do nothing bucket exists
+		}
+
+		// Shared sapi
+		$sharedSapi = $this->_container->get('syrup.shared_sapi');
+
+		// Temp
+		$temp = $this->getTemp();
+		$temp->setPreserveRunFolder(true);
+		$fileInfo = $temp->createFile('testFile', true);
+
+		unlink($fileInfo->getPathname());
+		rmdir($temp->getTmpFolder());
+
+		$outTable = 'in.c-' . $this->getFullName() . '.dummy';
 		if (isset($params['outputTable'])) {
 			$outTable = $params['outputTable'];
 		}
 
 		$table = new Table($this->_storageApi, $outTable);
-
 		$table->setFromArray($data, $hasHeader = true);
 
 		$this->_results = array($table);
@@ -68,4 +83,6 @@ class DummyExtractor extends Component
 			'table' => $table->getName()
 		);
 	}
+
+
 }

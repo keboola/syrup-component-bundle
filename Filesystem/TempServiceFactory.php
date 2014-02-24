@@ -9,6 +9,8 @@
 namespace Syrup\ComponentBundle\Filesystem;
 
 
+use Syrup\ComponentBundle\Exception\UserException;
+
 class TempServiceFactory
 {
     protected $components;
@@ -20,7 +22,10 @@ class TempServiceFactory
 
     public function get($componentName)
     {
+	    if (!array_key_exists($componentName, $this->components)) {
+		    throw new UserException("Component '".$componentName."' does not exist.");
+	    }
         return new TempService($componentName);
     }
 
-} 
+}
