@@ -15,7 +15,11 @@
     </php>
     <testsuites>
         <testsuite name="Syrup Component Bundle Tests">
-            <directory>Tests</directory>
+            <directory>Tests/Controller</directory>
+            <directory>Tests/Filesystem</directory>
+            <directory>Tests/Functional</directory>
+            <directory>Tests/Logger</directory>
+            <directory>Tests/Service</directory>
         </testsuite>
     </testsuites>
 

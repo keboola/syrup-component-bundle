@@ -21,9 +21,12 @@ class SyrupControllerListener
 	 */
 	protected $logger;
 
-	public function __construct(Logger $logger)
+	protected $components;
+
+	public function __construct(Logger $logger, array $components)
 	{
 		$this->logger = $logger;
+		$this->components = $components;
 	}
 
 	public function onKernelController(FilterControllerEvent $event)
@@ -51,18 +54,21 @@ class SyrupControllerListener
 		$pathInfo = explode('/', $request->getPathInfo());
 		if (count($pathInfo) >= 3) {
 			$componentName = $pathInfo[1];
-			$actionName = $pathInfo[2];
 
-			if ($request->isMethod('POST') || $request->isMethod('PUT')) {
-				$params = $request->getContent();
-			} else {
-				$params = $request->query->all();
+			if (in_array($componentName, $this->components)) {
+				$actionName = $pathInfo[2];
+
+				if ($request->isMethod('POST') || $request->isMethod('PUT')) {
+					$params = $request->getContent();
+				} else {
+					$params = $request->query->all();
+				}
+
+				$this->logger->info('Component ' . $componentName . ' finished action ' . $actionName, array(
+					'method'    => $request->getMethod(),
+					'params'    => $params
+				));
 			}
-
-			$this->logger->info('Component ' . $componentName . ' finished action ' . $actionName, array(
-				'method'    => $request->getMethod(),
-				'params'    => $params
-			));
 		}
 	}
 }

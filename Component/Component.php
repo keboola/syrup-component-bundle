@@ -9,16 +9,13 @@
 namespace Syrup\ComponentBundle\Component;
 
 use Keboola\Encryption\AesEncryptor;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Syrup\ComponentBundle\Component\ComponentInterface;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Config\Reader;
 use Keboola\StorageApi\Table;
 use Doctrine\DBAL\Connection;
-use Symfony\Component\HttpFoundation\Response;
-use Syrup\ComponentBundle\Filesystem\Temp;
 use Syrup\ComponentBundle\Filesystem\TempService;
+use Syrup\ComponentBundle\Service\Queue\Queue;
 
 class Component implements ComponentInterface
 {
@@ -71,6 +68,11 @@ class Component implements ComponentInterface
 	 * @var AesEncryptor
 	 */
 	protected $_encryptor;
+
+	/**
+	 * @var Queue
+	 */
+	protected $_queue;
 
     /**
 	 * @param \Keboola\StorageApi\Client $storageApi
@@ -183,7 +185,10 @@ class Component implements ComponentInterface
 		return $this->_prefix . '-' . $this->_name;
 	}
 
-    protected function getTemp()
+	/**
+	 * @return TempService
+	 */
+	protected function getTemp()
     {
         if ($this->_temp == null) {
             $this->_temp = $this->_container->get('syrup.temp_service');
@@ -191,5 +196,16 @@ class Component implements ComponentInterface
 
         return $this->_temp;
     }
+
+	/**
+	 * @return Queue
+	 */
+	protected function getQueue()
+	{
+		if ($this->_queue == null) {
+			$this->_queue = $this->_container->get('syrup.queue');
+		}
+		return $this->_queue;
+	}
 
 }

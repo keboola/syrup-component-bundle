@@ -14,7 +14,7 @@ services:
             - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
     syrup.componentbundle.listener.controller:
         class: Syrup\ComponentBundle\Listener\SyrupControllerListener
-        arguments: [@logger]
+        arguments: [@logger, %components%]
         tags:
             - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
             - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
@@ -46,3 +46,9 @@ services:
     syrup.encryptor_factory:
         class: Syrup\ComponentBundle\Service\Encryption\EncryptorFactory
         arguments: [%components%]
+    syrup.queue:
+        class: Syrup\ComponentBundle\Service\Queue\Queue
+        arguments: [%aws%]
+    syrup.job_factory:
+        class: Syrup\ComponentBundle\Job\JobFactory
+        arguments: []
