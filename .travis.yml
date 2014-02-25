@@ -1,12 +1,12 @@
 language: php
-
 php:
-  - 5.4
-
+- 5.4
 branches:
   only:
-    - master
-
+  - master
 before_install:
-  - Test/ci.sh
-  - composer install --prefer-source --no-interaction
+- Tests/ci.sh
+- composer install --prefer-source --no-interaction
+env:
+  global:
+    secure: hKZXk6IXTmcnjco+sKz1dbFIOSQkvYWPTioLHfqhy5KQjX6RoTpk++/ws2afHw+3RaNwWo3Ia3rA5M0j2iBXFY31jZr9lHcl5bP20do6JlMKjJT9HxGsXwQbEddU2i97dR5V7c4PsrNdDIrwQuK8PSvy9S/oOdUAohwBtRJBb+8=
