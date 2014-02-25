@@ -1,0 +1,38 @@
+parameters:
+    app_name:          syrup-component-bundle
+
+    database_driver:   pdo_mysql
+    database_host:     localhost
+    database_port:     ~
+    database_name:     symfony
+    database_user:     root
+    database_password: ~
+
+    mailer_transport:  smtp
+    mailer_host:       localhost
+    mailer_user:       ~
+    mailer_password:   ~
+
+    locale:            en
+    secret:            VeryMuchClandestinePhraze
+
+    uploader.aws-access-key:
+    uploader.aws-secret-key:
+    uploader.s3-upload-path: keboola-logs/debug-files
+    uploader.bitly-login:
+    uploader.bitly-api-key:
+
+    storage_api.url:        https://connection.keboola.com
+    storage_api.test.url:   https://connection.keboola.com
+    storage_api.test.token: SAPI_TOKEN
+
+    shared_sapi.url:        https://connection.keboola.com
+    shared_sapi.token:      SAPI_TOKEN
+
+    components:
+        ex-dummy:
+            class:  Syrup\ComponentBundle\Component\DummyExtractor
+            encryption_key: thisKeyIsOnlyUsedForTesting
+            shared_sapi:
+                token: SAPI_TOKEN
+                url: https://connection.keboola.com
