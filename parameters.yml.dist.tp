@@ -32,7 +32,7 @@ parameters:
     components:
         ex-dummy:
             class:  Syrup\ComponentBundle\Component\DummyExtractor
-            encryption_key: thisKeyIsOnlyUsedForTesting
+            encryption_key: qr7wYvu32aLpeKBO8oKBO5VD8nliR13K
             shared_sapi:
                 token: SAPI_TOKEN
                 url: https://connection.keboola.com
