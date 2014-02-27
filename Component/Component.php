@@ -197,15 +197,5 @@ class Component implements ComponentInterface
         return $this->_temp;
     }
 
-	/**
-	 * @return Queue
-	 */
-	protected function getQueue()
-	{
-		if ($this->_queue == null) {
-			$this->_queue = $this->_container->get('syrup.queue');
-		}
-		return $this->_queue;
-	}
 
 }
