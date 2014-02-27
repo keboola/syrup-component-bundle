@@ -22,9 +22,10 @@ class TempServiceFactory
 
     public function get($componentName)
     {
-	    if (!array_key_exists($componentName, $this->components)) {
-		    throw new UserException("Component '".$componentName."' does not exist.");
-	    }
+	    /** @todo: will be in 1.4 */
+//	    if (!array_key_exists($componentName, $this->components)) {
+//		    throw new UserException("Component '".$componentName."' does not exist.");
+//	    }
         return new TempService($componentName);
     }
 
