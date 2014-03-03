@@ -80,12 +80,12 @@ class BaseController extends Controller
 
 	public function createResponse($content = '', $status = '200', $headers = array())
 	{
-		return new Response($content, $status, $headers = $this->corsHeaders($headers));
+		return new Response($content, $status, $this->commonHeaders($headers));
 	}
 
 	public function createJsonResponse(array $data, $status = '200', $headers = array())
 	{
-		return new JsonResponse($data, $status, $headers = $this->corsHeaders($headers));
+		return new JsonResponse($data, $status, $this->commonHeaders($headers));
 	}
 
 	/**
@@ -110,11 +110,13 @@ class BaseController extends Controller
 		return $return;
 	}
 
-	protected function corsHeaders($headers)
+	protected function commonHeaders($headers)
 	{
 		$headers['Access-Control-Allow-Origin'] = '*';
 		$headers['Access-Control-Allow-Methods'] = '*';
 		$headers['Access-Control-Allow-Headers'] = '*';
+
+		$headers['Cache-Control'] = 'private, no-cache, no-store, must-revalidate';
 
 		return $headers;
 	}
