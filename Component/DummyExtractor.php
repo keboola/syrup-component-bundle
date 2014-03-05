@@ -9,6 +9,7 @@
 
 namespace Syrup\ComponentBundle\Component;
 
+use Aws\Sqs\Exception\SqsException;
 use Keboola\StorageApi\ClientException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Keboola\StorageApi\Table;

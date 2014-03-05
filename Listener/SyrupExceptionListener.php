@@ -7,6 +7,7 @@
  */
 namespace Syrup\ComponentBundle\Listener;
 
+use Symfony\Component\Console\Event\ConsoleExceptionEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -27,6 +28,40 @@ class SyrupExceptionListener
 	{
 		$this->_logger = $logger;
 		$this->_formatter = $formatter;
+	}
+
+	public function onConsoleException(ConsoleExceptionEvent $event)
+	{
+		$exception = $event->getException();
+		$exceptionId = $this->_formatter->getComponentName() . '-' . md5(microtime());
+
+		$code = ($exception->getCode() < 300 || $exception->getCode() >= 600) ? 500 : $exception->getCode();
+		$content = array(
+			'status'    => 'error',
+			'error'     => ($code < 500) ? 'User error' : 'Application error',
+			'code'      => $code,
+			'message'   => ($code < 500) ? $exception->getMessage() : 'Contact support@keboola.com and attach this exception id.',
+			'exceptionId'   => $exceptionId,
+			'runId'     => $this->_formatter->getRunId()
+		);
+
+		// SyrupExceptionInterface holds additional data
+		if ($exception instanceof SyrupExceptionInterface) {
+			$content['data'] = $exception->getData();
+		}
+
+		// Log exception
+		$method = 'error';
+		if ($code >= 500) {
+			$method = 'critical';
+		}
+		$this->_logger->$method(
+			$exception->getMessage(),
+			array(
+				'exception'     => $exception,
+				'exceptionId'   => $exceptionId,
+			)
+		);
 	}
 
 	public function onKernelException(GetResponseForExceptionEvent $event)
