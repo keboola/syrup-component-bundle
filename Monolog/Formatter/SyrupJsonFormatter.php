@@ -164,6 +164,7 @@ class SyrupJsonFormatter extends JsonFormatter
 		$sapiEvent->setComponent($this->componentName);
 		$sapiEvent->setMessage($record['message']);
 		$sapiEvent->setRunId($this->storageApi->getRunId());
+		$sapiEvent->setParams($record['context']);
 
 		if ($e instanceof \Exception) {
 			$sapiEvent->setDescription($e->getMessage());

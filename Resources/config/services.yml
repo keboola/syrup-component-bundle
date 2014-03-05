@@ -12,6 +12,7 @@ services:
         arguments: [@logger, @syrup.monolog.json_formatter]
         tags:
             - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
+            - { name: kernel.event_listener, event: console.exception, method: onConsoleException }
     syrup.componentbundle.listener.controller:
         class: Syrup\ComponentBundle\Listener\SyrupControllerListener
         arguments: [@logger, %components%]
