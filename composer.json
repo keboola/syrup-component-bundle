@@ -13,14 +13,14 @@
 	"repositories": [],
 	"require": {
 		"php": ">=5.3.5",
-		"keboola/storage-api-client": "~2.8.0",
+		"keboola/storage-api-client": "~2.10.0",
 		"guzzle/guzzle": ">=3.0.0",
 		"keboola/csv": "1.1.*",
 		"aws/aws-sdk-php": "2.*",
 		"keboola/php-encryption": "~0.2.0"
 	},
 	"require-dev": {
-		"syrup/development-bundle": ">=1.1.1",
+		"keboola/syrup": "~1.2.0",
 		"phpunit/phpunit": "3.7.*"
 	},
 	"scripts": {
