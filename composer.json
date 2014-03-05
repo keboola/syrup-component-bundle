@@ -38,9 +38,6 @@
 			"keep-outdated": true,
 			"file": "vendor/syrup/development-bundle/app/config/parameters.yml",
 			"dist-file": "parameters.yml.dist"
-		},
-		"branch-alias": {
-			"dev-master": "2.3-dev"
 		}
 	},
 	"autoload": {
