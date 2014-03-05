@@ -26,13 +26,13 @@
 	"scripts": {
 		"post-install-cmd": [
 			"Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
-			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/syrup/development-bundle/app"
+			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/keboola/syrup/app"
 		],
 		"post-update-cmd": [
-			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/syrup/development-bundle/app"
+			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/keboola/syrup/app"
 		]
 	},
-	"minimum-stability": "stable",
+	"minimum-stability": "alpha",
 	"extra": {
 		"incenteev-parameters": {
 			"keep-outdated": true,
