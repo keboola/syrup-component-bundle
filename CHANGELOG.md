@@ -1,3 +1,18 @@
+## 1.4.0
+ * [refactor]   Removed dev dependency on development-bundle, using Syrup 1.2.x instead
+ * [BC break]   Console command exceptions are now handled using listener not by extending Application class
+
+## =====================================================================
+
+## 1.3.14
+ * [fix]    cache control headers
+
+## 1.3.13
+ * [fix]    getQueue removed from component
+
+## 1.3.12
+ * [fix]    removed bc breaking condition in TempServiceFactory
+
 ## 1.3.11
  * [Feature]    Logging info message "component start" and "component finish" enhanced with http method and params information
 
@@ -45,7 +60,7 @@
  * [BC break]       ApiController::$_storageApi -> ApiController::$storageApi
  * [BC break]       In paramters.yml - storageApi.url renamed to storage_api.url, storageApi.test.url renamed to storage_api.test.url
 
-=====================================================================
+## =====================================================================
 
 ## 1.2.24
  * [Bug Fix] Fixed deleting files in TempService
