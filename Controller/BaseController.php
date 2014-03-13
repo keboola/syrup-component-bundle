@@ -54,7 +54,7 @@ class BaseController extends Controller
 			$params = $request->query->all();
 		}
 
-		$this->logger->info('Component ' . $this->componentName . ' started action ' . $actionName, array(
+		$this->logger->debug('Component ' . $this->componentName . ' started action ' . $actionName, array(
 			'method'    => $request->getMethod(),
 			'params'    => $params
 		));
