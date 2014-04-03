@@ -1,11 +1,3 @@
-parameters:
-    uploader:
-        aws-access-key: ***REMOVED***
-        aws-secret-key: ***REMOVED***
-        s3-upload-path: keboola-logs/debug-files
-        bitly-login:    ***REMOVED***
-        bitly-api-key:  ***REMOVED***
-
 services:
     syrup.componentbundle.listener.exception:
         class: Syrup\ComponentBundle\Listener\SyrupExceptionListener
