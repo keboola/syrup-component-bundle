@@ -1,5 +1,6 @@
 ## 1.5.0
  * [BC break] Updated to SAPI client 2.11.x
+ * [BC break] Coding style, underscores from private and protected properties and methods removed
 
 ## 1.4.0
  * [refactor]   Removed dev dependency on development-bundle, using Syrup 1.2.x instead

@@ -16,8 +16,8 @@ use Keboola\StorageApi\Table;
 
 class DummyExtractor extends Component
 {
-	protected $_name = 'dummy';
-	protected $_prefix = 'ex';
+	protected $name = 'dummy';
+	protected $prefix = 'ex';
 
 	public function info($params)
 	{
@@ -29,7 +29,7 @@ class DummyExtractor extends Component
 		);
 	}
 
-	protected function _process($config, $params)
+	protected function process($config, $params)
 	{
 		// Get some data
 		$data = array(
@@ -54,7 +54,7 @@ class DummyExtractor extends Component
 		}
 
 		try {
-			$this->_storageApi->createBucket($this->getFullName(), 'in', 'Data bucket for Dummy Extractor');
+			$this->storageApi->createBucket($this->getFullName(), 'in', 'Data bucket for Dummy Extractor');
 		} catch (ClientException $e) {
 			// do nothing bucket exists
 		}
@@ -75,7 +75,7 @@ class DummyExtractor extends Component
 			$outTable = $params['outputTable'];
 		}
 
-		$table = new Table($this->_storageApi, $outTable);
+		$table = new Table($this->storageApi, $outTable);
 		$table->setFromArray($data, $hasHeader = true);
 
 		$this->_results = array($table);
