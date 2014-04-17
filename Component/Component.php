@@ -27,27 +27,27 @@ class Component implements ComponentInterface
 	/**
 	 * @var \Keboola\StorageApi\Client
 	 */
-	protected $_storageApi;
+	protected $storageApi;
 
 	/**
 	 * @var \Monolog\Logger
 	 */
-	protected $_log;
+	protected $log;
 
 	/**
 	 * @var Connection
 	 */
-	protected $_db;
+	protected $db;
 
 	/**
 	 * @var string
 	 */
-	protected $_name = 'componentName';
+	protected $name = 'componentName';
 
 	/**
 	 * @var string
 	 */
-	protected $_prefix = '';
+	protected $prefix = '';
 
 	/**
 	 * @var array
@@ -57,22 +57,22 @@ class Component implements ComponentInterface
     /**
      * @var TempService
      */
-    private $_temp;
+    private $temp;
 
 	/**
 	 * @var Client
 	 */
-	protected $_sharedSapi;
+	protected $sharedSapi;
 
 	/**
 	 * @var AesEncryptor
 	 */
-	protected $_encryptor;
+	protected $encryptor;
 
 	/**
 	 * @var Queue
 	 */
-	protected $_queue;
+	protected $queue;
 
     /**
 	 * @param \Keboola\StorageApi\Client $storageApi
@@ -80,9 +80,9 @@ class Component implements ComponentInterface
 	 */
 	public function __construct(Client $storageApi, $log)
 	{
-		$this->_storageApi = $storageApi;
-		$this->_log = $log;
-		Reader::$client = $this->_storageApi;
+		$this->storageApi = $storageApi;
+		$this->log = $log;
+		Reader::$client = $this->storageApi;
 	}
 
 	/**
@@ -91,7 +91,7 @@ class Component implements ComponentInterface
 	 */
 	public function setConnection($db)
 	{
-		$this->_db = $db;
+		$this->db = $db;
 
 		return $this;
 	}
@@ -113,14 +113,14 @@ class Component implements ComponentInterface
 	 */
 	public function setSharedSapi(Client $sharedSapi)
 	{
-		$this->_sharedSapi = $sharedSapi;
+		$this->sharedSapi = $sharedSapi;
 
 		return $this;
 	}
 
 	public function setEncryptor(AesEncryptor $encryptor)
 	{
-		$this->_encryptor = $encryptor;
+		$this->encryptor = $encryptor;
 	}
 
 	/**
@@ -132,11 +132,11 @@ class Component implements ComponentInterface
 		$config = $this->getConfig();
 
 		// $result should be instance of Table or array of Table objects
-		$response = $this->_process($config, $params);
+		$response = $this->process($config, $params);
 
 		if (!empty($this->_results)) {
 			foreach ($this->_results as $table) {
-				$this->_saveTable($table);
+				$this->saveTable($table);
 			}
 		}
 
@@ -146,12 +146,12 @@ class Component implements ComponentInterface
 	/**
 	 * Override this - get data and process them
 	 */
-	protected function _process($config, $params)
+	protected function process($config, $params)
 	{
 		return false;
 	}
 
-	protected function _saveTable($table)
+	protected function saveTable($table)
 	{
 		if ($table instanceof Table) {
 			$table->save();
@@ -172,7 +172,7 @@ class Component implements ComponentInterface
 	 */
 	public function getConfig()
 	{
-		if ($this->_storageApi->bucketExists('sys.c-' . $this->getFullName())) {
+		if ($this->storageApi->bucketExists('sys.c-' . $this->getFullName())) {
 			return Reader::read('sys.c-' . $this->getFullName());
 		} else {
 			return array();
@@ -181,7 +181,7 @@ class Component implements ComponentInterface
 
 	public function getFullName()
 	{
-		return $this->_prefix . '-' . $this->_name;
+		return $this->prefix . '-' . $this->name;
 	}
 
 	/**
@@ -189,11 +189,11 @@ class Component implements ComponentInterface
 	 */
 	protected function getTemp()
     {
-        if ($this->_temp == null) {
-            $this->_temp = $this->_container->get('syrup.temp_service');
+        if ($this->temp == null) {
+            $this->temp = $this->_container->get('syrup.temp_service');
         }
 
-        return $this->_temp;
+        return $this->temp;
     }
 
 
