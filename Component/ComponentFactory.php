@@ -84,7 +84,11 @@ class ComponentFactory
 			if (isset($componentConfig['shared_sapi']['url'])) {
 				$url = $componentConfig['shared_sapi']['url'];
 			}
-			$component->setSharedSapi(new Client($token, $url, $componentName));
+			$component->setSharedSapi(new Client([
+				'token' => $token,
+				'url' => $url,
+				'userAgent' => $componentName
+			]));
 		}
 
 		return $component;
