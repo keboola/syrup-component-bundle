@@ -6,7 +6,7 @@ branches:
   - master
 before_install:
 - Tests/ci.sh
-- composer install --prefer-source --no-interaction
+- composer install --prefer-source --no-interaction --dev
 env:
   global:
     secure: hKZXk6IXTmcnjco+sKz1dbFIOSQkvYWPTioLHfqhy5KQjX6RoTpk++/ws2afHw+3RaNwWo3Ia3rA5M0j2iBXFY31jZr9lHcl5bP20do6JlMKjJT9HxGsXwQbEddU2i97dR5V7c4PsrNdDIrwQuK8PSvy9S/oOdUAohwBtRJBb+8=
