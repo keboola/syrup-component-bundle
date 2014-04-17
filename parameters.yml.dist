@@ -16,11 +16,12 @@ parameters:
     locale:            en
     secret:            VeryMuchClandestinePhraze
 
-    uploader.aws-access-key:
-    uploader.aws-secret-key:
-    uploader.s3-upload-path: keboola-logs/debug-files
-    uploader.bitly-login:
-    uploader.bitly-api-key:
+    uploader:
+      aws-access-key:
+      aws-secret-key:
+      s3-upload-path: keboola-logs/debug-files
+      bitly-login:
+      bitly-api-key:
 
     storage_api.url:        https://connection.keboola.com
     storage_api.test.url:   https://connection.keboola.com
