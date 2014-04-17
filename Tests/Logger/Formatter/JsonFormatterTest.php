@@ -39,14 +39,30 @@ class JsonFormatterTest extends WebTestCase
 
 	public function testFormatter()
 	{
-		$client = static::createClient();
-		$container = $client->getContainer();
+		$attachmentUrl = 'http://neco';
+		$s3uploader = $this->getMockBuilder('Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader')
+			->disableOriginalConstructor()
+			->getMock();
 
-		/** @var SyrupJsonFormatter $formatter */
-		$formatter = $container->get('syrup.monolog.json_formatter');
+		$s3uploader->expects($this->any())
+			->method('uploadString')
+			->will($this->returnValue($attachmentUrl));
+
+		$storageApiService = $this->getMockBuilder('Syrup\ComponentBundle\Service\StorageApi\StorageApiService')
+			->disableOriginalConstructor()
+			->getMock();
+
+
+		$storageApiService
+			->expects($this->any())
+			->method('getClient');
+
+		$formatter = new SyrupJsonFormatter(
+			$this->appName,
+			$s3uploader,
+			$storageApiService
+		);
 		$formatter->setComponentName($this->componentName);
-
-		$this->assertInstanceOf('Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter', $formatter);
 
 		$record = json_decode($formatter->format($this->createUserExceptionRecord()), true);
 
