@@ -81,7 +81,6 @@ class Component implements ComponentInterface
 	public function __construct(Client $storageApi, $log)
 	{
 		$this->_storageApi = $storageApi;
-		$this->_storageApi->setUserAgent($this->getFullName());
 		$this->_log = $log;
 		Reader::$client = $this->_storageApi;
 	}

@@ -13,7 +13,7 @@
 	"repositories": [],
 	"require": {
 		"php": ">=5.3.5",
-		"keboola/storage-api-client": "~2.10.0",
+		"keboola/storage-api-client": "~2.11.0",
 		"guzzle/guzzle": ">=3.0.0",
 		"keboola/csv": "1.1.*",
 		"aws/aws-sdk-php": "2.*",

@@ -48,7 +48,11 @@ class StorageApiService
 				$this->storageApiUrl = $this->request->headers->get('X-StorageApi-Url');
 			}
 
-			$this->client = new Client($this->request->headers->get('X-StorageApi-Token'), $this->storageApiUrl);
+			$this->client = new Client([
+				'token' => $this->request->headers->get('X-StorageApi-Token'),
+				'url' => $this->storageApiUrl,
+				'userAgent' => explode('/', $this->request->getPathInfo())[1],
+			]);
 
 			if ($this->request->headers->has('X-KBC-RunId')) {
 				$kbcRunId = $this->request->headers->get('X-KBC-RunId');

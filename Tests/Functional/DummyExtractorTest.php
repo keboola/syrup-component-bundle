@@ -37,8 +37,10 @@ class DummyExtractorTest extends WebTestCase
 			'HTTP_X-StorageApi-Token' => $container->getParameter('storage_api.test.token')
 		));
 
-		self::$storageApi = new Client($container->getParameter('storage_api.test.token'),
-			self::$client->getContainer()->getParameter('storage_api.url'));
+		self::$storageApi = new Client([
+			'token' => $container->getParameter('storage_api.test.token'),
+			'url' => self::$client->getContainer()->getParameter('storage_api.url'),
+		]);
 
 		// Clear test environment
 		if (self::$storageApi->bucketExists(self::DATA_BUCKET_ID)) {
