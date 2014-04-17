@@ -22,7 +22,7 @@ class Component implements ComponentInterface
 	/**
 	 * @var ContainerInterface
 	 */
-	public $_container;
+	public $container;
 
 	/**
 	 * @var \Keboola\StorageApi\Client
@@ -52,7 +52,7 @@ class Component implements ComponentInterface
 	/**
 	 * @var array
 	 */
-	protected $_results;
+	protected $results;
 
     /**
      * @var TempService
@@ -102,7 +102,7 @@ class Component implements ComponentInterface
 	 */
 	public function setContainer($container)
 	{
-		$this->_container = $container;
+		$this->container = $container;
 
 		return $this;
 	}
@@ -134,8 +134,8 @@ class Component implements ComponentInterface
 		// $result should be instance of Table or array of Table objects
 		$response = $this->process($config, $params);
 
-		if (!empty($this->_results)) {
-			foreach ($this->_results as $table) {
+		if (!empty($this->results)) {
+			foreach ($this->results as $table) {
 				$this->saveTable($table);
 			}
 		}
@@ -162,7 +162,7 @@ class Component implements ComponentInterface
 
 	public function getResults()
 	{
-		return $this->_results;
+		return $this->results;
 	}
 
 	/**
@@ -190,7 +190,7 @@ class Component implements ComponentInterface
 	protected function getTemp()
     {
         if ($this->temp == null) {
-            $this->temp = $this->_container->get('syrup.temp_service');
+            $this->temp = $this->container->get('syrup.temp_service');
         }
 
         return $this->temp;

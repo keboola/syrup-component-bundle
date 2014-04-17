@@ -60,7 +60,7 @@ class DummyExtractor extends Component
 		}
 
 		// Shared sapi
-		$sharedSapi = $this->_container->get('syrup.shared_sapi');
+		$sharedSapi = $this->container->get('syrup.shared_sapi');
 
 		// Temp
 		$temp = $this->getTemp();
@@ -78,7 +78,7 @@ class DummyExtractor extends Component
 		$table = new Table($this->storageApi, $outTable);
 		$table->setFromArray($data, $hasHeader = true);
 
-		$this->_results = array($table);
+		$this->results = array($table);
 
 		return array(
 			'table' => $table->getName()
