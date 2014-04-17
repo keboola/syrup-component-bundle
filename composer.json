@@ -37,7 +37,7 @@
 		"incenteev-parameters": {
 			"keep-outdated": true,
 			"file": "vendor/keboola/syrup/app/config/parameters.yml",
-			"dist-file": "parameters.yml.dist"
+			"dist-file": "parameters.yml"
 		}
 	},
 	"autoload": {
