@@ -12,6 +12,7 @@
          bootstrap="vendor/autoload.php">
     <php>
         <server name="KERNEL_DIR" value="vendor/keboola/syrup/app/" />
+        <ini name="date.timezone" value="Europe/Prague"></ini>
     </php>
     <testsuites>
         <testsuite name="Syrup Component Bundle Tests">
