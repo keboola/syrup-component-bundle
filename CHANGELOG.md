@@ -1,3 +1,6 @@
+## 1.5.0
+ * [BC break] Updated to SAPI client 2.11.x
+
 ## 1.4.0
  * [refactor]   Removed dev dependency on development-bundle, using Syrup 1.2.x instead
  * [BC break]   Console command exceptions are now handled using listener not by extending Application class
