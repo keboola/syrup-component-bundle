@@ -20,7 +20,7 @@
 		"keboola/php-encryption": "~0.2.0"
 	},
 	"require-dev": {
-		"keboola/syrup": "~1.2.0",
+		"keboola/syrup": "~1.2.7",
 		"phpunit/phpunit": "3.7.*"
 	},
 	"scripts": {
@@ -32,7 +32,7 @@
 			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/keboola/syrup/app"
 		]
 	},
-	"minimum-stability": "alpha",
+	"minimum-stability": "stable",
 	"extra": {
 		"incenteev-parameters": {
 			"keep-outdated": true,
