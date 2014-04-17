@@ -8,14 +8,6 @@ parameters:
     database_user:     root
     database_password: ~
 
-
-    slevomat.database_driver:
-    slevomat.database_host:     localhost
-    slevomat.database_port:     ~
-    slevomat.database_name:     symfony
-    slevomat.database_user:     root
-    slevomat.database_password: ~
-
     mailer_transport:  smtp
     mailer_host:       localhost
     mailer_user:       ~
