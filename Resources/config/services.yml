@@ -39,9 +39,6 @@ services:
     syrup.encryptor_factory:
         class: Syrup\ComponentBundle\Service\Encryption\EncryptorFactory
         arguments: [%components%]
-#    syrup.queue:
-#        class: Syrup\ComponentBundle\Service\Queue\Queue
-#        arguments: [%aws%]
-#    syrup.job_factory:
-#        class: Syrup\ComponentBundle\Job\JobFactory
-#        arguments: []
+    syrup.elastic_search:
+        class: Elasticsearch\Client
+        arguments: [%elasticsearch%]

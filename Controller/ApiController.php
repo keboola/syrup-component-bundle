@@ -97,7 +97,6 @@ class ApiController extends BaseController
 
 	    if ($componentResponse instanceof Response) {
 		    $response = $componentResponse;
-		    $status = ($response->getStatusCode() == 200) ? 'ok' : 'error';
 	    } else {
 		    $responseBody = array(
 			    'status'    => isset($componentResponse['status']) ? $componentResponse['status'] : $status,
