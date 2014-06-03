@@ -1,3 +1,6 @@
+## 1.5.2
+ * [Feature]    Added support for asynchronous jobs using elastic search and SQS
+
 ## 1.5.1
  * [chore] code style
 
