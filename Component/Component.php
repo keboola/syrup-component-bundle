@@ -15,7 +15,6 @@ use Keboola\StorageApi\Config\Reader;
 use Keboola\StorageApi\Table;
 use Doctrine\DBAL\Connection;
 use Syrup\ComponentBundle\Filesystem\TempService;
-use Syrup\ComponentBundle\Service\Queue\Queue;
 
 class Component implements ComponentInterface
 {
@@ -68,11 +67,6 @@ class Component implements ComponentInterface
 	 * @var AesEncryptor
 	 */
 	protected $encryptor;
-
-	/**
-	 * @var Queue
-	 */
-	protected $queue;
 
     /**
 	 * @param \Keboola\StorageApi\Client $storageApi

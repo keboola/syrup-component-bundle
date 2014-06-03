@@ -24,7 +24,7 @@ class QueueService
 			'secret'    => $config['secret_key'],
 			'region'    => $config['region']
 		));
-		$this->queueUrl = $config['sqs_url'];
+		$this->queueUrl = $config['url'];
 	}
 
 

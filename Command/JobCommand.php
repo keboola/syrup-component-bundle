@@ -52,6 +52,8 @@ abstract class JobCommand extends ContainerAwareCommand
 
 	protected function initialize(InputInterface $input, OutputInterface $output)
 	{
+		$this->getContainer()->get('syrup.monolog.json_formatter')->setComponentName('gooddata-writer');
+
 		$jobId = $input->getArgument('jobId');
 
 		$this->job = $this->getJob($jobId);
