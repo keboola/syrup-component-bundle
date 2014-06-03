@@ -6,6 +6,6 @@ syrup_component_api_options:
         params: ".+"
 
 syrup_component_api_run:
-    path:     /{componentName}/{actionName}
-    defaults: { _controller: SyrupComponentBundle:Api:run, actionName: info, _format: json }
-    methods:  [GET, POST, PUT, DELETE]
+    path:     /{componentName}/run
+    defaults: { _controller: SyrupComponentBundle:Api:run, _format: json }
+    methods:  [POST]

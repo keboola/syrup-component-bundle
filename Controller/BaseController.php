@@ -35,11 +35,8 @@ class BaseController extends Controller
 	protected $componentName;
 
 
-	public function preExecute()
+	public function preExecute(Request $request)
 	{
-		/** @var Request $request */
-		$request = $this->getRequest();
-
 		$pathInfo = explode('/', $request->getPathInfo());
 		$this->componentName = $pathInfo[1];
 		$actionName = $pathInfo[2];
@@ -72,7 +69,6 @@ class BaseController extends Controller
 		$this->logger = $this->container->get('logger');
 	}
 
-	// @TODO refactor these using Request in container
 	protected function initEncryptor($componentName)
 	{
 		$this->container->set('syrup.encryptor', $this->get('syrup.encryptor_factory')->get($componentName));

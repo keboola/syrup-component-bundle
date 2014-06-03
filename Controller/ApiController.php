@@ -2,6 +2,7 @@
 
 namespace Syrup\ComponentBundle\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Keboola\StorageApi\Client;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -9,6 +10,10 @@ use Keboola\StorageApi\Event as SapiEvent;
 use Syrup\ComponentBundle\Component\Component;
 use Syrup\ComponentBundle\Component\ComponentFactory;
 use Syrup\ComponentBundle\Filesystem\Temp;
+use Syrup\ComponentBundle\Job\Job;
+use Syrup\ComponentBundle\Job\JobInterface;
+use Syrup\ComponentBundle\Job\JobManager;
+use Syrup\ComponentBundle\Service\Queue\QueueService;
 use Syrup\ComponentBundle\Service\SharedSapi\jobEvent;
 use Syrup\ComponentBundle\Service\SharedSapi\SharedSapiService;
 
@@ -22,106 +27,37 @@ class ApiController extends BaseController
 		$this->storageApi = $this->container->get('storage_api')->getClient();
 	}
 
-	/**
-	 * @deprecated - will be removed in 1.4.0, use TempService instead
-	 */
-	protected function initFilesystem(Component $component)
+	public function preExecute(Request $request)
 	{
-		$temp = new Temp($component);
-		$this->container->set('filesystem_temp', $temp);
-	}
-
-	/**
-	 * @TODO refactor using Request object in container in Symfony 2.4
-	 */
-	protected function initComponent(Client $storageApi, $componentName)
-	{
-		/** @var ComponentFactory $componentFactory */
-		$componentFactory = $this->container->get('syrup.component_factory');
-		$this->component = $componentFactory->get($storageApi, $componentName);
-		$this->component->setContainer($this->container);
-	}
-
-	public function preExecute()
-	{
-		parent::preExecute();
+		parent::preExecute($request);
 
 		$this->initStorageApi();
-		$this->initComponent($this->storageApi, $this->componentName);
-
-		//@TODO remove in 1.4.0
-		$this->initFilesystem($this->component);
 	}
 
 	/**
-	 * @param string $componentName
-	 * @param string $actionName
-	 * @throws \Symfony\Component\HttpKernel\Exception\HttpException
-	 * @return \Symfony\Component\HttpFoundation\Response
+	 * @param Request $request
+	 * @return Response
 	 */
-	public function runAction($componentName, $actionName)
+	public function runAction(Request $request)
     {
-	    set_time_limit(3600*3);
-	    $timestart = microtime(true);
+	    $params = $this->getPostJson($request);
 
-	    $request = $this->getRequest();
-	    $params = array();
-	    $method = $request->getMethod();
+	    /** @var JobManager $jobManager */
+	    $jobManager = $this->container->get('syrup.job_manager');
 
-	    $funcName = strtolower($method) . ucfirst($this->camelize($actionName));
+	    /** @var JobInterface $job */
+	    $job = $this->initJob($this->createJob($params));
 
-	    if (!method_exists($this->component, $funcName)) {
-		    $funcName2 = $this->camelize($actionName);
-		    if (!method_exists($this->component, $funcName2)) {
-			    throw new HttpException(400, "Component $componentName doesn't have function $funcName or $funcName2");
-		    }
-		    $funcName = $funcName2;
-	    }
+	    $jobManager->indexJob($job);
 
-	    switch ($method) {
-		    case 'GET':
-		    case 'DELETE':
-			    $params = $request->query->all();
-			    break;
-			case 'POST':
-		    case 'PUT':
-		        $params = $this->getPostJson($request);
-			    break;
-	    }
+	    $this->enqueue($job->getId());
 
-	    $componentResponse = $this->component->$funcName($params);
-
-	    $status = 'ok';
-	    $timeend = microtime(true);
-	    $duration = $timeend - $timestart;
-
-	    if ($componentResponse instanceof Response) {
-		    $response = $componentResponse;
-	    } else {
-		    $responseBody = array(
-			    'status'    => isset($componentResponse['status']) ? $componentResponse['status'] : $status,
-			    'duration'  => $duration
-		    );
-
-		    if (null != $componentResponse) {
-			    $responseBody = array_merge($componentResponse, $responseBody);
-		    }
-
-		    $response = $this->createJsonResponse($responseBody);
-	    }
-
-	    if ($actionName == 'run') {
-		    // Create Success event in SAPI
-		    $this->sendEventToSapi(SapiEvent::TYPE_SUCCESS, 'Action "'.$actionName.'" finished. Duration: ' . $duration, $componentName);
-
-		    // Log to Shared SAPI
-		    $this->logToSharedSapi($actionName, $status, $timestart, $timeend, json_encode($params));
-	    }
-
-	    return $response;
+	    return $this->createJsonResponse([
+		    'jobId' => $job->getId()
+	    ], 201);
     }
 
-	public function optionsAction($params)
+	public function optionsAction()
 	{
 		$response = new Response();
 		$response->headers->set('Accept', 'application/json');
@@ -133,6 +69,50 @@ class ApiController extends BaseController
 		$response->send();
 
 		return $response;
+	}
+
+	/** Jobs */
+
+	/**
+	 * @param JobInterface $job
+	 * @return JobInterface
+	 */
+	protected function initJob(JobInterface $job)
+	{
+		$sapiData = $this->storageApi->getLogData();
+		$jobId = $this->storageApi->generateId();
+
+		$job->setId($jobId);
+		$job->setProjectId($sapiData['owner']['id']);
+		$job->setToken($this->storageApi->getTokenString());
+		$job->setComponent($this->componentName);
+		$job->setStatus(Job::STATUS_NEW);
+
+		return $job;
+	}
+
+	/**
+	 * @param array $params
+	 * @return JobInterface
+	 */
+	protected function createJob($params = [])
+	{
+		return new Job($params);
+	}
+
+	protected function enqueue($jobId, $otherData = array())
+	{
+		$data = array(
+			'jobId'     => $jobId
+		);
+
+		if (count($otherData)) {
+			$data = array_merge($data, $otherData);
+		}
+
+		/** @var QueueService $queue */
+		$queue = $this->container->get('syrup.job_queue');
+		$queue->enqueue($data);
 	}
 
 	protected function sendEventToSapi($type, $message, $componentName)

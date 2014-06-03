@@ -16,19 +16,6 @@ use Syrup\ComponentBundle\Exception\UserException;
 
 class SyrupControllerListener
 {
-	/**
-	 * @var Logger
-	 */
-	protected $logger;
-
-	protected $components;
-
-	public function __construct(Logger $logger, array $components)
-	{
-		$this->logger = $logger;
-		$this->components = $components;
-	}
-
 	public function onKernelController(FilterControllerEvent $event)
 	{
 		if (HttpKernelInterface::MASTER_REQUEST === $event->getRequestType()) {
@@ -41,34 +28,10 @@ class SyrupControllerListener
 					&& method_exists($controller, 'preExecute')
 					&& $event->getRequest()->getMethod() != 'OPTIONS'
 				) {
-					$controller->preExecute();
+					$controller->preExecute($event->getRequest());
 				}
 			}
 		}
 	}
 
-	public function onKernelResponse(FilterResponseEvent $event)
-	{
-		$request = $event->getRequest();
-
-		$pathInfo = explode('/', $request->getPathInfo());
-		if (count($pathInfo) >= 3) {
-			$componentName = $pathInfo[1];
-
-			if (in_array($componentName, $this->components)) {
-				$actionName = $pathInfo[2];
-
-				if ($request->isMethod('POST') || $request->isMethod('PUT')) {
-					$params = $request->getContent();
-				} else {
-					$params = $request->query->all();
-				}
-
-				$this->logger->info('Component ' . $componentName . ' finished action ' . $actionName, array(
-					'method'    => $request->getMethod(),
-					'params'    => $params
-				));
-			}
-		}
-	}
 }

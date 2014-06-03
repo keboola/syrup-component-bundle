@@ -5,40 +5,56 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
             - { name: kernel.event_listener, event: console.exception, method: onConsoleException }
+
     syrup.componentbundle.listener.controller:
         class: Syrup\ComponentBundle\Listener\SyrupControllerListener
-        arguments: [@logger, %components%]
         tags:
             - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
-            - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
+
     syrup.component_factory:
         class: Syrup\ComponentBundle\Component\ComponentFactory
         arguments: [@logger, @doctrine, %components%]
+
     syrup.monolog.s3_uploader:
         class: Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader
         arguments: [%uploader%]
+
     syrup.monolog.json_formatter:
         class: Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter
         arguments: [%app_name%, @syrup.monolog.s3_uploader, @storage_api]
+
     syrup.routing_loader:
         class: Syrup\ComponentBundle\Routing\Loader
         arguments: [%components%]
         tags:
             - { name: routing.loader }
+
     syrup.temp_factory:
         class: Syrup\ComponentBundle\Filesystem\TempServiceFactory
         arguments: [%components%]
+
     storage_api:
         class: Syrup\ComponentBundle\Service\StorageApi\StorageApiService
         arguments: [%storage_api.url%]
         calls:
             - [setRequest, ['@?request=']]
+
     syrup.shared_sapi:
         class: Syrup\ComponentBundle\Service\SharedSapi\SharedSapiService
         arguments: [%shared_sapi.token%, %shared_sapi.url%]
+
     syrup.encryptor_factory:
         class: Syrup\ComponentBundle\Service\Encryption\EncryptorFactory
         arguments: [%components%]
-    syrup.elastic_search:
+
+    syrup.elasticsearch:
         class: Elasticsearch\Client
         arguments: [%elasticsearch%]
+
+    syrup.job_queue:
+        class: Syrup\ComponentBundle\Service\Queue\QueueService
+        arguments: [%queue%]
+
+    syrup.job_manager:
+        class: Syrup\ComponentBundle\Job\JobManager
+        arguments: [@syrup.elasticsearch, %job_manager%]
