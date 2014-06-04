@@ -38,4 +38,8 @@ interface JobInterface
 
 	public function setStatus($status);
 
+	public function setResult($result);
+
+	public function getResult();
+
 }

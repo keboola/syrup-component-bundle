@@ -56,6 +56,11 @@ abstract class JobCommand extends ContainerAwareCommand
 
 		$jobId = $input->getArgument('jobId');
 
+		if (is_null($jobId)) {
+			// @todo create CommandException
+			throw new \Exception("missing jobId argument");
+		}
+
 		$this->job = $this->getJob($jobId);
 
 		$this->sapiClient = new SapiClient([

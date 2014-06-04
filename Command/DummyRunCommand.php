@@ -63,7 +63,5 @@ class DummyRunCommand extends JobCommand
 		// update job to 'success' or 'error'
 		$this->job->setStatus(Job::STATUS_SUCCESS);
 		$this->jobManager->updateJob($this->job);
-
-		return 0;
 	}
 }

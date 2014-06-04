@@ -20,7 +20,7 @@ class Job implements JobInterface
 	protected $data;
 
 	private $requiredFields = [
-		'id', 'projectId', 'token', 'component', 'command', 'status'
+		'id', 'projectId', 'token', 'component', 'command', 'status', 'result'
 	];
 
 	protected $optionalFields = [];
@@ -92,6 +92,18 @@ class Job implements JobInterface
 	public function setComponent($component)
 	{
 		$this->data['component'] = $component;
+		return $this;
+	}
+
+	public function setResult($result)
+	{
+		$this->data['result'] = $result;
+		return $this;
+	}
+
+	public function getResult()
+	{
+		return $this->data['result'];
 	}
 
 	public function getData()

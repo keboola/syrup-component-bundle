@@ -22,6 +22,7 @@
 		"keboola/syrup": "~1.4.4"
 	},
 	"require-dev": {
+		"sensio/generator-bundle": "~2.3",
 		"phpunit/phpunit": "3.7.*"
 	},
 	"scripts": {
