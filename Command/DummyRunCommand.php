@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Syrup\ComponentBundle\Job\Job;
+use Syrup\ComponentBundle\Service\Queue\QueueMessage;
 
 
 class DummyRunCommand extends JobCommand
@@ -35,6 +36,8 @@ class DummyRunCommand extends JobCommand
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
+
+		// @todo - move this to Extractor class
 		/** RUN */
 		$data = array(
 			array('id', 'col1', 'col2', 'col3'),
@@ -64,4 +67,5 @@ class DummyRunCommand extends JobCommand
 		$this->job->setStatus(Job::STATUS_SUCCESS);
 		$this->jobManager->updateJob($this->job);
 	}
+
 }

@@ -56,5 +56,5 @@ services:
         arguments: [%queue%]
 
     syrup.job_manager:
-        class: Syrup\ComponentBundle\Job\JobManager
+        class: Syrup\ComponentBundle\Job\Metadata\JobManager
         arguments: [@syrup.elasticsearch, %job_manager%]

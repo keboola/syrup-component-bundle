@@ -44,14 +44,15 @@ class Component implements ComponentInterface
 	protected $name = 'componentName';
 
 	/**
+	 * @deprecated
+	 * @var
+	 */
+	protected $results;
+
+	/**
 	 * @var string
 	 */
 	protected $prefix = '';
-
-	/**
-	 * @var array
-	 */
-	protected $results;
 
     /**
      * @var TempService
@@ -120,6 +121,7 @@ class Component implements ComponentInterface
 	/**
 	 * @param null $params - parameters passed from API call
 	 * @return mixed
+	 * @deprecated
 	 */
 	public function postRun($params)
 	{
@@ -139,12 +141,18 @@ class Component implements ComponentInterface
 
 	/**
 	 * Override this - get data and process them
+	 * @deprecated
 	 */
 	protected function process($config, $params)
 	{
 		return false;
 	}
 
+	/**
+	 * @param $table
+	 * @deprecated
+	 * @throws \Exception
+	 */
 	protected function saveTable($table)
 	{
 		if ($table instanceof Table) {
@@ -154,6 +162,10 @@ class Component implements ComponentInterface
 		}
 	}
 
+	/**
+	 * @deprecated
+	 * @return mixed
+	 */
 	public function getResults()
 	{
 		return $this->results;

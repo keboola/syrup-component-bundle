@@ -5,7 +5,7 @@
  * Time: 17:19
  */
 
-namespace Syrup\ComponentBundle\Job;
+namespace Syrup\ComponentBundle\Job\Metadata;
 
 
 interface JobInterface
@@ -41,5 +41,13 @@ interface JobInterface
 	public function setResult($result);
 
 	public function getResult();
+
+	public function setRunId($runId);
+
+	public function getRunId();
+
+	public function setLockName($lockName);
+
+	public function getLockName();
 
 }

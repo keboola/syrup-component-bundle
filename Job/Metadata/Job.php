@@ -5,14 +5,14 @@
  * Time: 14:37
  */
 
-namespace Syrup\ComponentBundle\Job;
+namespace Syrup\ComponentBundle\Job\Metadata;
 
 
 use Syrup\ComponentBundle\Exception\ApplicationException;
 
 class Job implements JobInterface
 {
-	const STATUS_NEW = 'new';
+	const STATUS_WAITING = 'waiting';
 	const STATUS_PROCESSING = 'processing';
 	const STATUS_SUCCESS = 'success';
 	const STATUS_ERROR = 'error';
@@ -20,14 +20,13 @@ class Job implements JobInterface
 	protected $data;
 
 	private $requiredFields = [
-		'id', 'projectId', 'token', 'component', 'command', 'status', 'result'
+		'id', 'runId', 'lockName', 'projectId', 'token', 'component', 'command', 'status', 'result'
 	];
-
-	protected $optionalFields = [];
 
 	public function __construct($data = [])
 	{
-		$this->data = $data;
+		$this->data = array_combine($this->requiredFields, array_fill(0, count($this->requiredFields), null));
+		$this->data = array_merge($this->data, $data);
 	}
 
 	public function getId()
@@ -106,19 +105,45 @@ class Job implements JobInterface
 		return $this->data['result'];
 	}
 
+	public function getRunId()
+	{
+		return $this->data['runId'];
+	}
+
+	public function setRunId($runId)
+	{
+		$this->data['runId'] = $runId;
+	}
+
+	public function setLockName($lockName)
+	{
+		$this->data['lockName'] = $lockName;
+	}
+
+	public function getLockName()
+	{
+		return $this->data['lockName'];
+	}
+
+	public function setAttribute($key, $value)
+	{
+		$this->data[$key] = $value;
+	}
+
+	public function getAttribute($key)
+	{
+		return $this->data[$key];
+	}
+
 	public function getData()
 	{
-		$fields = array_merge($this->requiredFields, $this->optionalFields);
-
-		return array_intersect_key($this->data, array_flip($fields));
+		return $this->data;
 	}
 
 	public function validate()
 	{
-		$fields = array_merge($this->requiredFields, $this->optionalFields);
-
-		foreach ($fields as $field) {
-			if (!array_key_exists($field, $this->data)) {
+		foreach ($this->requiredFields as $field) {
+			if (!array_key_exists($field, $this->data) && !is_null($this->data[$field])) {
 				throw new ApplicationException("Job is missing required field '".$field."'.");
 			}
 		}
@@ -128,7 +153,7 @@ class Job implements JobInterface
 
 	protected function validateStatus()
 	{
-		$allowedStatuses = array(self::STATUS_NEW, self::STATUS_PROCESSING, self::STATUS_SUCCESS, self::STATUS_ERROR);
+		$allowedStatuses = array(self::STATUS_WAITING, self::STATUS_PROCESSING, self::STATUS_SUCCESS, self::STATUS_ERROR);
 
 		if (!in_array($this->getStatus(), $allowedStatuses)) {
 			throw new ApplicationException("Job status has unrecongized value '".$this->getStatus()."'. Job status must be one of (".implode(',',$allowedStatuses).")");

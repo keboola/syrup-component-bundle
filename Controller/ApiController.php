@@ -10,9 +10,9 @@ use Keboola\StorageApi\Event as SapiEvent;
 use Syrup\ComponentBundle\Component\Component;
 use Syrup\ComponentBundle\Component\ComponentFactory;
 use Syrup\ComponentBundle\Filesystem\Temp;
-use Syrup\ComponentBundle\Job\Job;
-use Syrup\ComponentBundle\Job\JobInterface;
-use Syrup\ComponentBundle\Job\JobManager;
+use Syrup\ComponentBundle\Job\Metadata\Job;
+use Syrup\ComponentBundle\Job\Metadata\JobInterface;
+use Syrup\ComponentBundle\Job\Metadata\JobManager;
 use Syrup\ComponentBundle\Service\Queue\QueueService;
 use Syrup\ComponentBundle\Service\SharedSapi\jobEvent;
 use Syrup\ComponentBundle\Service\SharedSapi\SharedSapiService;
@@ -42,19 +42,25 @@ class ApiController extends BaseController
     {
 	    $params = $this->getPostJson($request);
 
-	    /** @var JobManager $jobManager */
-	    $jobManager = $this->container->get('syrup.job_manager');
+	    if ($request->headers->has('x-kbc-runid')) {
+		    $params['runId'] = $request->headers->get('x-kbc-runid');
+	    } else {
+		    $params['runId'] = $this->storageApi->generateId();
+	    }
+	    $params['command'] = 'run';
 
-	    /** @var JobInterface $job */
+	    /** @var Job $job */
 	    $job = $this->initJob($this->createJob($params));
 
+	    /** @var JobManager $jobManager */
+	    $jobManager = $this->container->get('syrup.job_manager');
 	    $jobManager->indexJob($job);
 
 	    $this->enqueue($job->getId());
 
 	    return $this->createJsonResponse([
 		    'jobId' => $job->getId()
-	    ], 201);
+	    ], 202);
     }
 
 	public function optionsAction()
@@ -80,13 +86,16 @@ class ApiController extends BaseController
 	protected function initJob(JobInterface $job)
 	{
 		$sapiData = $this->storageApi->getLogData();
+		$projectId = $sapiData['owner']['id'];
+
 		$jobId = $this->storageApi->generateId();
 
 		$job->setId($jobId);
-		$job->setProjectId($sapiData['owner']['id']);
+		$job->setProjectId($projectId);
 		$job->setToken($this->storageApi->getTokenString());
 		$job->setComponent($this->componentName);
-		$job->setStatus(Job::STATUS_NEW);
+		$job->setStatus(Job::STATUS_WAITING);
+		$job->setLockName($job->getComponent() . '-' . $job->getProjectId());
 
 		return $job;
 	}

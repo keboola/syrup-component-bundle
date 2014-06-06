@@ -14,15 +14,17 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Syrup\ComponentBundle\Filesystem\TempService;
-use Syrup\ComponentBundle\Job\Job;
-use Syrup\ComponentBundle\Job\JobManager;
+use Syrup\ComponentBundle\Exception\UserException;
 use Keboola\StorageApi\Client as SapiClient;
-use Syrup\ComponentBundle\Service\Queue\QueueService;
+use Syrup\ComponentBundle\Job\Metadata\Job;
+use Syrup\ComponentBundle\Job\Metadata\JobManager;
+use Syrup\ComponentBundle\Service\Db\Lock;
 
-abstract class JobCommand extends ContainerAwareCommand
+class JobCommand extends ContainerAwareCommand
 {
-	protected $componentName = '';
+	const STATUS_SUCCESS = 0;
+	const STATUS_ERROR = 1;
+	const STATUS_LOCK = 2;
 
 	/** @var JobManager */
 	protected $jobManager;
@@ -33,47 +35,88 @@ abstract class JobCommand extends ContainerAwareCommand
 	/** @var SapiClient */
 	protected $sapiClient;
 
-	/** @var TempService */
-    protected $temp;
-
-	/** @var  QueueService */
-	protected $queue;
-
 	protected function configure()
 	{
 		$this
+			->setName('syrup:run-job')
+			->setDescription('Command to execute jobs')
 			->addArgument(
 				'jobId',
 				InputArgument::REQUIRED,
-				'ID of the jbo'
+				'ID of the job'
 			)
 		;
 	}
 
 	protected function initialize(InputInterface $input, OutputInterface $output)
 	{
-		$this->getContainer()->get('syrup.monolog.json_formatter')->setComponentName('gooddata-writer');
+		$this->getContainer()->get('syrup.monolog.json_formatter')->setComponentName('syrup');
 
 		$jobId = $input->getArgument('jobId');
 
 		if (is_null($jobId)) {
-			// @todo create CommandException
-			throw new \Exception("missing jobId argument");
+			throw new UserException("Missing jobId argument.");
 		}
 
 		$this->job = $this->getJob($jobId);
 
+		$this->getContainer()->get('syrup.monolog.json_formatter')->setComponentName($this->job->getComponent());
+
 		$this->sapiClient = new SapiClient([
 			'token' => $this->job->getToken(),
 			'url' => $this->getContainer()->getParameter('storage_api.url'),
-			'userAgent' => $this->componentName,
+			'userAgent' => $this->job->getComponent(),
 		]);
+		$this->sapiClient->setRunId($this->job->getRunId());
+		$this->getContainer()->set('storage_api', $this->sapiClient);
+	}
 
-		$this->sapiClient->setRunId($jobId);
+	protected function execute(InputInterface $input, OutputInterface $output)
+	{
+		/** @var \PDO $pdo */
+		$pdo = $this->getContainer()->get('pdo');
+		$pdo->exec('SET wait_timeout = 31536000;');
+		$lock = new Lock($pdo, $this->job->getId());
+
+		if (!$lock->lock()) {
+			return self::STATUS_LOCK;
+		}
 
 		// update job status to 'processing'
 		$this->job->setStatus(Job::STATUS_PROCESSING);
 		$this->jobManager->updateJob($this->job);
+
+		$jobExecutorName = $this->job->getComponent() . '.job_executor';
+		$jobExecutor = $this->getContainer()->get($jobExecutorName);
+
+		try {
+			// execute job
+			$result = $jobExecutor->execute($this->job);
+			$this->job->setStatus(Job::STATUS_SUCCESS);
+			$this->job->setResult($result);
+			$this->jobManager->updateJob($this->job);
+
+			$lock->unlock();
+			return self::STATUS_SUCCESS;
+		} catch (UserException $e) {
+
+			// update job with error message
+			$this->job->setStatus(Job::STATUS_ERROR);
+			$this->job->setResult($e->getMessage());
+			$this->jobManager->updateJob($this->job);
+
+			$lock->unlock();
+			return self::STATUS_SUCCESS;
+		} catch (\Exception $e) {
+
+			// update job with 'contact support' message
+			$this->job->setStatus(Job::STATUS_ERROR);
+			$this->job->setResult('Internal error occured please contact support@keboola.com');
+			$this->jobManager->updateJob($this->job);
+
+			$lock->unlock();
+			return self::STATUS_ERROR;
+		}
 	}
 
 	protected function getJobManager()
@@ -87,24 +130,6 @@ abstract class JobCommand extends ContainerAwareCommand
 
 	protected function getJob($jobId)
 	{
-		return new Job($this->getJobManager()->getJobData($jobId, $this->componentName));
-	}
-
-    protected function getTemp()
-    {
-        if ($this->temp == null) {
-            $this->temp = $this->getContainer()->get('syrup.temp_factory')->get($this->componentName);
-        }
-
-        return $this->temp;
-    }
-
-	protected function getJobQueue()
-	{
-		if ($this->queue == null) {
-			$this->queue = $this->getContainer()->get('syrup.job_queue');
-		}
-
-		return $this->queue;
+		return $this->getJobManager()->getJob($jobId);
 	}
 }

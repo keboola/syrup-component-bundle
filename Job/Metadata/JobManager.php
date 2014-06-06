@@ -5,7 +5,7 @@
  * Time: 14:29
  */
 
-namespace Syrup\ComponentBundle\Job;
+namespace Syrup\ComponentBundle\Job\Metadata;
 
 use Elasticsearch\Client as ElasticsearchClient;
 use Syrup\ComponentBundle\Exception\ApplicationException;
@@ -85,18 +85,20 @@ class JobManager
 		return $response['_id'];
 	}
 
-	public function getJobData($jobId, $component=null)
+	public function getJob($jobId, $component=null)
 	{
-		$type = $this->getType($component);
-
 		$params = array();
 		$params['index'] = $this->getIndex();
-		$params['type'] = (is_null($type))?'jobs_*':$type;
+
+		if ($component != null) {
+			$params['type'] = $this->getType($component);
+		}
+
 		$params['body']['query']['match']['id'] = $jobId;
 
 		$results = $this->client->search($params);
 
-		return $results['hits']['hits'][0]['_source'];
+		return new Job($results['hits']['hits'][0]['_source']);
 	}
 
 	protected function getType($component)
