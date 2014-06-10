@@ -112,7 +112,8 @@ class ApiController extends BaseController
 	protected function enqueue($jobId, $otherData = array())
 	{
 		$data = array(
-			'jobId'     => $jobId
+			'jobId'     => $jobId,
+			'component' => $this->componentName
 		);
 
 		if (count($otherData)) {

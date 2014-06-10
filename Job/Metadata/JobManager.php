@@ -98,6 +98,10 @@ class JobManager
 
 		$results = $this->client->search($params);
 
+		if (!isset($results['hits']['hits'][0])) {
+			return null;
+		}
+
 		return new Job($results['hits']['hits'][0]['_source']);
 	}
 

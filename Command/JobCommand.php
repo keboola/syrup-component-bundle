@@ -60,6 +60,10 @@ class JobCommand extends ContainerAwareCommand
 
 		$this->job = $this->getJob($jobId);
 
+		if ($this->job == null) {
+			return;
+		}
+
 		$this->getContainer()->get('syrup.monolog.json_formatter')->setComponentName($this->job->getComponent());
 
 		$this->sapiClient = new SapiClient([
@@ -73,6 +77,10 @@ class JobCommand extends ContainerAwareCommand
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
+		if ($this->job == null) {
+			return self::STATUS_ERROR;
+		}
+
 		/** @var \PDO $pdo */
 		$pdo = $this->getContainer()->get('pdo');
 		$pdo->exec('SET wait_timeout = 31536000;');
