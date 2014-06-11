@@ -8,6 +8,7 @@
 namespace Syrup\ComponentBundle\Job\Metadata;
 
 use Elasticsearch\Client as ElasticsearchClient;
+use Elasticsearch\Common\Exceptions\Missing404Exception;
 use Syrup\ComponentBundle\Exception\ApplicationException;
 
 class JobManager
@@ -87,22 +88,57 @@ class JobManager
 
 	public function getJob($jobId, $component=null)
 	{
-		$params = array();
+		$params = [];
 		$params['index'] = $this->getIndex();
+		$params['type'] = is_null($component)?'_all':$this->getType($component);
+		$params['id'] = $jobId;
 
-		if ($component != null) {
-			$params['type'] = $this->getType($component);
-		}
-
-		$params['body']['query']['match']['id'] = $jobId;
-
-		$results = $this->client->search($params);
-
-		if (!isset($results['hits']['hits'][0])) {
+		try {
+			$result = $this->client->get($params);
+			return new Job($result['_source']);
+		} catch (Missing404Exception $e) {
 			return null;
 		}
+	}
 
-		return new Job($results['hits']['hits'][0]['_source']);
+	public function getJobs($projectId, $component = null, $runId = null, $query=null)
+	{
+
+		$filter = [];
+		$filter[] = ['term' => ['projectId' => $projectId]];
+
+		if ($runId != null) {
+			$filter[] = ['term' => ['runId' => $runId]];
+		}
+
+		if ($query == null) {
+			$query = ['match_all' => []];
+		}
+
+		$params = [];
+		$params['index'] = $this->getIndex();
+		$params['type'] = $this->getType($component);
+		$params['body'] = [
+			'size' => self::PAGING,
+			'query' => [
+				'filtered' => [
+					'filter' => [
+						'bool' => [
+							'must' => $filter
+						]
+					],
+					'query' => $query
+				]
+			]
+		];
+
+		$results = [];
+		$hits = $this->client->search($params);
+		foreach ($hits['hits']['hits'] as $hit) {
+			$results[] = $hit['_source'];
+		}
+
+		return $results;
 	}
 
 	protected function getType($component)

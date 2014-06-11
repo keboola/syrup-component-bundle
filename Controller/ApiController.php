@@ -52,8 +52,7 @@ class ApiController extends BaseController
 	    /** @var Job $job */
 	    $job = $this->initJob($this->createJob($params));
 
-	    /** @var JobManager $jobManager */
-	    $jobManager = $this->container->get('syrup.job_manager');
+	    $jobManager = $this->getJobManager();
 	    $jobManager->indexJob($job);
 
 	    $this->enqueue($job->getId());
@@ -78,6 +77,14 @@ class ApiController extends BaseController
 	}
 
 	/** Jobs */
+
+	/**
+	 * @return JobManager
+	 */
+	private function getJobManager()
+	{
+		return $this->container->get('syrup.job_manager');
+	}
 
 	/**
 	 * @param JobInterface $job

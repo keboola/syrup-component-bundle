@@ -9,3 +9,4 @@ syrup_component_api_run:
     path:     /{componentName}/run
     defaults: { _controller: SyrupComponentBundle:Api:run, _format: json }
     methods:  [POST]
+
