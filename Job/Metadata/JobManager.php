@@ -15,7 +15,7 @@ class JobManager
 {
 	const INDEX = '_syrup_current';
 
-	const PAGING = 9999;
+	const PAGING = 100;
 
 	/** @var ElasticsearchClient */
 	protected $client;
@@ -101,9 +101,8 @@ class JobManager
 		}
 	}
 
-	public function getJobs($projectId, $component = null, $runId = null, $query=null)
+	public function getJobs($projectId, $component = null, $runId = null, $queryString=null, $offset=0, $limit=self::PAGING)
 	{
-
 		$filter = [];
 		$filter[] = ['term' => ['projectId' => $projectId]];
 
@@ -111,15 +110,27 @@ class JobManager
 			$filter[] = ['term' => ['runId' => $runId]];
 		}
 
-		if ($query == null) {
-			$query = ['match_all' => []];
+		$query = ['match_all' => []];
+		if ($queryString != null) {
+			$query = [
+				'query_string' => [
+					'allow_leading_wildcard' => 'false',
+					'default_operator' => 'AND',
+					'query' => $queryString
+				]
+			];
 		}
 
 		$params = [];
 		$params['index'] = $this->getIndex();
-		$params['type'] = $this->getType($component);
+
+		if (!is_null($component)) {
+			$params['type'] = $this->getType($component);
+		}
+
 		$params['body'] = [
-			'size' => self::PAGING,
+			'from' => $offset,
+			'size' => $limit,
 			'query' => [
 				'filtered' => [
 					'filter' => [
@@ -134,6 +145,7 @@ class JobManager
 
 		$results = [];
 		$hits = $this->client->search($params);
+
 		foreach ($hits['hits']['hits'] as $hit) {
 			$results[] = $hit['_source'];
 		}
