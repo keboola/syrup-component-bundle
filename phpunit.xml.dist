@@ -7,7 +7,7 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          processIsolation="false"
-         stopOnFailure="false"
+         stopOnFailure="true"
          syntaxCheck="false"
          bootstrap="vendor/autoload.php">
     <php>
@@ -19,7 +19,6 @@
             <directory>Tests/Controller</directory>
             <directory>Tests/Filesystem</directory>
             <directory>Tests/Job</directory>
-            <directory>Tests/Functional</directory>
             <directory>Tests/Logger</directory>
             <directory>Tests/Service</directory>
         </testsuite>

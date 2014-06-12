@@ -68,7 +68,7 @@ class BaseControllerTest extends WebTestCase
 
 		$this->baseController->setContainer($container);
 
-		$this->baseController->preExecute();
+		$this->baseController->preExecute($request);
 
 		$logger = static::readAttribute($this->baseController, 'logger');
 		$this->assertInstanceOf('Symfony\Bridge\Monolog\Logger', $logger);

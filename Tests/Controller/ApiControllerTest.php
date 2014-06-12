@@ -46,16 +46,6 @@ class ApiControllerTest extends WebTestCase
 		$this->assertInstanceOf('Keboola\StorageApi\Client', $sapiClient);
 	}
 
-	public function testInitComponent()
-	{
-		$this->invokeMethod($this->controller, 'initStorageApi');
-		$sapiClient = static::readAttribute($this->controller, 'storageApi');
-		$this->invokeMethod($this->controller, 'initComponent', array($sapiClient, $this->componentName));
-		$component = static::readAttribute($this->controller, 'component');
-
-		$this->assertInstanceOf('Syrup\ComponentBundle\Component\DummyExtractor', $component);
-	}
-
 	public function testGetSharedSapi()
 	{
 		$sharedSapi = $this->invokeMethod($this->controller, 'getSharedSapi');
