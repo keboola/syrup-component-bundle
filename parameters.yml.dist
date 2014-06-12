@@ -8,6 +8,13 @@ parameters:
     database_user:     root
     database_password: ~
 
+	# Session PDO handler table
+    pdo.db_options:
+        db_table:    session
+        db_id_col:   id
+        db_data_col: value
+        db_time_col: time
+
     mailer_transport:  smtp
     mailer_host:       localhost
     mailer_user:       ~
@@ -16,13 +23,6 @@ parameters:
     locale:            en
     secret:            VeryMuchClandestinePhraze
 
-    uploader:
-      aws-access-key:
-      aws-secret-key:
-      s3-upload-path: keboola-logs/debug-files
-      bitly-login:
-      bitly-api-key:
-
     storage_api.url:        https://connection.keboola.com
     storage_api.test.url:   https://connection.keboola.com
     storage_api.test.token: SAPI_TOKEN
@@ -30,10 +30,23 @@ parameters:
     shared_sapi.url:        https://connection.keboola.com
     shared_sapi.token:      SAPI_TOKEN
 
+    uploader:
+        aws-access-key:
+        aws-secret-key:
+        s3-upload-path: keboola-logs/debug-files
+        bitly-login:
+        bitly-api-key:
+
+    queue:
+        access_key:
+        secret_key:
+        region:
+        url:
+
+    elasticsearch:
+        hosts: [localhost:9200]
+
+    job_manager:
+        index_prefix: devel
+
     components:
-        ex-dummy:
-            class:  Syrup\ComponentBundle\Component\DummyExtractor
-            encryption_key: qr7wYvu32aLpeKBO8oKBO5VD8nliR13K
-            shared_sapi:
-                token: SAPI_TOKEN
-                url: https://connection.keboola.com
