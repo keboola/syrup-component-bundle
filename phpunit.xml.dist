@@ -18,6 +18,7 @@
         <testsuite name="Syrup Component Bundle Tests">
             <directory>Tests/Controller</directory>
             <directory>Tests/Filesystem</directory>
+            <directory>Tests/Job</directory>
             <directory>Tests/Functional</directory>
             <directory>Tests/Logger</directory>
             <directory>Tests/Service</directory>

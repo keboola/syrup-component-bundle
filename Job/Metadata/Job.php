@@ -27,6 +27,10 @@ class Job implements JobInterface
 	{
 		$this->data = array_combine($this->requiredFields, array_fill(0, count($this->requiredFields), null));
 		$this->data = array_merge($this->data, $data);
+
+		if (!isset($data['lockName'])) {
+			$this->setLockName($this->getComponent() . '-' . $this->getProjectId());
+		}
 		$this->data['status'] = self::STATUS_WAITING;
 	}
 
