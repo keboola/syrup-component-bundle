@@ -95,7 +95,7 @@ class JobCommand extends ContainerAwareCommand
 		$this->job->setStatus(Job::STATUS_PROCESSING);
 		$this->jobManager->updateJob($this->job);
 
-		$jobExecutorName = $this->job->getComponent() . '.job_executor';
+		$jobExecutorName = str_replace('-', '_', $this->job->getComponent()) . '.job_executor';
 
 		/** @var ExecutorInterface $jobExecutor */
 		$jobExecutor = $this->getContainer()->get($jobExecutorName);
