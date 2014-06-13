@@ -41,9 +41,8 @@ class BaseController extends Controller
 		$this->componentName = $pathInfo[1];
 		$actionName = $pathInfo[2];
 
-		$this->initLogger($this->componentName);
-		$this->initTempService($this->componentName);
-		$this->initEncryptor($this->componentName);
+		$this->initLogger();
+		$this->initTemp();
 
 		if ($request->isMethod('POST') || $request->isMethod('PUT')) {
 			$params = $request->getContent();
@@ -57,21 +56,14 @@ class BaseController extends Controller
 		));
 	}
 
-	protected function initTempService($componentName)
+	protected function initTemp()
 	{
-		$this->temp = $this->get('syrup.temp_factory')->get($componentName);
-		$this->container->set('syrup.temp_service', $this->temp);
+		$this->temp = $this->get('syrup.temp');
 	}
 
-	protected function initLogger($componentName)
+	protected function initLogger()
 	{
-		$this->get('syrup.monolog.json_formatter')->setComponentName($componentName);
 		$this->logger = $this->container->get('logger');
-	}
-
-	protected function initEncryptor($componentName)
-	{
-		$this->container->set('syrup.encryptor', $this->get('syrup.encryptor_factory')->get($componentName));
 	}
 
 	public function createResponse($content = '', $status = '200', $headers = array())

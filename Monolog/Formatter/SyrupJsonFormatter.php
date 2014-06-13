@@ -20,11 +20,6 @@ class SyrupJsonFormatter extends JsonFormatter
 {
 	protected $appName;
 
-	protected $componentName = '';
-
-	/** @deprecated - will be removed in 1.4.0 */
-	protected $runId;
-
 	/** @var Client */
 	protected $storageApi;
 
@@ -46,25 +41,9 @@ class SyrupJsonFormatter extends JsonFormatter
 		$this->storageApiService = $storageApiService;
 	}
 
-	public function setComponentName($name)
-	{
-		$this->componentName = $name;
-	}
-
-	public function getComponentName()
-	{
-		return $this->componentName;
-	}
-
 	public function getAppName()
 	{
 		return $this->appName;
-	}
-
-	/** @deprecated - will be removed in 1.4.0 */
-	public function setRunId($id)
-	{
-		$this->runId = $id;
 	}
 
 	public function getRunId()
@@ -94,8 +73,7 @@ class SyrupJsonFormatter extends JsonFormatter
 			}
 		}
 
-		$record['app']          = $this->appName;
-		$record['component']    = $this->componentName;
+		$record['component']    = $this->appName;
 		$record['priority']     = $record['level_name'];
 		$record['pid']          = getmypid();
 		$record['runId']        = $this->getRunId();
@@ -136,7 +114,7 @@ class SyrupJsonFormatter extends JsonFormatter
 			$record['level'] != Logger::DEBUG
 			&& $record['level'] != Logger::CRITICAL
 			&& $this->storageApi != null
-			&& $this->componentName != null
+			&& $this->appName != null
 		) {
 			$this->_logToSapi($record, $e);
 		}
@@ -161,7 +139,7 @@ class SyrupJsonFormatter extends JsonFormatter
 	protected function _logToSapi($record, $e = null)
 	{
 		$sapiEvent = new Event();
-		$sapiEvent->setComponent($this->componentName);
+		$sapiEvent->setComponent($this->appName);
 		$sapiEvent->setMessage($record['message']);
 		$sapiEvent->setRunId($this->storageApi->getRunId());
 		$sapiEvent->setParams($record['context']);

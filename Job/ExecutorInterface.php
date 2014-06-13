@@ -7,9 +7,12 @@
 
 namespace Syrup\ComponentBundle\Job;
 
+use Keboola\StorageApi\Client;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 
 interface ExecutorInterface
 {
+	public function setStorageApi(Client $sapi);
+
 	public function execute(Job $job);
 }

@@ -29,9 +29,9 @@ services:
         tags:
             - { name: routing.loader }
 
-    syrup.temp_factory:
-        class: Syrup\ComponentBundle\Filesystem\TempServiceFactory
-        arguments: [%components%]
+    syrup.temp:
+        class: Syrup\ComponentBundle\Filesystem\Temp
+        arguments: [%app_name%]
 
     storage_api:
         class: Syrup\ComponentBundle\Service\StorageApi\StorageApiService
@@ -43,9 +43,9 @@ services:
         class: Syrup\ComponentBundle\Service\SharedSapi\SharedSapiService
         arguments: [%shared_sapi.token%, %shared_sapi.url%]
 
-    syrup.encryptor_factory:
-        class: Syrup\ComponentBundle\Service\Encryption\EncryptorFactory
-        arguments: [%components%]
+    syrup.encryptor:
+        class: Syrup\ComponentBundle\Encryption\Encryptor
+        arguments: [%encryption_key%]
 
     syrup.elasticsearch:
         class: Elasticsearch\Client

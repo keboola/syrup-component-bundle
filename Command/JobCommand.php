@@ -16,6 +16,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Syrup\ComponentBundle\Exception\UserException;
 use Keboola\StorageApi\Client as SapiClient;
+use Syrup\ComponentBundle\Job\ExecutorInterface;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 use Syrup\ComponentBundle\Job\Metadata\JobManager;
 use Syrup\ComponentBundle\Service\Db\Lock;
@@ -95,7 +96,10 @@ class JobCommand extends ContainerAwareCommand
 		$this->jobManager->updateJob($this->job);
 
 		$jobExecutorName = $this->job->getComponent() . '.job_executor';
+
+		/** @var ExecutorInterface $jobExecutor */
 		$jobExecutor = $this->getContainer()->get($jobExecutorName);
+		$jobExecutor->setStorageApi($this->sapiClient);
 
 		try {
 			// execute job

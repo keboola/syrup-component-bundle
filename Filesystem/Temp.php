@@ -1,9 +1,9 @@
 <?php
 /**
- * Temp.php
- *
- * @author: Miroslav Čillík <miro@keboola.com>
- * @created: 15.8.13
+ * Created by PhpStorm.
+ * User: mirocillik
+ * Date: 05/11/13
+ * Time: 14:48
  */
 
 namespace Syrup\ComponentBundle\Filesystem;
@@ -11,107 +11,159 @@ namespace Syrup\ComponentBundle\Filesystem;
 
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
-use Syrup\ComponentBundle\Component\Component;
 
-class Temp
+class TempService
 {
-	/**
-	 * @var Filesystem
-	 */
-	private $filesystem;
-
-	/**
-	 * @var Component
-	 */
-	private $component;
-
-	/**
-	 * @var \SplFileInfo[]
-	 */
-	private $files = array();
+    /**
+     * @var Filesystem
+     */
+    protected $filesystem;
 
     /**
-     * @var bool
+     * @var String
      */
-    protected $preserve = false;
+    protected $prefix;
+
+    /**
+     * @var \SplFileInfo[]
+     */
+    protected $files = array();
 
 	/**
-	 * Constructor
-	 *
-	 * Creates directory for filesystem according to Syrup Component
-	 *
-	 * @param Component $component
+	 * @var String
 	 */
-	public function __construct(Component $component)
-	{
-		$this->filesystem = new Filesystem();
-		$this->component = $component;
+	protected $tmpRunFolder;
 
-		if (!file_exists($this->getTmpPath()) && !is_dir($this->getTmpPath())) {
-			$this->filesystem->mkdir($this->getTmpPath(), 0770);
+	/**
+	 * @var Bool
+	 */
+	protected $preserveRunFolder = false;
+
+    public function __construct($prefix = '')
+    {
+        $this->prefix = $prefix;
+        $this->filesystem = new Filesystem();
+	    $this->tmpRunFolder = $this->getTmpPath();
+    }
+
+	public function initRunFolder()
+	{
+		clearstatcache();
+		if (!file_exists($this->tmpRunFolder) && !is_dir($this->tmpRunFolder)) {
+			$this->filesystem->mkdir($this->tmpRunFolder);
 		}
 	}
 
-    /**
-     * If preserve is set to true, temporary files will not be deleted in destructor
-     *
-     */
-    public function setPreserve($value)
-    {
-        $this->preserve = $value;
-    }
+	/**
+	 * @param bool $value
+	 */
+	public function setPreserveRunFolder($value)
+	{
+		$this->preserveRunFolder = $value;
+	}
 
     /**
      * Get path to temp directory
      *
      * @return string
      */
-    private function getTmpPath()
+    protected function getTmpPath()
     {
-        return sys_get_temp_dir() . "/" . $this->component->getFullName();
+	    $tmpDir = sys_get_temp_dir();
+	    if (!empty($this->prefix)) {
+		    $tmpDir .= "/" . $this->prefix;
+	    }
+	    $tmpDir .= "/" . uniqid("run-", true);
+        return $tmpDir;
     }
+
+	/**
+	 * Returns path to temp folder for current request
+	 *
+	 * @return string
+	 */
+	public function getTmpFolder()
+	{
+		return $this->tmpRunFolder;
+	}
 
 	/**
 	 * Create empty file in TMP directory
 	 *
 	 * @param string $suffix filename suffix
+	 * @param bool $preserve
+	 * @throws \Exception
 	 * @return \SplFileInfo
-	 * @throws \Exception|\Symfony\Component\Filesystem\Exception\IOException
 	 */
-	public function createTmpFile($suffix = null)
-	{
-		$file = uniqid();
+    public function createTmpFile($suffix = null, $preserve = false)
+    {
+	    $this->initRunFolder();
 
-		if ($suffix) {
-			$file .= '-' . $suffix;
-		}
+        $file = uniqid();
 
-		$fileInfo = new \SplFileInfo($this->getTmpPath() . '/' . $file);
+        if ($suffix) {
+            $file .= '-' . $suffix;
+        }
 
-		try {
-			$this->filesystem->touch($fileInfo);
-			$this->files[] = $fileInfo;
-			$this->filesystem->chmod($fileInfo, 0600);
+        $fileInfo = new \SplFileInfo($this->tmpRunFolder . '/' . $file);
 
-			return $fileInfo;
-		} catch (IOException $e) {
-			throw $e;
-		}
-	}
+        $this->filesystem->touch($fileInfo);
+        $this->files[] = array(
+	        'file'  => $fileInfo,
+	        'preserve'  => $preserve
+        );
+        $this->filesystem->chmod($fileInfo, 0600);
+
+        return $fileInfo;
+    }
 
 	/**
-	 * Destructor
+	 * Creates named temporary file
 	 *
-	 * Delete all files created by syrup component run
+	 * @param $fileName
+	 * @param bool $preserve
+	 * @return \SplFileInfo
+	 * @throws \Exception
 	 */
-	function __destruct()
+	public function createFile($fileName, $preserve = false)
 	{
-        if (!$this->preserve) {
-            foreach ($this->files AS $fileInfo) {
-                if (file_exists($fileInfo) && is_file($fileInfo)) {
-                    unlink($fileInfo);
-                }
+		$this->initRunFolder();
+
+		$fileInfo = new \SplFileInfo($this->tmpRunFolder . '/' . $fileName);
+
+		$this->filesystem->touch($fileInfo);
+		$this->files[] = array(
+			'file'  => $fileInfo,
+			'preserve'  => $preserve
+		);
+		$this->filesystem->chmod($fileInfo, 0600);
+
+		return $fileInfo;
+	}
+
+    /**
+     * Destructor
+     *
+     * Delete all files created by syrup component run
+     */
+    function __destruct()
+    {
+        $preserveRunFolder = $this->preserveRunFolder;
+
+	    $fs = new Filesystem();
+
+        foreach ($this->files as $file) {
+	        if ($file['preserve']) {
+		        $preserveRunFolder = true;
+	        }
+            if (file_exists($file['file']) && is_file($file['file']) && !$file['preserve']) {
+                $fs->remove($file['file']);
             }
         }
-	}
-}
+
+	    if (!$preserveRunFolder) {
+		    $fs->remove($this->tmpRunFolder);
+	    }
+
+    }
+} 

@@ -20,20 +20,20 @@ class SyrupExceptionListener
 	/**
 	 * @var \Monolog\Logger
 	 */
-	protected $_logger;
+	protected $logger;
 
-	protected $_formatter;
+	protected $formatter;
 
 	public function __construct(Logger $logger, SyrupJsonFormatter $formatter)
 	{
-		$this->_logger = $logger;
-		$this->_formatter = $formatter;
+		$this->logger = $logger;
+		$this->formatter = $formatter;
 	}
 
 	public function onConsoleException(ConsoleExceptionEvent $event)
 	{
 		$exception = $event->getException();
-		$exceptionId = $this->_formatter->getComponentName() . '-' . md5(microtime());
+		$exceptionId = $this->formatter->getAppName() . '-' . md5(microtime());
 
 		$code = ($exception->getCode() < 300 || $exception->getCode() >= 600) ? 500 : $exception->getCode();
 		$content = array(
@@ -42,7 +42,7 @@ class SyrupExceptionListener
 			'code'      => $code,
 			'message'   => ($code < 500) ? $exception->getMessage() : 'Contact support@keboola.com and attach this exception id.',
 			'exceptionId'   => $exceptionId,
-			'runId'     => $this->_formatter->getRunId()
+			'runId'     => $this->formatter->getRunId()
 		);
 
 		// SyrupExceptionInterface holds additional data
@@ -55,7 +55,7 @@ class SyrupExceptionListener
 		if ($code >= 500) {
 			$method = 'critical';
 		}
-		$this->_logger->$method(
+		$this->logger->$method(
 			$exception->getMessage(),
 			array(
 				'exception'     => $exception,
@@ -68,7 +68,7 @@ class SyrupExceptionListener
 	{
 		// You get the exception object from the received event
 		$exception = $event->getException();
-		$exceptionId = $this->_formatter->getComponentName() . '-' . md5(microtime());
+		$exceptionId = $this->formatter->getAppName() . '-' . md5(microtime());
 
 		// Customize your response object to display the exception details
 		$response = new Response();
@@ -87,7 +87,7 @@ class SyrupExceptionListener
 			'code'      => $code,
 			'message'   => ($code < 500) ? $exception->getMessage() : 'Contact support@keboola.com and attach this exception id.',
 			'exceptionId'   => $exceptionId,
-			'runId'     => $this->_formatter->getRunId()
+			'runId'     => $this->formatter->getRunId()
 		);
 
 		// SyrupExceptionInterface holds additional data
@@ -108,7 +108,7 @@ class SyrupExceptionListener
 		if ($code >= 500) {
 			$method = 'critical';
 		}
-		$this->_logger->$method(
+		$this->logger->$method(
 			$exception->getMessage(),
 			array(
 				'exception'     => $exception,

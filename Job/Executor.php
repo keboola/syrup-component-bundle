@@ -7,10 +7,19 @@
 
 namespace Syrup\ComponentBundle\Job;
 
+use Keboola\StorageApi\Client as SapiClient;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 
 class Executor implements ExecutorInterface
 {
+	protected $storageApi;
+
+	public function setStorageApi(SapiClient $sapi)
+	{
+		$this->storageApi = $sapi;
+	}
+
+
 	public function execute(Job $job)
 	{
 		print "doing stuff";
