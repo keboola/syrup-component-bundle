@@ -12,7 +12,7 @@ namespace Syrup\ComponentBundle\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
-class TempService
+class Temp
 {
     /**
      * @var Filesystem
@@ -166,4 +166,4 @@ class TempService
 	    }
 
     }
-} 
+}
