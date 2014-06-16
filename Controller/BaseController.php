@@ -28,7 +28,7 @@ class BaseController extends Controller
 	/** @var Logger */
 	protected $logger;
 
-	/** @var TempService */
+	/** @var Temp */
 	protected $temp;
 
 	/** @var String */
