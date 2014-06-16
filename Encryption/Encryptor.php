@@ -5,7 +5,7 @@
  * Time: 11:47
  */
 
-namespace Syrup\ComponentBundle\Service\Encryption;
+namespace Syrup\ComponentBundle\Encryption;
 
 
 use Keboola\Encryption\AesEncryptor;
