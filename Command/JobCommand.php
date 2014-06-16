@@ -69,7 +69,6 @@ class JobCommand extends ContainerAwareCommand
 			'userAgent' => $this->job->getComponent(),
 		]);
 		$this->sapiClient->setRunId($this->job->getRunId());
-		$this->getContainer()->set('storage_api', $this->sapiClient);
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)
@@ -114,6 +113,9 @@ class JobCommand extends ContainerAwareCommand
 			$this->jobManager->updateJob($this->job);
 
 			$lock->unlock();
+
+			//@todo log exception
+
 			return self::STATUS_SUCCESS;
 		} catch (\Exception $e) {
 
@@ -123,6 +125,9 @@ class JobCommand extends ContainerAwareCommand
 			$this->jobManager->updateJob($this->job);
 
 			$lock->unlock();
+
+			//@todo log exception
+
 			return self::STATUS_ERROR;
 		}
 	}

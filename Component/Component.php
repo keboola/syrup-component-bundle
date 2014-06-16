@@ -14,6 +14,7 @@ use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Config\Reader;
 use Keboola\StorageApi\Table;
 use Doctrine\DBAL\Connection;
+use Syrup\ComponentBundle\Filesystem\Temp;
 use Syrup\ComponentBundle\Filesystem\TempService;
 
 class Component implements ComponentInterface
@@ -54,10 +55,10 @@ class Component implements ComponentInterface
 	 */
 	protected $prefix = '';
 
-    /**
-     * @var TempService
-     */
-    private $temp;
+	/**
+	 * @var Temp
+	 */
+	private $temp;
 
 	/**
 	 * @var Client
@@ -69,7 +70,7 @@ class Component implements ComponentInterface
 	 */
 	protected $encryptor;
 
-    /**
+	/**
 	 * @param \Keboola\StorageApi\Client $storageApi
 	 * @param \Monolog\Logger $log
 	 */
@@ -191,16 +192,16 @@ class Component implements ComponentInterface
 	}
 
 	/**
-	 * @return TempService
+	 * @return Temp
 	 */
 	protected function getTemp()
-    {
-        if ($this->temp == null) {
-            $this->temp = $this->container->get('syrup.temp_service');
-        }
+	{
+		if ($this->temp == null) {
+			$this->temp = $this->container->get('syrup.temp');
+		}
 
-        return $this->temp;
-    }
+		return $this->temp;
+	}
 
 
 }
