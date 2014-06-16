@@ -51,8 +51,6 @@ class JobCommand extends ContainerAwareCommand
 
 	protected function initialize(InputInterface $input, OutputInterface $output)
 	{
-		$this->getContainer()->get('syrup.monolog.json_formatter')->setComponentName('syrup');
-
 		$jobId = $input->getArgument('jobId');
 
 		if (is_null($jobId)) {
@@ -64,8 +62,6 @@ class JobCommand extends ContainerAwareCommand
 		if ($this->job == null) {
 			return;
 		}
-
-		$this->getContainer()->get('syrup.monolog.json_formatter')->setComponentName($this->job->getComponent());
 
 		$this->sapiClient = new SapiClient([
 			'token' => $this->job->getToken(),
