@@ -36,27 +36,29 @@ class Loader extends BaseLoader
 	{
 		$collection = new RouteCollection();
 
-		foreach ($this->components as $componentName => $component) {
+		if ($this->components != null) {
+			foreach ($this->components as $componentName => $component) {
 
-			if (!isset($component['bundle'])) {
-				continue;
-			}
-
-			$bundleClassName = preg_replace('/^.*\\\/', '', $component['bundle']);
-			$resource = '@' . $bundleClassName . '/Resources/config/routing.yml';
-			$type = 'yaml';
-
-			/** @var RouteCollection $importedRoutes */
-			$importedRoutes = $this->import($resource, $type);
-
-			foreach ($importedRoutes as $route) {
-				/** @var Route $route */
-				if (!strstr($route->getPath(), $componentName)) {
-					$route->setPath('/'. $componentName . $route->getPath());
+				if (!isset($component['bundle'])) {
+					continue;
 				}
-			}
 
-			$collection->addCollection($importedRoutes);
+				$bundleClassName = preg_replace('/^.*\\\/', '', $component['bundle']);
+				$resource = '@' . $bundleClassName . '/Resources/config/routing.yml';
+				$type = 'yaml';
+
+				/** @var RouteCollection $importedRoutes */
+				$importedRoutes = $this->import($resource, $type);
+
+				foreach ($importedRoutes as $route) {
+					/** @var Route $route */
+					if (!strstr($route->getPath(), $componentName)) {
+						$route->setPath('/'. $componentName . $route->getPath());
+					}
+				}
+
+				$collection->addCollection($importedRoutes);
+			}
 		}
 
 		return $collection;

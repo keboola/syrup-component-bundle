@@ -50,16 +50,14 @@ class ApiController extends BaseController
 	public function runAction(Request $request)
     {
 	    $params = $this->getPostJson($request);
-
-	    if ($request->headers->has('x-kbc-runid')) {
-		    $params['runId'] = $request->headers->get('x-kbc-runid');
-	    } else {
-		    $params['runId'] = $this->storageApi->generateId();
-	    }
-	    $params['command'] = 'run';
+	    $runId = $this->getRunId($request);
 
 	    /** @var Job $job */
-	    $job = $this->initJob($this->createJob($params));
+	    $job = $this->initJob($this->createJob([
+		    'params'    => $params,
+		    'runId'     => $runId,
+		    'command'   => 'run'
+        ]));
 
 	    $jobManager = $this->getJobManager();
 	    $jobManager->indexJob($job);
@@ -185,6 +183,14 @@ class ApiController extends BaseController
 				"exception" => $e->getTraceAsString()
 			));
 		}
+	}
+
+	protected function getRunId(Request $request)
+	{
+		if ($request->headers->has('x-kbc-runid')) {
+			return $request->headers->get('x-kbc-runid');
+		}
+		return $this->storageApi->generateId();
 	}
 
 	/**
