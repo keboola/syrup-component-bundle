@@ -111,7 +111,9 @@ class JobCommand extends ContainerAwareCommand
 		} catch (UserException $e) {
 
 			// update job with error message
-			$result = $e->getMessage();
+			$result = [
+				'message' => $e->getMessage()
+			];
 			$status = Job::STATUS_ERROR;
 
 			$this->logger->error(
@@ -124,7 +126,9 @@ class JobCommand extends ContainerAwareCommand
 		} catch (\Exception $e) {
 
 			// update job with 'contact support' message
-			$result = 'Internal error occured please contact support@keboola.com';
+			$result = [
+				'message' => 'Internal error occured please contact support@keboola.com'
+			];
 			$status = Job::STATUS_ERROR;
 
 			$this->logger->alert(
