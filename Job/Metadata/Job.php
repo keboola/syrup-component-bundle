@@ -20,7 +20,7 @@ class Job implements JobInterface
 	protected $data;
 
 	private $requiredFields = [
-		'id', 'runId', 'lockName', 'projectId', 'token', 'component', 'command', 'status', 'result', 'params'
+		'id', 'runId', 'lockName', 'projectId', 'token', 'component', 'command', 'status', 'result', 'params', 'created', 'duration'
 	];
 
 	public function __construct($data = [])
@@ -140,6 +140,26 @@ class Job implements JobInterface
 		return $this->data['params'];
 	}
 
+	public function getCreated()
+	{
+		return $this->data['created'];
+	}
+
+	public function setCreated($datetime)
+	{
+		$this->data['created'] = $datetime;
+	}
+
+	public function getDuration()
+	{
+		return $this->data['duration'];
+	}
+
+	public function setDuration($duration)
+	{
+		$this->data['duration'] = $duration;
+	}
+
 	public function setAttribute($key, $value)
 	{
 		$this->data[$key] = $value;
@@ -153,6 +173,13 @@ class Job implements JobInterface
 	public function getData()
 	{
 		return $this->data;
+	}
+
+	public function getLogData()
+	{
+		$logData = $this->data;
+		unset($logData['token']);
+		return $logData;
 	}
 
 	public function validate()

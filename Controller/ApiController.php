@@ -110,6 +110,7 @@ class ApiController extends BaseController
 		$job->setComponent($this->componentName);
 		$job->setStatus(Job::STATUS_WAITING);
 		$job->setLockName($job->getComponent() . '-' . $job->getProjectId());
+		$job->setCreated(date('c'));
 
 		return $job;
 	}
@@ -123,12 +124,12 @@ class ApiController extends BaseController
 		return new Job($params);
 	}
 
-	protected function enqueue($jobId, $otherData = array())
+	protected function enqueue($jobId, $otherData = [])
 	{
-		$data = array(
+		$data = [
 			'jobId'     => $jobId,
 			'component' => $this->componentName
-		);
+		];
 
 		if (count($otherData)) {
 			$data = array_merge($data, $otherData);
@@ -161,7 +162,7 @@ class ApiController extends BaseController
 	{
 		$logData = $this->storageApi->getLogData();
 
-		$ssEvent = new JobEvent(array(
+		$ssEvent = new JobEvent([
 			'component' => $this->component->getFullName(),
 			'action'    => $actionName,
 			'url'       => $this->getRequest()->getUri(),
@@ -173,15 +174,15 @@ class ApiController extends BaseController
 			'startTime' => $startTime,
 			'endTime'   => $endTime,
 			'request'   => $params
-	    ));
+		]);
 
 		try {
 			$this->getSharedSapi()->log($ssEvent);
 		} catch (\Exception $e) {
-			$this->logger->warning("Error while logging into Shared SAPI", array(
+			$this->logger->warning("Error while logging into Shared SAPI", [
 				"message"   => $e->getMessage(),
 				"exception" => $e->getTraceAsString()
-			));
+			]);
 		}
 	}
 

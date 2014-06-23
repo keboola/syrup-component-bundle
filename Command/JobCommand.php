@@ -10,6 +10,7 @@ namespace Syrup\ComponentBundle\Command;
 
 
 use Keboola\StorageApi\Client;
+use Monolog\Logger;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -35,6 +36,9 @@ class JobCommand extends ContainerAwareCommand
 
 	/** @var SapiClient */
 	protected $sapiClient;
+
+	/** @var Logger */
+	protected $logger;
 
 	protected function configure()
 	{
@@ -69,6 +73,8 @@ class JobCommand extends ContainerAwareCommand
 			'userAgent' => $this->job->getComponent(),
 		]);
 		$this->sapiClient->setRunId($this->job->getRunId());
+
+		$this->logger = $this->getContainer()->get('logger');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)
@@ -96,40 +102,49 @@ class JobCommand extends ContainerAwareCommand
 		$jobExecutor = $this->getContainer()->get($jobExecutorName);
 		$jobExecutor->setStorageApi($this->sapiClient);
 
+		$startTime = time();
+
 		try {
 			// execute job
 			$result = $jobExecutor->execute($this->job);
-			$this->job->setStatus(Job::STATUS_SUCCESS);
-			$this->job->setResult($result);
-			$this->jobManager->updateJob($this->job);
-
-			$lock->unlock();
-			return self::STATUS_SUCCESS;
+			$status = Job::STATUS_SUCCESS;
 		} catch (UserException $e) {
 
 			// update job with error message
-			$this->job->setStatus(Job::STATUS_ERROR);
-			$this->job->setResult($e->getMessage());
-			$this->jobManager->updateJob($this->job);
+			$result = $e->getMessage();
+			$status = Job::STATUS_ERROR;
 
-			$lock->unlock();
-
-			//@todo log exception
-
-			return self::STATUS_SUCCESS;
+			$this->logger->error(
+				$e->getMessage(),
+				[
+					'exception' => $e,
+					'job'       => $this->job->getLogData()
+				]
+			);
 		} catch (\Exception $e) {
 
 			// update job with 'contact support' message
-			$this->job->setStatus(Job::STATUS_ERROR);
-			$this->job->setResult('Internal error occured please contact support@keboola.com');
-			$this->jobManager->updateJob($this->job);
+			$result = 'Internal error occured please contact support@keboola.com';
+			$status = Job::STATUS_ERROR;
 
-			$lock->unlock();
-
-			//@todo log exception
-
-			return self::STATUS_ERROR;
+			$this->logger->alert(
+				$e->getMessage(),
+				[
+					'exception' => $e,
+					'job'       => $this->job->getLogData()
+				]
+			);
 		}
+
+		$duration = time() - $startTime;
+
+		$this->job->setStatus($status);
+		$this->job->setResult($result);
+		$this->job->setDuration($duration);
+		$this->jobManager->updateJob($this->job);
+
+		$lock->unlock();
+		return $status;
 	}
 
 	protected function getJobManager()

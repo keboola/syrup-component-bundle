@@ -50,4 +50,12 @@ interface JobInterface
 
 	public function getLockName();
 
+	public function setCreated($datetime);
+
+	public function getCreated();
+
+	public function setDuration($duration);
+
+	public function getDuration();
+
 }
