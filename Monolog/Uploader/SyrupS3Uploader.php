@@ -24,14 +24,9 @@ class SyrupS3Uploader
 	/** @var S3Client */
 	protected $s3;
 
-	/** @var Logger */
-	protected $log;
-
-	public function __construct($config, Logger $log)
+	public function __construct($config)
 	{
 		$this->config = $config;
-		$this->log = $log;
-
 		$this->s3 = $this->getS3();
 	}
 
@@ -83,13 +78,6 @@ class SyrupS3Uploader
 			try {
 				return $this->shortenUrl($url);
 			} catch (\Exception $e) {
-
-				$this->log->error('Exception occured shortening the url', array(
-					'message'   => $e->getMessage(),
-					'url'   => $url,
-					'exception' => $e
-				));
-
 				return $url;
 			}
 		} else {
