@@ -4,11 +4,11 @@ parameters:
     database_driver:   pdo_mysql
     database_host:     localhost
     database_port:     ~
-    database_name:     symfony
-    database_user:     root
-    database_password: ~
+    database_name:
+    database_user:
+    database_password:
 
-	# Session PDO handler table
+    # Session PDO handler table
     pdo.db_options:
         db_table:    session
         db_id_col:   id
@@ -25,15 +25,15 @@ parameters:
 
     storage_api.url:        https://connection.keboola.com
     storage_api.test.url:   https://connection.keboola.com
-    storage_api.test.token: SAPI_TOKEN
+    storage_api.test.token:  SAPI_TOKEN
 
-    shared_sapi.url:        https://connection.keboola.com
-    shared_sapi.token:      SAPI_TOKEN
+    shared_sapi.url:   https://connection.keboola.com
+    shared_sapi.token: SAPI_TOKEN
 
     uploader:
         aws-access-key:
         aws-secret-key:
-        s3-upload-path: keboola-logs/debug-files
+        s3-upload-path:
         bitly-login:
         bitly-api-key:
 
@@ -48,5 +48,7 @@ parameters:
 
     job_manager:
         index_prefix: devel
+
+    encryption_key:
 
     components:
