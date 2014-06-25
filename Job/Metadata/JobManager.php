@@ -45,7 +45,7 @@ class JobManager
 
 		$response = $this->client->index($jobData);
 
-		if (!$response['ok']) {
+		if (!$response['created']) {
 			$e = new ApplicationException("Unable to index job");
 			$e->setData(array(
 				'job'   => $jobData
