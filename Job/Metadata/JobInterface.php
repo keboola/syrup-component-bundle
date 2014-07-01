@@ -22,17 +22,21 @@ interface JobInterface
 
 	public function setId($id);
 
-	public function getProjectId();
+	public function getProject();
 
-	public function setProjectId($id);
+	public function setProject(array $project);
 
 	public function getToken();
 
-	public function setToken($token);
+	public function setToken(array $token);
 
 	public function getCommand();
 
 	public function setCommand($cmd);
+
+	public function getParams();
+
+	public function setParams(array $params);
 
 	public function getStatus();
 
@@ -50,12 +54,28 @@ interface JobInterface
 
 	public function getLockName();
 
-	public function setCreated($datetime);
+	public function getProcess();
 
-	public function getCreated();
+	public function setProcess(array $process);
 
-	public function setDuration($duration);
+	public function setCreatedTime($datetime);
 
-	public function getDuration();
+	public function getCreatedTime();
+
+	public function getStartTime();
+
+	public function setStartTime($time);
+
+	public function getEndTime();
+
+	public function setEndTime($time);
+
+	public function setDurationSeconds($seconds);
+
+	public function getDurationSeconds();
+
+	public function setWaitSeconds($seconds);
+
+	public function getWaitSeconds();
 
 }

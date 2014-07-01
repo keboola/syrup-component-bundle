@@ -2,6 +2,7 @@
 
 namespace Syrup\ComponentBundle\Controller;
 
+use Keboola\Encryption\EncryptorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Keboola\StorageApi\Client;
@@ -50,17 +51,11 @@ class ApiController extends BaseController
 	public function runAction(Request $request)
     {
 	    $params = $this->getPostJson($request);
-	    $runId = $this->getRunId($request);
 
 	    /** @var Job $job */
-	    $job = $this->initJob($this->createJob([
-		    'params'    => $params,
-		    'runId'     => $runId,
-		    'command'   => 'run'
-        ]));
+	    $job = $this->createJob('run', $params);
 
-	    $jobManager = $this->getJobManager();
-	    $jobManager->indexJob($job);
+	    $this->getJobManager()->indexJob($job);
 
 	    $this->enqueue($job->getId());
 
@@ -94,34 +89,36 @@ class ApiController extends BaseController
 	}
 
 	/**
-	 * @param JobInterface $job
-	 * @return JobInterface
-	 */
-	protected function initJob(JobInterface $job)
-	{
-		$sapiData = $this->storageApi->getLogData();
-		$projectId = $sapiData['owner']['id'];
-
-		$jobId = $this->storageApi->generateId();
-
-		$job->setId($jobId);
-		$job->setProjectId($projectId);
-		$job->setToken($this->storageApi->getTokenString());
-		$job->setComponent($this->componentName);
-		$job->setStatus(Job::STATUS_WAITING);
-		$job->setLockName($job->getComponent() . '-' . $job->getProjectId());
-		$job->setCreated(date('c'));
-
-		return $job;
-	}
-
-	/**
+	 * @param string $command
 	 * @param array $params
 	 * @return JobInterface
 	 */
-	protected function createJob($params = [])
+	protected function createJob($command, $params)
 	{
-		return new Job($params);
+		$request = $this->container->get('request');
+		$tokenData = $this->storageApi->verifyToken();
+
+		return new Job([
+			'id'    => $this->storageApi->generateId(),
+			'runId'     => $this->getRunId($request),
+			'project'   => [
+				'id'        => $tokenData['owner']['id'],
+				'name'      => $tokenData['owner']['name']
+			],
+			'token'     => [
+				'id'            => $tokenData['id'],
+				'description'   => $tokenData['description'],
+				'token'         => $this->getEncryptor()->encrypt($this->storageApi->getTokenString())
+			],
+			'component' => $this->componentName,
+			'command'   => $command,
+			'params'    => $params,
+			'process'   => [
+				'host'  => $request->getHost(),
+				'pid'   => posix_getpid()
+			],
+			'createdTime'   => date('c')
+		]);
 	}
 
 	protected function enqueue($jobId, $otherData = [])
@@ -138,6 +135,16 @@ class ApiController extends BaseController
 		/** @var QueueService $queue */
 		$queue = $this->container->get('syrup.job_queue');
 		$queue->enqueue($data);
+	}
+
+	/** Stuff */
+
+	/**
+	 * @return EncryptorInterface
+	 */
+	protected function getEncryptor()
+	{
+		return $this->container->get('syrup.encryptor');
 	}
 
 	protected function sendEventToSapi($type, $message, $componentName)

@@ -104,7 +104,7 @@ class JobManager
 	public function getJobs($projectId, $component = null, $runId = null, $queryString=null, $offset=0, $limit=self::PAGING)
 	{
 		$filter = [];
-		$filter[] = ['term' => ['projectId' => $projectId]];
+		$filter[] = ['term' => ['project.id' => $projectId]];
 
 		if ($runId != null) {
 			$filter[] = ['term' => ['runId' => $runId]];

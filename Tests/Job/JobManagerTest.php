@@ -1,5 +1,6 @@
 <?php
 use Elasticsearch\Client as ElasticClient;
+use Keboola\Encryption\EncryptorInterface;
 use Keboola\StorageApi\Client as SapiClient;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Syrup\ComponentBundle\Job\Metadata\Job;
@@ -21,6 +22,9 @@ class JobManagerTest extends WebTestCase
 	/** @var SapiClient */
 	protected static $sapiClient;
 
+	/** @var EncryptorInterface */
+	protected static $encryptor;
+
 	/** @var ElasticClient */
 	protected static $elasticClient;
 
@@ -39,6 +43,8 @@ class JobManagerTest extends WebTestCase
 			'userAgent' => 'syrup-component-bundle-test',
 		]);
 
+		self::$encryptor = self::$kernel->getContainer()->get('syrup.encryptor');
+
 		// clear data
 		$sapiData = self::$sapiClient->getLogData();
 		$projectId = $sapiData['owner']['id'];
@@ -55,24 +61,28 @@ class JobManagerTest extends WebTestCase
 
 	private function createJob()
 	{
-		$sapiData = self::$sapiClient->getLogData();
-		$projectId = $sapiData['owner']['id'];
+		$tokenData = self::$sapiClient->verifyToken();
 
-		$jobId = self::$sapiClient->generateId();
-		$runId = self::$sapiClient->generateId();
-		$token = self::$sapiClient->getTokenString();
-		$component = self::$component;
-
-		$job = new Job([
-			'id'    => $jobId,
-			'runId' => $runId,
-			'projectId' => $projectId,
-			'token'     => $token,
-			'component' => $component,
-			'command'   => 'run'
+		return new Job([
+			'id'        => self::$sapiClient->generateId(),
+			'runId'     => self::$sapiClient->generateId(),
+			'project'   => [
+				'id'        => $tokenData['owner']['id'],
+				'name'      => $tokenData['owner']['name']
+			],
+			'token'     => [
+				'id'            => $tokenData['id'],
+				'description'   => $tokenData['description'],
+				'token'         => self::$encryptor->encrypt(self::$sapiClient->getTokenString())
+			],
+			'component' => self::$component,
+			'command'   => 'run',
+			'process'   => [
+				'host'  => 'test',
+				'pid'   => posix_getpid()
+			],
+			'createdTime'   => date('c')
 		]);
-
-		return $job;
 	}
 
 	private function assertJob(Job $job, $resJob)
@@ -80,8 +90,14 @@ class JobManagerTest extends WebTestCase
 		$this->assertEquals($job->getId(), $resJob['id']);
 		$this->assertEquals($job->getRunId(), $resJob['runId']);
 		$this->assertEquals($job->getLockName(), $resJob['lockName']);
-		$this->assertEquals($job->getProjectId(), $resJob['projectId']);
-		$this->assertEquals($job->getToken(), $resJob['token']);
+
+		$this->assertEquals($job->getProject()['id'], $resJob['project']['id']);
+		$this->assertEquals($job->getProject()['name'], $resJob['project']['name']);
+
+		$this->assertEquals($job->getToken()['id'], $resJob['token']['id']);
+		$this->assertEquals($job->getToken()['description'], $resJob['token']['description']);
+		$this->assertEquals($job->getToken()['token'], $resJob['token']['token']);
+
 		$this->assertEquals($job->getComponent(), $resJob['component']);
 		$this->assertEquals($job->getStatus(), $resJob['status']);
 	}
@@ -109,7 +125,7 @@ class JobManagerTest extends WebTestCase
 
 		$resJob = self::$jobManager->getJob($id);
 
-		$this->assertJob($job, $resJob);
+		$this->assertJob($job, $resJob->getData());
 	}
 
 	public function testGetJobs()
@@ -128,8 +144,9 @@ class JobManagerTest extends WebTestCase
 			sleep($delaySecs);
 			$retries++;
 
-			$res = self::$jobManager->getJobs($job->getProjectId(), self::$component);
-			if (count($res) == 2) {
+			$projectId = $job->getProject()['id'];
+			$res = self::$jobManager->getJobs($projectId, self::$component);
+			if (count($res) >= 2) {
 				break;
 			}
 		}
@@ -148,7 +165,6 @@ class JobManagerTest extends WebTestCase
 			}
 		}
 
-		$this->assertCount(2, $res);
 		$this->assertTrue($job1Asserted);
 		$this->assertTrue($job2Asserted);
 	}

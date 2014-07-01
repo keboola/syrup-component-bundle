@@ -9,27 +9,51 @@ namespace Syrup\ComponentBundle\Job\Metadata;
 
 
 use Syrup\ComponentBundle\Exception\ApplicationException;
+use Syrup\ComponentBundle\Exception\UserException;
 
 class Job implements JobInterface
 {
-	const STATUS_WAITING = 'waiting';
+	const STATUS_WAITING    = 'waiting';
 	const STATUS_PROCESSING = 'processing';
-	const STATUS_SUCCESS = 'success';
-	const STATUS_ERROR = 'error';
+	const STATUS_SUCCESS    = 'success';
+	const STATUS_CANCELLED  = 'cancelled';
+	const STATUS_ERROR      = 'error';
 
-	protected $data;
-
-	private $requiredFields = [
-		'id', 'runId', 'lockName', 'projectId', 'token', 'component', 'command', 'status', 'result', 'params', 'created', 'duration'
+	protected $data = [
+		'id'        => null,
+		'runId'     => null,
+		'lockName'  => null,
+		'project'   => [
+			'id'        => null,
+			'name'      => null
+		],
+		'token'     => [
+			'id'            => null,
+			'description'   => null,
+			'token'         => null
+		],
+		'component' => null,
+		'command'   => null,
+		'params'    => [],
+		'result'    => [],
+		'status'    => null,
+		'process'   => [
+			'host'      => null,
+			'pid'       => null
+		],
+		'createdTime'   => null,
+		'startTime'     => null,
+		'endTime'       => null,
+		'durationSeconds'   => null,
+		'waitSeconds'       => null
 	];
 
-	public function __construct($data = [])
+	public function __construct(array $data = [])
 	{
-		$this->data = array_combine($this->requiredFields, array_fill(0, count($this->requiredFields), null));
 		$this->data = array_merge($this->data, $data);
 
 		if (!isset($data['lockName'])) {
-			$this->setLockName($this->getComponent() . '-' . $this->getProjectId());
+			$this->setLockName($this->getComponent() . '-' . $this->getProject()['id']);
 		}
 		$this->data['status'] = self::STATUS_WAITING;
 	}
@@ -45,14 +69,28 @@ class Job implements JobInterface
 		return $this;
 	}
 
-	public function getProjectId()
+	public function getProject()
 	{
-		return (int) $this->data['projectId'];
+		return $this->data['project'];
 	}
 
-	public function setProjectId($id)
+	/**
+	 * @param array $project
+	 * - id
+	 * - name
+	 * @return $this
+	 */
+	public function setProject(array $project)
 	{
-		$this->data['projectId'] = (int) $id;
+		if (!isset($project['id'])) {
+			throw new ApplicationException("Missing project id");
+		}
+
+		if (!isset($project['name'])) {
+			throw new ApplicationException("Missing project name");
+		}
+
+		$this->data['project'] = $project;
 		return $this;
 	}
 
@@ -61,8 +99,20 @@ class Job implements JobInterface
 		return $this->data['token'];
 	}
 
-	public function setToken($token)
+	public function setToken(array $token)
 	{
+		if (!isset($token['id'])) {
+			throw new ApplicationException("Missing token id");
+		}
+
+		if (!isset($token['description'])) {
+			throw new ApplicationException("Missing token description");
+		}
+
+		if (!isset($token['token'])) {
+			throw new ApplicationException("Missing token");
+		}
+
 		$this->data['token'] = $token;
 	}
 
@@ -130,7 +180,7 @@ class Job implements JobInterface
 		return $this->data['lockName'];
 	}
 
-	public function setParams($params)
+	public function setParams(array $params)
 	{
 		$this->data['params'] = $params;
 	}
@@ -140,24 +190,74 @@ class Job implements JobInterface
 		return $this->data['params'];
 	}
 
-	public function getCreated()
+	public function getProcess()
 	{
-		return $this->data['created'];
+		return $this->data['process'];
 	}
 
-	public function setCreated($datetime)
+	public function setProcess(array $process)
 	{
-		$this->data['created'] = $datetime;
+		if (!isset($process['host'])) {
+			throw new ApplicationException("Missing process host");
+		}
+
+		if (!isset($process['pid'])) {
+			throw new ApplicationException("Missing process pid");
+		}
+
+		$this->data['process'] = $process;
+
+		return $this;
 	}
 
-	public function getDuration()
+	public function getCreatedTime()
 	{
-		return $this->data['duration'];
+		return $this->data['createdTime'];
 	}
 
-	public function setDuration($duration)
+	public function setCreatedTime($datetime)
 	{
-		$this->data['duration'] = $duration;
+		$this->data['createdTime'] = $datetime;
+	}
+
+	public function getStartTime()
+	{
+		return $this->data['startTime'];
+	}
+
+	public function setStartTime($datetime)
+	{
+		$this->data['startTime'] = $datetime;
+	}
+
+	public function getEndTime()
+	{
+		return $this->data['endTime'];
+	}
+
+	public function setEndTime($datetime)
+	{
+		$this->data['endTime'] = $datetime;
+	}
+
+	public function getDurationSeconds()
+	{
+		return $this->data['durationSeconds'];
+	}
+
+	public function setDurationSeconds($seconds)
+	{
+		$this->data['durationSeconds'] = $seconds;
+	}
+
+	public function getWaitSeconds()
+	{
+		return $this->data['waitSeconds'];
+	}
+
+	public function setWaitSeconds($seconds)
+	{
+		$this->data['waitSeconds'] = $seconds;
 	}
 
 	public function setAttribute($key, $value)
@@ -184,21 +284,20 @@ class Job implements JobInterface
 
 	public function validate()
 	{
-		foreach ($this->requiredFields as $field) {
-			if (!array_key_exists($field, $this->data) && !is_null($this->data[$field])) {
-				throw new ApplicationException("Job is missing required field '".$field."'.");
-			}
-		}
-
-		$this->validateStatus();
-	}
-
-	protected function validateStatus()
-	{
-		$allowedStatuses = array(self::STATUS_WAITING, self::STATUS_PROCESSING, self::STATUS_SUCCESS, self::STATUS_ERROR);
+		$allowedStatuses = array(
+			self::STATUS_WAITING,
+			self::STATUS_PROCESSING,
+			self::STATUS_SUCCESS,
+			self::STATUS_ERROR,
+			self::STATUS_CANCELLED
+		);
 
 		if (!in_array($this->getStatus(), $allowedStatuses)) {
-			throw new ApplicationException("Job status has unrecongized value '".$this->getStatus()."'. Job status must be one of (".implode(',',$allowedStatuses).")");
+			throw new ApplicationException(
+				"Job status has unrecongized value '"
+				. $this->getStatus() . "'. Job status must be one of ("
+				. implode(',',$allowedStatuses) . ")"
+			);
 		}
 	}
 }

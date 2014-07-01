@@ -1,7 +1,10 @@
+## 1.6.0 
  
  * [BC Break]   ComponentName is now defined as app_name in parameters.yml
  * [BC Break]   Temp refactord
  * [BC Break]   Encryptor refactord
+
+## =====================================================================
 
 ## 1.5.2
  * [Feature]    Added support for asynchronous jobs using elastic search and SQS
