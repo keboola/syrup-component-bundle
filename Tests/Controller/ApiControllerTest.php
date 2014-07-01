@@ -2,6 +2,7 @@
 
 namespace Syrup\ComponentBundle\Tests\Controller;
 
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Client;
 use Syrup\ComponentBundle\Controller\ApiController;
@@ -27,9 +28,9 @@ class ApiControllerTest extends WebTestCase
 	public function setUp()
 	{
 		self::$client = static::createClient();
-		$container = self::$client->getContainer();
+		$container = static::$client->getContainer();
 
-		$request = Request::create('/ex-dummy/run', 'POST');
+		$request = Request::create('/syrup-component-bundle/run', 'POST');
 		$request->headers->set('X-StorageApi-Token', $container->getParameter('storage_api.test.token'));
 
 		$container->enterScope('request');
@@ -51,5 +52,26 @@ class ApiControllerTest extends WebTestCase
 		$sharedSapi = $this->invokeMethod($this->controller, 'getSharedSapi');
 
 		$this->assertInstanceOf('Syrup\ComponentBundle\Service\SharedSapi\SharedSapiService', $sharedSapi);
+	}
+
+	public function testRun()
+	{
+		$container = static::$client->getContainer();
+
+		static::$client->request(
+			'POST',
+			'/syrup-component-bundle/run',
+			array(),
+			array(),
+			array(
+				'HTTP_X-StorageApi-Token' => $container->getParameter('storage_api.test.token')
+			)
+		);
+
+		$res = json_decode(static::$client->getResponse()->getContent(), true);
+
+		$this->assertArrayHasKey('jobId', $res);
+
+		//@todo: check if job of that id exists in ES
 	}
 }

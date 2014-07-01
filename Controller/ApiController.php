@@ -33,15 +33,18 @@ class ApiController extends BaseController
 		parent::preExecute($request);
 
 		$this->initStorageApi();
-		$this->initComponent($this->storageApi, $this->componentName);
+//		$this->initComponent($this->storageApi, $this->componentName);
 	}
 
+	/** @deprecated */
 	protected function initComponent(Client $storageApi, $componentName)
 	{
 		/** @var ComponentFactory $componentFactory */
 		$componentFactory = $this->container->get('syrup.component_factory');
 		$this->component = $componentFactory->get($storageApi, $componentName);
 		$this->component->setContainer($this->container);
+
+		return $this->component;
 	}
 
 	/**

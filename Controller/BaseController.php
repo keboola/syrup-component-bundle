@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Syrup\ComponentBundle\Component\Component;
 use Syrup\ComponentBundle\Exception\UserException;
-use Syrup\ComponentBundle\Filesystem\TempService;
+use Syrup\ComponentBundle\Filesystem\Temp;
 
 class BaseController extends Controller
 {
