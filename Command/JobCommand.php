@@ -9,6 +9,7 @@
 namespace Syrup\ComponentBundle\Command;
 
 
+use Keboola\Encryption\EncryptorInterface;
 use Keboola\StorageApi\Client;
 use Monolog\Logger;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -64,12 +65,15 @@ class JobCommand extends ContainerAwareCommand
 		$this->job = $this->getJob($jobId);
 
 		if ($this->job == null) {
-			return;
+			return self::STATUS_ERROR;
 		}
 
+		/** @var EncryptorInterface $encryptor */
+		$encryptor = $this->getContainer()->get('syrup.encryptor');
+
 		$this->sapiClient = new SapiClient([
-			'token' => $this->job->getToken(),
-			'url' => $this->getContainer()->getParameter('storage_api.url'),
+			'token'     => $encryptor->decrypt($this->job->getToken()['token']),
+			'url'       => $this->getContainer()->getParameter('storage_api.url'),
 			'userAgent' => $this->job->getComponent(),
 		]);
 		$this->sapiClient->setRunId($this->job->getRunId());
@@ -92,8 +96,11 @@ class JobCommand extends ContainerAwareCommand
 			return self::STATUS_LOCK;
 		}
 
+		$startTime = time();
+
 		// update job status to 'processing'
 		$this->job->setStatus(Job::STATUS_PROCESSING);
+		$this->job->setStartTime($startTime);
 		$this->jobManager->updateJob($this->job);
 
 		$jobExecutorName = str_replace('-', '_', $this->job->getComponent()) . '.job_executor';
@@ -101,8 +108,6 @@ class JobCommand extends ContainerAwareCommand
 		/** @var ExecutorInterface $jobExecutor */
 		$jobExecutor = $this->getContainer()->get($jobExecutorName);
 		$jobExecutor->setStorageApi($this->sapiClient);
-
-		$startTime = time();
 
 		try {
 			// execute job
@@ -140,11 +145,13 @@ class JobCommand extends ContainerAwareCommand
 			);
 		}
 
-		$duration = time() - $startTime;
+		$endTime = time();
+		$duration = $endTime - $startTime;
 
 		$this->job->setStatus($status);
 		$this->job->setResult($result);
-		$this->job->setDuration($duration);
+		$this->job->setEndTime($startTime);
+		$this->job->setDurationSeconds($duration);
 		$this->jobManager->updateJob($this->job);
 
 		$lock->unlock();
