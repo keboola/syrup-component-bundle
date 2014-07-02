@@ -2,7 +2,6 @@
 
 namespace Syrup\ComponentBundle\Tests\Controller;
 
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Client;
 use Syrup\ComponentBundle\Controller\ApiController;
@@ -71,7 +70,5 @@ class ApiControllerTest extends WebTestCase
 		$res = json_decode(static::$client->getResponse()->getContent(), true);
 
 		$this->assertArrayHasKey('jobId', $res);
-
-		//@todo: check if job of that id exists in ES
 	}
 }
