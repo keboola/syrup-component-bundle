@@ -58,12 +58,14 @@ class ApiController extends BaseController
 	    /** @var Job $job */
 	    $job = $this->createJob('run', $params);
 
-	    $this->getJobManager()->indexJob($job);
+	    $jobId = $this->getJobManager()->indexJob($job);
 
-	    $this->enqueue($job->getId());
+	    $this->enqueue($jobId);
 
 	    return $this->createJsonResponse([
-		    'jobId' => $job->getId()
+		    'id'        => $jobId,
+		    'url'       => $this->getJobUrl($jobId),
+		    'status'    => $job->getStatus()
 	    ], 202);
     }
 
@@ -83,10 +85,16 @@ class ApiController extends BaseController
 
 	/** Jobs */
 
+	protected function getJobUrl($jobId)
+	{
+		$queueParams = $this->container->getParameter('queue');
+		return $queueParams['url'] . '/job/=' . $jobId;
+	}
+
 	/**
 	 * @return JobManager
 	 */
-	private function getJobManager()
+	protected function getJobManager()
 	{
 		return $this->container->get('syrup.job_manager');
 	}
@@ -124,7 +132,7 @@ class ApiController extends BaseController
 		]);
 	}
 
-	protected function enqueue($jobId, $otherData = [])
+	protected function enqueue($jobId, $queueName = 'default', $otherData = [])
 	{
 		$data = [
 			'jobId'     => $jobId,
@@ -136,7 +144,7 @@ class ApiController extends BaseController
 		}
 
 		/** @var QueueService $queue */
-		$queue = $this->container->get('syrup.job_queue');
+		$queue = $this->container->get('syrup.queue_factory')->get($queueName);
 		$queue->enqueue($data);
 	}
 

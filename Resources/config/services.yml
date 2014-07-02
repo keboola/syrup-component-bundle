@@ -51,9 +51,9 @@ services:
         class: Elasticsearch\Client
         arguments: [%elasticsearch%]
 
-    syrup.job_queue:
-        class: Syrup\ComponentBundle\Service\Queue\QueueService
-        arguments: [%queue%]
+    syrup.queue_factory:
+        class: Syrup\ComponentBundle\Service\Queue\QueueFactory
+        arguments: [@doctrine.dbal.default_connection, %queue%]
 
     syrup.job_manager:
         class: Syrup\ComponentBundle\Job\Metadata\JobManager
