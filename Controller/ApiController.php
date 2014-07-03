@@ -48,20 +48,29 @@ class ApiController extends BaseController
 	}
 
 	/**
+	 * Run Action
+	 *
+	 * Creates new job, saves it to Elasticsearch and add to SQS
+	 *
 	 * @param Request $request
 	 * @return Response
 	 */
 	public function runAction(Request $request)
     {
+	    // Get params from request
 	    $params = $this->getPostJson($request);
 
+	    // Create new job
 	    /** @var Job $job */
 	    $job = $this->createJob('run', $params);
 
+	    // Add job to Elasticsearch
 	    $jobId = $this->getJobManager()->indexJob($job);
 
+	    // Add job to SQS
 	    $this->enqueue($jobId);
 
+	    // Response with link to job resource
 	    return $this->createJsonResponse([
 		    'id'        => $jobId,
 		    'url'       => $this->getJobUrl($jobId),
@@ -132,6 +141,13 @@ class ApiController extends BaseController
 		]);
 	}
 
+	/**
+	 * Add JobId to queue
+	 *
+	 * @param        $jobId
+	 * @param string $queueName
+	 * @param array  $otherData
+	 */
 	protected function enqueue($jobId, $queueName = 'default', $otherData = [])
 	{
 		$data = [

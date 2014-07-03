@@ -10,7 +10,6 @@ namespace Syrup\ComponentBundle\Command;
 
 
 use Keboola\Encryption\EncryptorInterface;
-use Keboola\StorageApi\Client;
 use Monolog\Logger;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -62,12 +61,14 @@ class JobCommand extends ContainerAwareCommand
 			throw new UserException("Missing jobId argument.");
 		}
 
+		// Get job from ES
 		$this->job = $this->getJob($jobId);
 
 		if ($this->job == null) {
 			return self::STATUS_ERROR;
 		}
 
+		// SAPI init
 		/** @var EncryptorInterface $encryptor */
 		$encryptor = $this->getContainer()->get('syrup.encryptor');
 
@@ -87,6 +88,7 @@ class JobCommand extends ContainerAwareCommand
 			return self::STATUS_ERROR;
 		}
 
+		// Lock DB
 		/** @var \PDO $pdo */
 		$pdo = $this->getContainer()->get('pdo');
 		$pdo->exec('SET wait_timeout = 31536000;');
@@ -98,24 +100,25 @@ class JobCommand extends ContainerAwareCommand
 
 		$startTime = time();
 
-		// update job status to 'processing'
+		// Update job status to 'processing'
 		$this->job->setStatus(Job::STATUS_PROCESSING);
 		$this->job->setStartTime($startTime);
 		$this->jobManager->updateJob($this->job);
 
+		// Instantiate jobExecutor based on component name
 		$jobExecutorName = str_replace('-', '_', $this->job->getComponent()) . '.job_executor';
 
 		/** @var ExecutorInterface $jobExecutor */
 		$jobExecutor = $this->getContainer()->get($jobExecutorName);
 		$jobExecutor->setStorageApi($this->sapiClient);
 
+		// Execute job
 		try {
-			// execute job
 			$result = $jobExecutor->execute($this->job);
 			$status = Job::STATUS_SUCCESS;
 		} catch (UserException $e) {
 
-			// update job with error message
+			// Update job with error message
 			$result = [
 				'message' => $e->getMessage()
 			];
@@ -130,7 +133,7 @@ class JobCommand extends ContainerAwareCommand
 			);
 		} catch (\Exception $e) {
 
-			// update job with 'contact support' message
+			// Update job with 'contact support' message
 			$result = [
 				'message' => 'Internal error occured please contact support@keboola.com'
 			];
@@ -145,6 +148,8 @@ class JobCommand extends ContainerAwareCommand
 			);
 		}
 
+
+		// Update job with results
 		$endTime = time();
 		$duration = $endTime - $startTime;
 
@@ -154,10 +159,14 @@ class JobCommand extends ContainerAwareCommand
 		$this->job->setDurationSeconds($duration);
 		$this->jobManager->updateJob($this->job);
 
+		// DB unlock
 		$lock->unlock();
 		return $status;
 	}
 
+	/**
+	 * @return JobManager
+	 */
 	protected function getJobManager()
 	{
 		if ($this->jobManager == null) {
@@ -167,6 +176,10 @@ class JobCommand extends ContainerAwareCommand
 		return $this->jobManager;
 	}
 
+	/**
+	 * @param $jobId
+	 * @return null|Job
+	 */
 	protected function getJob($jobId)
 	{
 		return $this->getJobManager()->getJob($jobId);
