@@ -75,14 +75,6 @@ class JobManager
 
 		$response = $this->client->update($jobData);
 
-		if (!$response['ok']) {
-			$e = new ApplicationException("Unable to update job");
-			$e->setData(array(
-				'job'   => $jobData
-			));
-			throw $e;
-		}
-
 		return $response['_id'];
 	}
 
