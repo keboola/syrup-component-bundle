@@ -112,6 +112,9 @@ class JobCommand extends ContainerAwareCommand
 		$jobExecutor = $this->getContainer()->get($jobExecutorName);
 		$jobExecutor->setStorageApi($this->sapiClient);
 
+		$logFunc = 'error';
+		$logException = null;
+
 		// Execute job
 		try {
 			$result = $jobExecutor->execute($this->job);
@@ -124,13 +127,9 @@ class JobCommand extends ContainerAwareCommand
 			];
 			$status = Job::STATUS_ERROR;
 
-			$this->logger->error(
-				$e->getMessage(),
-				[
-					'exception' => $e,
-					'job'       => $this->job->getLogData()
-				]
-			);
+			$logFunc = 'error';
+			$logException = $e;
+
 		} catch (\Exception $e) {
 
 			// Update job with 'contact support' message
@@ -139,13 +138,8 @@ class JobCommand extends ContainerAwareCommand
 			];
 			$status = Job::STATUS_ERROR;
 
-			$this->logger->alert(
-				$e->getMessage(),
-				[
-					'exception' => $e,
-					'job'       => $this->job->getLogData()
-				]
-			);
+			$logFunc = 'alert';
+			$logException = $e;
 		}
 
 
@@ -158,6 +152,19 @@ class JobCommand extends ContainerAwareCommand
 		$this->job->setEndTime($startTime);
 		$this->job->setDurationSeconds($duration);
 		$this->jobManager->updateJob($this->job);
+
+		// log error
+		if ($status == Job::STATUS_ERROR) {
+			$logMessage = ($logException == null)?'Error occured':$logException->getMessage();
+
+			$this->logger->$logFunc(
+				$logMessage,
+				[
+					'exception' => $logException,
+					'job'       => $this->job->getLogData()
+				]
+			);
+		}
 
 		// DB unlock
 		$lock->unlock();

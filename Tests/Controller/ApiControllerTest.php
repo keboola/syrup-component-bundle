@@ -69,6 +69,8 @@ class ApiControllerTest extends WebTestCase
 
 		$res = json_decode(static::$client->getResponse()->getContent(), true);
 
-		$this->assertArrayHasKey('jobId', $res);
+		$this->assertArrayHasKey('id', $res);
+		$this->assertArrayHasKey('url', $res);
+		$this->assertArrayHasKey('status', $res);
 	}
 }
