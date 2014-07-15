@@ -97,7 +97,7 @@ class ApiController extends BaseController
 	protected function getJobUrl($jobId)
 	{
 		$queueParams = $this->container->getParameter('queue');
-		return $queueParams['url'] . '/job/=' . $jobId;
+		return $queueParams['url'] . '/job/' . $jobId;
 	}
 
 	/**

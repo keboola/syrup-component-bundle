@@ -99,6 +99,9 @@ class SyrupExceptionListener
 		$response->setStatusCode($code);
 		$response->headers->set('Content-Type', 'application/json');
 		$response->headers->set('Access-Control-Allow-Origin', '*');
+		$response->headers->set('Access-Control-Allow-Methods', '*');
+		$response->headers->set('Access-Control-Allow-Headers', '*');
+		$response->headers->set('Cache-Control', 'private, no-cache, no-store, must-revalidate');
 
 		// Send the modified response object to the event
 		$event->setResponse($response);
