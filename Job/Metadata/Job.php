@@ -51,8 +51,10 @@ class Job implements JobInterface
 	public function __construct(array $data = [])
 	{
 		$this->data['status'] = self::STATUS_WAITING;
-		$this->setLockName($this->getComponent() . '-' . $this->getProject()['id']);
 		$this->data = array_merge($this->data, $data);
+		if (null == $this->data['lockName']) {
+			$this->setLockName($this->getComponent() . '-' . $this->getProject()['id']);
+		}
 	}
 
 	public function getId()
