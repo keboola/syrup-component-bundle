@@ -52,6 +52,7 @@ class Job implements JobInterface
 	{
 		$this->data['status'] = self::STATUS_WAITING;
 		$this->data = array_merge($this->data, $data);
+
 		if (null == $this->data['lockName']) {
 			$this->setLockName($this->getComponent() . '-' . $this->getProject()['id']);
 		}

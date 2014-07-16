@@ -168,7 +168,14 @@ class JobCommand extends ContainerAwareCommand
 
 		// DB unlock
 		$lock->unlock();
-		return $status;
+
+
+		// @todo: refactor
+		if ($status == Job::STATUS_ERROR) {
+			return self::STATUS_ERROR;
+		}
+
+		return self::STATUS_SUCCESS;
 	}
 
 	/**
