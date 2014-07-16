@@ -118,14 +118,17 @@ class JobCommand extends ContainerAwareCommand
 		// Execute job
 		try {
 			$result = $jobExecutor->execute($this->job);
-			$status = Job::STATUS_SUCCESS;
+			$jobStatus = Job::STATUS_SUCCESS;
+			$status = self::STATUS_SUCCESS;
+
 		} catch (UserException $e) {
 
 			// Update job with error message
 			$result = [
 				'message' => $e->getMessage()
 			];
-			$status = Job::STATUS_ERROR;
+			$jobStatus = Job::STATUS_ERROR;
+			$status = self::STATUS_SUCCESS;
 
 			$logFunc = 'error';
 			$logException = $e;
@@ -136,7 +139,8 @@ class JobCommand extends ContainerAwareCommand
 			$result = [
 				'message' => 'Internal error occured please contact support@keboola.com'
 			];
-			$status = Job::STATUS_ERROR;
+			$jobStatus = Job::STATUS_ERROR;
+			$status = self::STATUS_ERROR;
 
 			$logFunc = 'alert';
 			$logException = $e;
@@ -147,7 +151,7 @@ class JobCommand extends ContainerAwareCommand
 		$endTime = time();
 		$duration = $endTime - $startTime;
 
-		$this->job->setStatus($status);
+		$this->job->setStatus($jobStatus);
 		$this->job->setResult($result);
 		$this->job->setEndTime(date('c', $endTime));
 		$this->job->setDurationSeconds($duration);
@@ -169,13 +173,7 @@ class JobCommand extends ContainerAwareCommand
 		// DB unlock
 		$lock->unlock();
 
-
-		// @todo: refactor
-		if ($status == Job::STATUS_ERROR) {
-			return self::STATUS_ERROR;
-		}
-
-		return self::STATUS_SUCCESS;
+		return $status;
 	}
 
 	/**
