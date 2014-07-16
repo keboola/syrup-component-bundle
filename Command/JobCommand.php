@@ -158,7 +158,7 @@ class JobCommand extends ContainerAwareCommand
 		$this->jobManager->updateJob($this->job);
 
 		// log error
-		if ($status == Job::STATUS_ERROR) {
+		if ($jobStatus == Job::STATUS_ERROR) {
 			$logMessage = ($logException == null)?'Error occured':$logException->getMessage();
 
 			$this->logger->$logFunc(
