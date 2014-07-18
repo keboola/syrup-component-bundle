@@ -96,13 +96,12 @@ class JobManager
 			]
 		];
 
-		try {
-			$result = $this->client->search($params);
+		$result = $this->client->search($params);
 
+		if ($result['hits']['total'] > 0) {
 			return new Job($result['hits']['hits'][0]['_source']);
-		} catch (Missing404Exception $e) {
-			return null;
 		}
+		return null;
 	}
 
 	public function getJobs($projectId, $component = null, $runId = null, $queryString=null, $offset=0, $limit=self::PAGING)
