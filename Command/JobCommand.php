@@ -92,7 +92,7 @@ class JobCommand extends ContainerAwareCommand
 		/** @var \PDO $pdo */
 		$pdo = $this->getContainer()->get('pdo');
 		$pdo->exec('SET wait_timeout = 31536000;');
-		$lock = new Lock($pdo, $this->job->getId());
+		$lock = new Lock($pdo, $this->job->getLockName());
 
 		if (!$lock->lock()) {
 			return self::STATUS_LOCK;
