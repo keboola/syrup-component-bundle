@@ -13,7 +13,9 @@ use Syrup\ComponentBundle\Exception\ApplicationException;
 
 class JobManager
 {
-	const INDEX = '_syrup_current';
+	const INDEX = '_syrup';
+
+	const INDEX_CURRENT = '_syrup_current';
 
 	const PAGING = 100;
 
@@ -37,7 +39,7 @@ class JobManager
 		$job->validate();
 
 		$jobData = array(
-			'index' => $this->getIndex(),
+			'index' => $this->getIndexCurrent(),
 			'type'  => $this->getType($job->getComponent()),
 			'id'    => $job->getId(),
 			'body'  => $job->getData()
@@ -65,7 +67,7 @@ class JobManager
 		$job->validate();
 
 		$jobData = array(
-			'index' => $this->getIndex(),
+			'index' => $this->getIndexCurrent(),
 			'type'  => $this->getType($job->getComponent()),
 			'id'    => $job->getId(),
 			'body'  => array(
@@ -82,12 +84,22 @@ class JobManager
 	{
 		$params = [];
 		$params['index'] = $this->getIndex();
-		$params['type'] = is_null($component)?'_all':$this->getType($component);
-		$params['id'] = $jobId;
+
+		if (!is_null($component)) {
+			$params['type'] = $this->getType($component);
+		}
+
+		$params['body'] = [
+			'size'  => 1,
+			'query' => [
+				'match' => ['id' => $jobId]
+			]
+		];
 
 		try {
-			$result = $this->client->get($params);
-			return new Job($result['_source']);
+			$result = $this->client->search($params);
+
+			return new Job($result['hits']['hits'][0]['_source']);
 		} catch (Missing404Exception $e) {
 			return null;
 		}
@@ -153,6 +165,11 @@ class JobManager
 	public function getIndex()
 	{
 		return $this->config['index_prefix'] . self::INDEX;
+	}
+
+	public function getIndexCurrent()
+	{
+		return $this->config['index_prefix'] . self::INDEX_CURRENT;
 	}
 
 }
