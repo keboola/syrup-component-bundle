@@ -55,6 +55,10 @@ class JobManager
 			throw $e;
 		}
 
+		$this->client->indices()->refresh(array(
+			'index' => $this->getIndexCurrent()
+		));
+
 		return $response['_id'];
 	}
 
@@ -67,7 +71,7 @@ class JobManager
 		$job->validate();
 
 		$jobData = array(
-			'index' => $this->getIndexCurrent(),
+			'index' => $this->getIndex(),
 			'type'  => $this->getType($job->getComponent()),
 			'id'    => $job->getId(),
 			'body'  => array(
@@ -76,6 +80,10 @@ class JobManager
 		);
 
 		$response = $this->client->update($jobData);
+
+		$this->client->indices()->refresh(array(
+			'index' => $this->getIndex()
+		));
 
 		return $response['_id'];
 	}
