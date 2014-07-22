@@ -30,6 +30,48 @@ class JobManager
 		$this->config = $config;
 	}
 
+	public function createIndex()
+	{
+		// Assemble new index name
+		$lastIndexName = $this->getLastIndex();
+		$lastIndexNameArr = explode('_', $lastIndexName);
+		$nextIndexNumber = $lastIndexNameArr[3] + 1;
+		$nextIndexName = $this->getIndex() . '_' . date('Y') . '_' . $nextIndexNumber;
+
+		// Create new index
+		$this->client->indices()->create([
+			'index'  => $nextIndexName
+		]);
+
+		// Update aliases
+		$params['body'] = [
+			'actions' => [
+				[
+					'remove' => [
+						'index' => $lastIndexName,
+						'alias' => $this->getIndexCurrent()
+					]
+				],
+				[
+					'add' => [
+						'index' => $nextIndexName,
+						'alias' => $this->getIndexCurrent()
+					]
+				],
+				[
+					'add' => [
+						'index' => $nextIndexName,
+						'alias' => $this->getIndex()
+					]
+				]
+			]
+		];
+
+		$this->client->indices()->updateAliases($params);
+
+		return $nextIndexName;
+	}
+
 	/**
 	 * @param JobInterface $job
 	 * @return string jobId
@@ -179,4 +221,18 @@ class JobManager
 		return $this->config['index_prefix'] . self::INDEX_CURRENT;
 	}
 
+	public function getIndexRead()
+	{
+		return $this->getIndex() . '_*';
+	}
+
+	protected function getLastIndex()
+	{
+		$indices = $this->client->indices()->getAlias([
+			'name'  => $this->getIndex()
+		]);
+		$lastIndexName = key(array_slice($indices, -1, 1));
+
+		return $lastIndexName;
+	}
 }
