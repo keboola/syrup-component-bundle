@@ -18,11 +18,7 @@ class SharedSapiService
 
 	public function __construct(Client $client)
 	{
-		$this->client = new Client([
-			'token' => $token,
-			'url' => $url,
-			'userAgent' => 'Syrup'
-		]);
+		$this->client = $client;
 	}
 
 	public function log(Event $event)
