@@ -16,7 +16,7 @@ class SharedSapiService
 	/** @var Client */
 	protected $client;
 
-	public function __construct($token, $url)
+	public function __construct(Client $client)
 	{
 		$this->client = new Client([
 			'token' => $token,
@@ -38,4 +38,4 @@ class SharedSapiService
 
 		$table->save();
 	}
-} 
+}

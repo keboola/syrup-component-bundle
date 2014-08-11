@@ -27,8 +27,10 @@ parameters:
     storage_api.test.url:   https://connection.keboola.com
     storage_api.test.token:  SAPI_TOKEN
 
-    shared_sapi.url:   https://connection.keboola.com
-    shared_sapi.token: SAPI_TOKEN
+	shared_sapi:
+        url:   https://connection.keboola.com
+        token: SAPI_TOKEN
+        userAgent: Syrup
 
     uploader:
         aws-access-key:
