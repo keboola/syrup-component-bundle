@@ -135,7 +135,7 @@ class ApiController extends BaseController
 			'params'    => $params,
 			'process'   => [
 				'host'  => gethostname(),
-				'pid'   => posix_getpid()
+				'pid'   => getmypid()
 			],
 			'createdTime'   => date('c')
 		]);
