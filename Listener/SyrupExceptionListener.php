@@ -78,7 +78,9 @@ class SyrupExceptionListener extends ErrorHandler
 			)
 		);
 
-		$this->prevErrorHandler[0]->handle($level, $message, $file, $line, $context);
+		if (is_array($this->prevErrorHandler) && $this->prevErrorHandler[0] instanceof ErrorHandler) {
+			$this->prevErrorHandler[0]->handle($level, $message, $file, $line, $context);
+		}
 	}
 
 	public function handleFatal()
