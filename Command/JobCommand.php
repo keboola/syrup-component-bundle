@@ -99,6 +99,11 @@ class JobCommand extends ContainerAwareCommand
 		// Update job status to 'processing'
 		$this->job->setStatus(Job::STATUS_PROCESSING);
 		$this->job->setStartTime(date('c', $startTime));
+		$this->job->setProcess([
+			'host'  => gethostname(),
+			'pid'   => getmypid()
+		]);
+
 		$this->jobManager->updateJob($this->job);
 
 		// Instantiate jobExecutor based on component name
