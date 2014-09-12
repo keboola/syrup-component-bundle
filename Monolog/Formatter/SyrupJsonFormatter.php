@@ -98,7 +98,9 @@ class SyrupJsonFormatter extends JsonFormatter
 			/** @var \Exception $e */
 			$e = $record['context']['exception'];
 			unset($record['context']['exception']);
-			if ($e instanceof \Exception) {
+			if ($e instanceof \Symfony\Component\Debug\Exception\FatalErrorException) {
+				$record['message'] = $e->__toString();
+			} else if ($e instanceof \Exception) {
 				$serialized = $e->__toString();
 				$record['attachment'] = $this->uploader->uploadString('exception', $serialized);
 			}
