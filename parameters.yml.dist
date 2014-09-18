@@ -15,6 +15,14 @@ parameters:
         db_data_col: value
         db_time_col: time
 
+	# locks DB
+	locks_db.driver:    pdo_mysql
+    locks_db.host:      localhost
+    locks_db.port:      ~
+    locks_db.name:
+    locks_db.user:
+    locks_db.password:
+
     mailer_transport:  smtp
     mailer_host:       localhost
     mailer_user:       ~
@@ -40,13 +48,11 @@ parameters:
         bitly-api-key:
 
     queue:
-        access_key:
-        secret_key:
-        region:
-        url:
+        url:      http://syrup-queue.kbc-devel-02.keboola.com
+        db_table: queues
 
     elasticsearch:
-        hosts: [localhost:9200]
+        hosts: []
 
     job_manager:
         index_prefix: devel
