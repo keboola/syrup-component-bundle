@@ -32,6 +32,7 @@
 			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/keboola/syrup/app vendor/keboola/syrup/app"
 		],
 		"post-update-cmd": [
+			"Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
 			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/keboola/syrup/app vendor/keboola/syrup/app"
 		]
 	},
