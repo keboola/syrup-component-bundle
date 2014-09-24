@@ -10,6 +10,8 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Keboola\StorageApi\Event as SapiEvent;
 use Syrup\ComponentBundle\Component\Component;
 use Syrup\ComponentBundle\Component\ComponentFactory;
+use Syrup\ComponentBundle\Exception\ApplicationException;
+use Syrup\ComponentBundle\Exception\UserException;
 use Syrup\ComponentBundle\Filesystem\Temp;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 use Syrup\ComponentBundle\Job\Metadata\JobInterface;
@@ -57,6 +59,8 @@ class ApiController extends BaseController
 	 */
 	public function runAction(Request $request)
     {
+	    $foo = new Bar();
+
 	    // Get params from request
 	    $params = $this->getPostJson($request);
 

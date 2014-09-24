@@ -15,8 +15,8 @@ parameters:
         db_data_col: value
         db_time_col: time
 
-	# locks DB
-	locks_db.driver:    pdo_mysql
+    # locks DB
+    locks_db.driver:    pdo_mysql
     locks_db.host:      localhost
     locks_db.port:      ~
     locks_db.name:

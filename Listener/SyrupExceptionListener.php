@@ -21,7 +21,7 @@ use Syrup\ComponentBundle\Exception\SyrupExceptionInterface;
 use Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter;
 use Syrup\CoreBundle\Debug\ExceptionHandler;
 
-class SyrupExceptionListener extends ErrorHandler
+class SyrupExceptionListener
 {
 	/**
 	 * @var \Monolog\Logger
@@ -30,83 +30,10 @@ class SyrupExceptionListener extends ErrorHandler
 
 	protected $formatter;
 
-	private $prevErrorHandler;
-
-	private $levels = array(
-		E_WARNING           => 'Warning',
-		E_NOTICE            => 'Notice',
-		E_USER_ERROR        => 'User Error',
-		E_USER_WARNING      => 'User Warning',
-		E_USER_NOTICE       => 'User Notice',
-		E_STRICT            => 'Runtime Notice',
-		E_RECOVERABLE_ERROR => 'Catchable Fatal Error',
-		E_DEPRECATED        => 'Deprecated',
-		E_USER_DEPRECATED   => 'User Deprecated',
-		E_ERROR             => 'Error',
-		E_CORE_ERROR        => 'Core Error',
-		E_COMPILE_ERROR     => 'Compile Error',
-		E_PARSE             => 'Parse',
-	);
-
 	public function __construct(Logger $logger, SyrupJsonFormatter $formatter)
 	{
 		$this->logger = $logger;
 		$this->formatter = $formatter;
-
-		$this->prevErrorHandler = set_error_handler(array($this, 'handle'));
-		register_shutdown_function(array($this, 'handleFatal'));
-	}
-
-	public function handle($level, $message, $file = 'unknown', $line = 0, $context = array())
-	{
-		$exceptionId = $this->formatter->getAppName() . '-' . md5(microtime());
-
-		$code = ($level < 300 || $level >= 600) ? 500 : $level;
-
-		// Log
-		$method = 'error';
-		if ($code >= 500) {
-			$method = 'critical';
-		}
-		$this->logger->$method(
-			$message,
-			array(
-				'exception'     => new ApplicationException($message),
-				'exceptionId'   => $exceptionId,
-			)
-		);
-
-		if (is_array($this->prevErrorHandler) && $this->prevErrorHandler[0] instanceof ErrorHandler) {
-			$this->prevErrorHandler[0]->handle($level, $message, $file, $line, $context);
-		}
-	}
-
-	public function handleFatal()
-	{
-		if (null === $error = error_get_last()) {
-			return;
-		}
-
-		$type = $error['type'];
-		if (!in_array($type, array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE))) {
-			return;
-		}
-
-		$level = isset($this->levels[$type]) ? $this->levels[$type] : $type;
-		$message = sprintf('%s: %s in %s line %d', $level, $error['message'], $error['file'], $error['line']);
-		$exception = new FatalErrorException($message, 0, $type, $error['file'], $error['line']);
-
-		$this->logger->critical($error['message'], array(
-			'exception' => $exception
-		));
-
-		// get current exception handler
-		$exceptionHandler = set_exception_handler(function () {});
-		restore_exception_handler();
-
-		if (is_array($exceptionHandler) && $exceptionHandler[0] instanceof ExceptionHandler) {
-			$exceptionHandler[0]->handle($exception);
-		}
 	}
 
 	public function onConsoleException(ConsoleExceptionEvent $event)
@@ -141,10 +68,6 @@ class SyrupExceptionListener extends ErrorHandler
 				'exceptionId'   => $exceptionId,
 			)
 		);
-	}
-
-	public function onKernelRequest(GetResponseEvent $event)
-	{
 	}
 
 	public function onKernelException(GetResponseForExceptionEvent $event)

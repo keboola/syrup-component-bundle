@@ -54,6 +54,8 @@ class StorageApiService
 				'userAgent' => explode('/', $this->request->getPathInfo())[1],
 			]);
 
+			$this->client->verifyToken();
+
 			if ($this->request->headers->has('X-KBC-RunId')) {
 				$kbcRunId = $this->request->headers->get('X-KBC-RunId');
 			} else {
@@ -65,4 +67,4 @@ class StorageApiService
 
 		return $this->client;
 	}
-} 
+}
