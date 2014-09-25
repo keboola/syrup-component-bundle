@@ -59,8 +59,6 @@ class ApiController extends BaseController
 	 */
 	public function runAction(Request $request)
     {
-	    $foo = new Bar();
-
 	    // Get params from request
 	    $params = $this->getPostJson($request);
 
