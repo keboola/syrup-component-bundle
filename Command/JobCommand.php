@@ -17,6 +17,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Syrup\ComponentBundle\Exception\UserException;
 use Keboola\StorageApi\Client as SapiClient;
+use Syrup\ComponentBundle\Job\Exception\InitializationException;
 use Syrup\ComponentBundle\Job\ExecutorInterface;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 use Syrup\ComponentBundle\Job\Metadata\JobManager;
@@ -24,9 +25,10 @@ use Syrup\ComponentBundle\Service\Db\Lock;
 
 class JobCommand extends ContainerAwareCommand
 {
-	const STATUS_SUCCESS = 0;
-	const STATUS_ERROR = 1;
-	const STATUS_LOCK = 2;
+	const STATUS_SUCCESS    = 0;
+	const STATUS_ERROR      = 1;
+	const STATUS_RETRY      = 2;
+	const STATUS_LOCK       = 3;
 
 	/** @var JobManager */
 	protected $jobManager;
@@ -113,63 +115,52 @@ class JobCommand extends ContainerAwareCommand
 		$jobExecutor = $this->getContainer()->get($jobExecutorName);
 		$jobExecutor->setStorageApi($this->sapiClient);
 
-		$logFunc = 'error';
-		$logException = null;
-
 		// Execute job
 		try {
-			$result = $jobExecutor->execute($this->job);
+			$jobResult = $jobExecutor->execute($this->job);
 			$jobStatus = Job::STATUS_SUCCESS;
 			$status = self::STATUS_SUCCESS;
 
-		} catch (UserException $e) {
+		} catch (InitializationException $e) {
+			// job will be requeud
+			$exceptionId = $this->logException('error', $e);
+			$jobResult = [
+				'message'       => $e->getMessage(),
+				'exceptionId'   => $exceptionId
+			];
+			$jobStatus = Job::STATUS_PROCESSING;
+			$status = self::STATUS_RETRY;
 
-			// Update job with error message
-			$result = [
-				'message' => $e->getMessage()
+		} catch (UserException $e) {
+			$exceptionId = $this->logException('error', $e);
+			$jobResult = [
+				'message'       => $e->getMessage(),
+				'exceptionId'   => $exceptionId
 			];
 			$jobStatus = Job::STATUS_ERROR;
 			$status = self::STATUS_SUCCESS;
 
-			$logFunc = 'error';
-			$logException = $e;
+			$this->logException('error', $e);
 
 		} catch (\Exception $e) {
-
-			// Update job with 'contact support' message
-			$result = [
-				'message' => 'Internal error occured please contact support@keboola.com'
+			$exceptionId = $this->logException('critical', $e);
+			$jobResult = [
+				'message' => 'Internal error occured please contact support@keboola.com',
+				'exceptionId'   => $exceptionId
 			];
 			$jobStatus = Job::STATUS_ERROR;
 			$status = self::STATUS_ERROR;
-
-			$logFunc = 'alert';
-			$logException = $e;
 		}
-
 
 		// Update job with results
 		$endTime = time();
 		$duration = $endTime - $startTime;
 
 		$this->job->setStatus($jobStatus);
-		$this->job->setResult($result);
+		$this->job->setResult($jobResult);
 		$this->job->setEndTime(date('c', $endTime));
 		$this->job->setDurationSeconds($duration);
 		$this->jobManager->updateJob($this->job);
-
-		// log error
-		if ($jobStatus == Job::STATUS_ERROR) {
-			$logMessage = ($logException == null)?'Error occured':$logException->getMessage();
-
-			$this->logger->$logFunc(
-				$logMessage,
-				[
-					'exception' => $logException,
-					'job'       => $this->job->getLogData()
-				]
-			);
-		}
 
 		// DB unlock
 		$lock->unlock();
@@ -196,5 +187,21 @@ class JobCommand extends ContainerAwareCommand
 	protected function getJob($jobId)
 	{
 		return $this->getJobManager()->getJob($jobId);
+	}
+
+	protected function logException($level, \Exception $exception)
+	{
+		$exceptionId = $this->job->getComponent() . '-' . md5(microtime());
+
+		$this->logger->$level(
+			$exception->getMessage(),
+			[
+				'exceptionId'   => $exceptionId,
+				'exception'     => $exception,
+				'job'           => $this->job->getLogData()
+			]
+		);
+
+		return $exceptionId;
 	}
 }
