@@ -148,9 +148,10 @@ class JobManager
 	public function getJob($jobId, $component=null)
 	{
 		$params = [];
-		$params['index'] = $this->getIndex();
+		$params['index'] = $this->config['index_prefix'] . '_syrup_*';
 
 		if (!is_null($component)) {
+			$params['index'] = $this->config['index_prefix'] . '_syrup_' . $component;
 			$params['type'] = $this->getType($component);
 		}
 
@@ -195,9 +196,10 @@ class JobManager
 		}
 
 		$params = [];
-		$params['index'] = $this->config['index_prefix'] . '_*';
+		$params['index'] = $this->config['index_prefix'] . '_syrup_*';
 
 		if (!is_null($component)) {
+			$params['index'] = $this->config['index_prefix'] . '_syrup_' . $component;
 			$params['type'] = $this->getType($component);
 		}
 
