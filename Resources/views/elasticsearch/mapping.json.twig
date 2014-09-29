@@ -1,0 +1,14 @@
+{% extends 'SyrupComponentBundle:elasticsearch:mappingDefault.json.twig' %}
+
+{% block type_name %}jobs_test{% endblock %}
+
+{% block params %}
+"params": {
+	"dynamic": "strict",
+	"properties": {
+		"test": {
+			"type": "string"
+		}
+	}
+},
+{% endblock %}

@@ -60,7 +60,7 @@ class JobCommand extends ContainerAwareCommand
 		}
 
 		// Get job from ES
-		$this->job = $this->getJob($jobId);
+		$this->job = $this->getJobManager()->getJob($jobId);
 
 		if ($this->job == null) {
 			return self::STATUS_ERROR;
@@ -178,15 +178,6 @@ class JobCommand extends ContainerAwareCommand
 		}
 
 		return $this->jobManager;
-	}
-
-	/**
-	 * @param $jobId
-	 * @return null|Job
-	 */
-	protected function getJob($jobId)
-	{
-		return $this->getJobManager()->getJob($jobId);
 	}
 
 	protected function logException($level, \Exception $exception)

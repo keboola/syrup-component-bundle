@@ -13,10 +13,6 @@ use Syrup\ComponentBundle\Exception\ApplicationException;
 
 class JobManager
 {
-	const INDEX = '_syrup';
-
-	const INDEX_CURRENT = '_syrup_current';
-
 	const PAGING = 100;
 
 	/** @var ElasticsearchClient */
@@ -24,34 +20,44 @@ class JobManager
 
 	protected $config;
 
-	public function __construct(ElasticsearchClient $client, array $config)
+	protected $componentName;
+
+	public function __construct(ElasticsearchClient $client, array $config, $componentName)
 	{
 		$this->client = $client;
 		$this->config = $config;
+		$this->componentName = $componentName;
 	}
 
-	public function createIndex()
+	public function createIndex($settings = null, $mappings = null)
 	{
 		// Assemble new index name
+
+		$nextIndexNumber = 1;
 		$lastIndexName = $this->getLastIndex();
-		$lastIndexNameArr = explode('_', $lastIndexName);
-		$nextIndexNumber = $lastIndexNameArr[3] + 1;
+
+		if (null != $lastIndexName) {
+			$lastIndexNameArr = explode('_', $lastIndexName);
+			$nextIndexNumber = array_pop($lastIndexNameArr) + 1;
+		}
+
 		$nextIndexName = $this->getIndex() . '_' . date('Y') . '_' . $nextIndexNumber;
 
 		// Create new index
-		$this->client->indices()->create([
-			'index'  => $nextIndexName
-		]);
+		$params['index'] = $nextIndexName;
+		if (null != $settings) {
+			$params['body']['settings'] = $settings;
+		}
+		if (null != $mappings) {
+			$params['body']['mappings'] = $mappings;
+		}
+
+		$this->client->indices()->create($params);
 
 		// Update aliases
+		$params = [];
 		$params['body'] = [
 			'actions' => [
-				[
-					'remove' => [
-						'index' => $lastIndexName,
-						'alias' => $this->getIndexCurrent()
-					]
-				],
 				[
 					'add' => [
 						'index' => $nextIndexName,
@@ -66,6 +72,15 @@ class JobManager
 				]
 			]
 		];
+
+		if (null != $lastIndexName) {
+			array_unshift($params['body']['actions'], [
+				'remove' => [
+					'index' => $lastIndexName,
+					'alias' => $this->getIndexCurrent()
+				]
+			]);
+		}
 
 		$this->client->indices()->updateAliases($params);
 
@@ -142,7 +157,12 @@ class JobManager
 		$params['body'] = [
 			'size'  => 1,
 			'query' => [
-				'match' => ['id' => $jobId]
+				'match_all' => []
+			],
+			'filter' => [
+				'ids' => [
+					'values' => [$jobId]
+				]
 			]
 		];
 
@@ -175,7 +195,7 @@ class JobManager
 		}
 
 		$params = [];
-		$params['index'] = $this->getIndex();
+		$params['index'] = $this->config['index_prefix'] . '_*';
 
 		if (!is_null($component)) {
 			$params['type'] = $this->getType($component);
@@ -213,26 +233,28 @@ class JobManager
 
 	public function getIndex()
 	{
-		return $this->config['index_prefix'] . self::INDEX;
+		return $this->config['index_prefix'] . '_syrup_' . $this->componentName;
 	}
 
 	public function getIndexCurrent()
 	{
-		return $this->config['index_prefix'] . self::INDEX_CURRENT;
-	}
-
-	public function getIndexRead()
-	{
-		return $this->getIndex() . '_*';
+		return $this->getIndex() . '_current' ;
 	}
 
 	protected function getLastIndex()
 	{
-		$indices = $this->client->indices()->getAlias([
-			'name'  => $this->getIndex()
-		]);
-		$lastIndexName = key(array_slice($indices, -1, 1));
+		try {
+			$indices = $this->client->indices()->getAlias([
+				'name'  => $this->getIndex()
+			]);
 
-		return $lastIndexName;
+			$keys = array_keys($indices);
+			sort($keys);
+			return array_pop($keys);
+
+		} catch (Missing404Exception $e) {
+			return null;
+
+		}
 	}
 }
