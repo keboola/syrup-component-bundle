@@ -53,6 +53,8 @@ class JobCommand extends ContainerAwareCommand
 
 	protected function initialize(InputInterface $input, OutputInterface $output)
 	{
+		$this->logger = $this->getContainer()->get('logger');
+
 		$jobId = $input->getArgument('jobId');
 
 		if (is_null($jobId)) {
@@ -63,6 +65,7 @@ class JobCommand extends ContainerAwareCommand
 		$this->job = $this->getJobManager()->getJob($jobId);
 
 		if ($this->job == null) {
+			$this->logger->error("Job id '".$jobId."' not found.");
 			return self::STATUS_ERROR;
 		}
 
@@ -76,8 +79,6 @@ class JobCommand extends ContainerAwareCommand
 			'userAgent' => $this->job->getComponent(),
 		]);
 		$this->sapiClient->setRunId($this->job->getRunId());
-
-		$this->logger = $this->getContainer()->get('logger');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)

@@ -25,7 +25,7 @@ class CreateIndexCommand extends ContainerAwareCommand
 			->setName('syrup:create-index')
 			->setDescription('Create new elasticsearch index')
 			->addOption('default', '-d', InputOption::VALUE_OPTIONAL, 'If set, default mapping wil be used, use this option also when running command from syrup-component-bundle space.')
-			->addOption('no-mapping', null, InputOption::VALUE_OPTIONAL, 'Creates index without any mapping')
+			->addOption('no-mapping', null, InputOption::VALUE_OPTIONAL, 'Creates index without any mappings.')
 		;
 	}
 
@@ -44,7 +44,7 @@ class CreateIndexCommand extends ContainerAwareCommand
 			$mappingsPathAbsolute = realpath(__DIR__ . '/' . $mappingsPath);
 
 			if (!is_dir($mappingsPathAbsolute)) {
-				throw new ApplicationException("Unable to access directory 'Resources/elasticsearch'");
+				throw new ApplicationException("Unable to access directory 'Resources/views/elasticsearch'");
 			}
 
 			$this->getContainer()->get('twig.loader')->addPath($mappingsPathAbsolute, $namespace = '__main__');
