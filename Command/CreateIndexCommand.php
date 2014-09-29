@@ -24,8 +24,8 @@ class CreateIndexCommand extends ContainerAwareCommand
 		$this
 			->setName('syrup:create-index')
 			->setDescription('Create new elasticsearch index')
-			->addOption('default', '-d', InputOption::VALUE_OPTIONAL, 'If set, default mapping wil be used, use this option also when running command from syrup-component-bundle space.')
-			->addOption('no-mapping', null, InputOption::VALUE_OPTIONAL, 'Creates index without any mappings.')
+			->addOption('default', '-d', InputOption::VALUE_NONE, 'If set, default mapping wil be used, use this option also when running command from syrup-component-bundle space.')
+			->addOption('no-mapping', null, InputOption::VALUE_NONE, 'Creates index without any mappings.')
 		;
 	}
 
@@ -34,7 +34,7 @@ class CreateIndexCommand extends ContainerAwareCommand
 		$settings = null;
 		$mappings = null;
 
-		if (null == $input->getOption('no-mapping')) {
+		if (!$input->getOption('no-mapping')) {
 			$mappingsPath = '../../../../../../Resources/views/Elasticsearch/';
 
 			if ($input->getOption('default')) {
