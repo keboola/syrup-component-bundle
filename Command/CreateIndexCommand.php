@@ -34,10 +34,10 @@ class CreateIndexCommand extends ContainerAwareCommand
 		$settings = null;
 		$mappings = null;
 
-		if (null == $input->getOption('no-mapping')) {
+		if (!$input->getOption('no-mapping')) {
 			$mappingsPath = '../../../../../../Resources/views/elasticsearch/';
 
-			if ($input->hasOption('default')) {
+			if ($input->getOption('default')) {
 				$mappingsPath = '../Resources/views/elasticsearch/';
 			}
 
