@@ -27,8 +27,8 @@ class JobCommand extends ContainerAwareCommand
 {
 	const STATUS_SUCCESS    = 0;
 	const STATUS_ERROR      = 1;
-	const STATUS_RETRY      = 2;
-	const STATUS_LOCK       = 3;
+	const STATUS_LOCK       = 2;
+	const STATUS_RETRY      = 3;
 
 	/** @var JobManager */
 	protected $jobManager;

@@ -20,7 +20,7 @@
 		"keboola/php-encryption": "~0.2.0",
 		"elasticsearch/elasticsearch": "~1.0",
 		"sensio/generator-bundle": "~2.3",
-		"keboola/syrup": "~1.5.3",
+		"keboola/syrup": "~1.6.0",
 		"pimple/pimple": "2.0.*",
 		"keboola/php-temp": ">=0.1.0"
 	},

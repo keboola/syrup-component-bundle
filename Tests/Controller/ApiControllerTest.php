@@ -52,25 +52,4 @@ class ApiControllerTest extends WebTestCase
 
 		$this->assertInstanceOf('Syrup\ComponentBundle\Service\SharedSapi\SharedSapiService', $sharedSapi);
 	}
-
-	public function testRun()
-	{
-		$container = static::$client->getContainer();
-
-		static::$client->request(
-			'POST',
-			'/syrup-component-bundle/run',
-			array(),
-			array(),
-			array(
-				'HTTP_X-StorageApi-Token' => $container->getParameter('storage_api.test.token')
-			)
-		);
-
-		$res = json_decode(static::$client->getResponse()->getContent(), true);
-
-		$this->assertArrayHasKey('id', $res);
-		$this->assertArrayHasKey('url', $res);
-		$this->assertArrayHasKey('status', $res);
-	}
 }
