@@ -97,7 +97,7 @@ class JobManager
 
 		$jobData = array(
 			'index' => $this->getIndexCurrent(),
-			'type'  => $this->getType($job->getComponent()),
+			'type'  => 'jobs',
 			'id'    => $job->getId(),
 			'body'  => $job->getData()
 		);
@@ -129,7 +129,7 @@ class JobManager
 
 		$jobData = array(
 			'index' => $this->getIndex(),
-			'type'  => $this->getType($job->getComponent()),
+			'type'  => 'jobs',
 			'id'    => $job->getId(),
 			'body'  => array(
 				'doc'   => $job->getData()
@@ -224,11 +224,6 @@ class JobManager
 		}
 
 		return $results;
-	}
-
-	protected function getType($component)
-	{
-		return 'jobs_' . $component;
 	}
 
 	public function getIndex()
