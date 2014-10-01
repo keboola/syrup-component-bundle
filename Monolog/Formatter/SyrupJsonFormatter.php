@@ -9,6 +9,8 @@ namespace Syrup\ComponentBundle\Monolog\Formatter;
 
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Logger;
+use Symfony\Component\Debug\Exception\FlattenException;
+use Symfony\Component\Debug\ExceptionHandler;
 use Syrup\ComponentBundle\Exception\NoRequestException;
 use Syrup\ComponentBundle\Exception\SyrupComponentException;
 use Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader;
@@ -98,10 +100,11 @@ class SyrupJsonFormatter extends JsonFormatter
 			/** @var \Exception $e */
 			$e = $record['context']['exception'];
 			unset($record['context']['exception']);
-			if ($e instanceof \Symfony\Component\Debug\Exception\FatalErrorException) {
-				$record['message'] = $e->__toString();
-			} else if ($e instanceof \Exception) {
-				$serialized = $e->__toString();
+			if ($e instanceof \Exception) {
+				$e = FlattenException::create($e);
+				$eHandler = new ExceptionHandler(true, 'UTF-8');
+				$serialized = $eHandler->getContent($e);
+
 				$record['attachment'] = $this->uploader->uploadString('exception', $serialized);
 			}
 		}
