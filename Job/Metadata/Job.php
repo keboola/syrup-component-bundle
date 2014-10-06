@@ -19,6 +19,10 @@ class Job implements JobInterface
 	const STATUS_CANCELLED  = 'cancelled';
 	const STATUS_ERROR      = 'error';
 
+	protected $index;
+
+	protected $type;
+
 	protected $data = [
 		'id'        => null,
 		'runId'     => null,
@@ -48,7 +52,7 @@ class Job implements JobInterface
 		'waitSeconds'       => null
 	];
 
-	public function __construct(array $data = [])
+	public function __construct(array $data = [], $index = null, $type = null)
 	{
 		$this->data['status'] = self::STATUS_WAITING;
 		$this->data = array_merge($this->data, $data);
@@ -56,6 +60,19 @@ class Job implements JobInterface
 		if (null == $this->data['lockName']) {
 			$this->setLockName($this->getComponent() . '-' . $this->getProject()['id']);
 		}
+
+		$this->index = $index;
+		$this->type = $type;
+	}
+
+	public function getIndex()
+	{
+		return $this->index;
+	}
+
+	public function getType()
+	{
+		return $this->type;
 	}
 
 	public function getId()

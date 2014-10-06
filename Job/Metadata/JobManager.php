@@ -128,8 +128,8 @@ class JobManager
 		$job->validate();
 
 		$jobData = array(
-			'index' => $this->getIndex(),
-			'type'  => 'jobs',
+			'index' => $job->getIndex(),
+			'type'  => $job->getType(),
 			'id'    => $job->getId(),
 			'body'  => array(
 				'doc'   => $job->getData()
@@ -139,7 +139,7 @@ class JobManager
 		$response = $this->client->update($jobData);
 
 		$this->client->indices()->refresh(array(
-			'index' => $this->getIndex()
+			'index' => $job->getIndex()
 		));
 
 		return $response['_id'];
@@ -169,7 +169,13 @@ class JobManager
 		$result = $this->client->search($params);
 
 		if ($result['hits']['total'] > 0) {
-			return new Job($result['hits']['hits'][0]['_source']);
+			$job = new Job(
+				$result['hits']['hits'][0]['_source'],
+				$result['hits']['hits'][0]['_index'],
+				$result['hits']['hits'][0]['_type']
+			);
+
+			return $job;
 		}
 		return null;
 	}
@@ -220,7 +226,10 @@ class JobManager
 		$hits = $this->client->search($params);
 
 		foreach ($hits['hits']['hits'] as $hit) {
-			$results[] = $hit['_source'];
+			$res = $hit['_source'];
+			$res['_index'] = $hit['_index'];
+			$res['_type'] = $hit['_type'];
+			$results[] = $res;
 		}
 
 		return $results;
@@ -234,6 +243,11 @@ class JobManager
 	public function getIndexCurrent()
 	{
 		return $this->getIndex() . '_current' ;
+	}
+
+	public function getIndexPrefix()
+	{
+		return $this->config['index_prefix'];
 	}
 
 	protected function getLastIndex()

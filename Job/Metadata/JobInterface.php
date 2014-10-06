@@ -78,4 +78,7 @@ interface JobInterface
 
 	public function getWaitSeconds();
 
+	public function getIndex();
+
+	public function getType();
 }

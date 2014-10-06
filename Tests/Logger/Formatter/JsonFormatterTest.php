@@ -17,15 +17,12 @@ class JsonFormatterTest extends WebTestCase
 {
 	protected $appName = 'syrup-component-bundle';
 
-	protected $componentName = 'phpunit';
-
 	protected function assertRecord(array $record)
 	{
 		$this->assertArrayHasKey('message', $record);
 		$this->assertArrayHasKey('level', $record);
 		$this->assertArrayHasKey('channel', $record);
 		$this->assertArrayHasKey('context', $record);
-		$this->assertArrayHasKey('app', $record);
 		$this->assertArrayHasKey('component', $record);
 		$this->assertArrayHasKey('priority', $record);
 		$this->assertArrayHasKey('pid', $record);
@@ -33,8 +30,7 @@ class JsonFormatterTest extends WebTestCase
 		$this->assertArrayHasKey('error', $record);
 		$this->assertArrayHasKey('attachment', $record);
 
-		$this->assertEquals($this->appName, $record['app']);
-		$this->assertEquals($this->componentName, $record['component']);
+		$this->assertEquals($this->appName, $record['component']);
 	}
 
 	public function testFormatter()
@@ -62,7 +58,6 @@ class JsonFormatterTest extends WebTestCase
 			$s3uploader,
 			$storageApiService
 		);
-		$formatter->setComponentName($this->componentName);
 
 		$record = json_decode($formatter->format($this->createUserExceptionRecord()), true);
 

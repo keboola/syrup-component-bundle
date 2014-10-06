@@ -52,8 +52,8 @@ class JobManagerTest extends WebTestCase
 		$jobs = self::$jobManager->getJobs($projectId, self::$component);
 		foreach ($jobs as $job) {
 			self::$elasticClient->delete([
-				'index' => self::$jobManager->getIndex(),
-				'type'  => 'jobs_' . self::$component,
+				'index' => $job['_index'],
+				'type'  => $job['_type'],
 				'id'    => $job['id']
 			]);
 		}
@@ -109,13 +109,25 @@ class JobManagerTest extends WebTestCase
 
 		$res = self::$elasticClient->get(array(
 			'index' => self::$jobManager->getIndex(),
-			'type'  => 'jobs_syrup-component-bundle',
+			'type'  => 'jobs',
 			'id'    => $id
 		));
 
 		$resJob = $res['_source'];
 
 		$this->assertJob($job, $resJob);
+	}
+
+	public function testUpdateJob()
+	{
+		$newJob = $this->createJob();
+		$id = self::$jobManager->indexJob($newJob);
+
+		$job = self::$jobManager->getJob($id);
+
+		$job->setStatus(Job::STATUS_CANCELLED);
+
+		self::$jobManager->updateJob($job);
 	}
 
 	public function testGetJob()

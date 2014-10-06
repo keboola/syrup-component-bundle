@@ -20,9 +20,7 @@ class EncryptorTest extends WebTestCase
 		$client = static::createClient();
 		$container = $client->getContainer();
 
-		/** @var EncryptorFactory $encryptorFactory */
-		$encryptorFactory = $container->get('syrup.encryptor_factory');
-		$encryptor = $encryptorFactory->get('ex-dummy');
+		$encryptor = $container->get('syrup.encryptor');
 
 		$encrypted = $encryptor->encrypt('secret');
 
