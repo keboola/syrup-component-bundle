@@ -39,7 +39,10 @@
 							"type": "long"
 						},
 						"name": {
-							"type": "string"
+							"type": "string",
+							"fields": {
+								"raw":   { "type": "string", "index": "not_analyzed" }
+							}
 						}
 					}
 				},
@@ -50,7 +53,10 @@
 							"type": "long"
 						},
 						"description": {
-							"type": "string"
+							"type": "string",
+							"fields": {
+								"raw":   { "type": "string", "index": "not_analyzed" }
+							}
 						},
 						"token": {
 							"index": "not_analyzed",
