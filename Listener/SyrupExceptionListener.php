@@ -103,9 +103,15 @@ class SyrupExceptionListener
 			'runId'     => $this->formatter->getRunId()
 		);
 
+		$logData = array(
+			'exception'     => $exception,
+			'exceptionId'   => $exceptionId,
+		);
+
 		// SyrupExceptionInterface holds additional data
 		if ($exception instanceof SyrupExceptionInterface) {
 			$content['data'] = $exception->getData();
+			$logData['data'] = $exception->getData();
 		}
 
 		$response->setContent(json_encode($content));
@@ -126,10 +132,7 @@ class SyrupExceptionListener
 		}
 		$this->logger->$method(
 			$exception->getMessage(),
-			array(
-				'exception'     => $exception,
-				'exceptionId'   => $exceptionId,
-			)
+			$logData
 		);
 	}
 }
