@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Syrup\ComponentBundle\Exception\SyrupComponentException;
 use Syrup\ComponentBundle\Exception\UserException;
 use Keboola\StorageApi\Client as SapiClient;
 use Syrup\ComponentBundle\Job\Exception\InitializationException;

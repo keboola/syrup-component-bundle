@@ -51,8 +51,14 @@ class SyrupExceptionListener
 			'runId'     => $this->formatter->getRunId()
 		);
 
+		$logData = array(
+			'exception'     => $exception,
+			'exceptionId'   => $exceptionId,
+		);
+
 		// SyrupExceptionInterface holds additional data
 		if ($exception instanceof SyrupExceptionInterface) {
+			$logData['data'] = $exception->getData();
 			$content['data'] = $exception->getData();
 		}
 
@@ -61,25 +67,13 @@ class SyrupExceptionListener
 		if ($code >= 500) {
 			$method = 'critical';
 		}
-		$this->logger->$method(
-			$exception->getMessage(),
-			array(
-				'exception'     => $exception,
-				'exceptionId'   => $exceptionId,
-			)
-		);
+		$this->logger->$method($exception->getMessage(), $logData);
 	}
 
 	public function onKernelException(GetResponseForExceptionEvent $event)
 	{
 		// You get the exception object from the received event
 		$exception = $event->getException();
-
-		// On dummy exception do nothing
-		if ($exception instanceof DummyException) {
-			$event->stopPropagation();
-			return;
-		}
 
 		$exceptionId = $this->formatter->getAppName() . '-' . md5(microtime());
 

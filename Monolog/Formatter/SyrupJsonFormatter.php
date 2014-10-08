@@ -105,7 +105,7 @@ class SyrupJsonFormatter extends JsonFormatter
 				$eHandler = new ExceptionHandler(true, 'UTF-8');
 				$serialized = $eHandler->getContent($e);
 
-				$record['attachment'] = $this->uploader->uploadString('exception', $serialized);
+				$record['attachment'] = $this->uploader->uploadString('exception', $serialized, 'text/html');
 			}
 		}
 
