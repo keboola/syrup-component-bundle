@@ -7,20 +7,22 @@
 
 namespace Syrup\ComponentBundle\Service\Db;
 
+use Doctrine\DBAL\Connection;
+
 class Lock
 {
-	/** @var \PDO */
-	protected $pdo;
+	/** @var Connection */
+	protected $conn;
 
 	protected $lockName;
 
 	/**
-	 * @param \PDO $pdo
+	 * @param Connection $connection
 	 * @param string $lockName Lock name is server wide - should be prefixed by db name
 	 */
-	public function __construct(\PDO $pdo, $lockName = '')
+	public function __construct($connection, $lockName = '')
 	{
-		$this->pdo = $pdo;
+		$this->conn = $connection;
 		$this->setLockName($lockName);
 	}
 
@@ -31,7 +33,7 @@ class Lock
 	public function lock($timeout = 0)
 	{
 		$sql = 'SELECT GET_LOCK(:name, :timeout)';
-		$sth = $this->pdo->prepare($sql, array(\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY));
+		$sth = $this->conn->prepare($sql);
 		$sth->execute(array(':name' => $this->prefixedLockName(), ':timeout' => $timeout));
 		return $sth->fetchColumn();
 	}
@@ -39,7 +41,7 @@ class Lock
 	public function isFree()
 	{
 		$sql = 'SELECT IS_FREE_LOCK(:name)';
-		$sth = $this->pdo->prepare($sql, array(\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY));
+		$sth = $this->conn->prepare($sql);
 		$sth->execute(array(':name' => $this->prefixedLockName()));
 		return $sth->fetchColumn();
 	}
@@ -47,7 +49,7 @@ class Lock
 	public function unlock()
 	{
 		$sql = 'DO RELEASE_LOCK(:name)';
-		$sth = $this->pdo->prepare($sql, array(\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY));
+		$sth = $this->conn->prepare($sql);
 		$sth->execute(array(':name' => $this->prefixedLockName()));
 	}
 
@@ -60,11 +62,11 @@ class Lock
 	{
 		$error = array();
 		for ($i = 0; $i < 5; $i++) {
-			$result = $this->pdo->query('SELECT DATABASE()');
+			$result = $this->conn->query('SELECT DATABASE()');
 			if ($result) {
 				return (string)$result->fetchColumn();
 			} else {
-				$error = $this->pdo->errorInfo();
+				$error = $this->conn->errorInfo();
 			}
 			sleep($i * 60);
 		}

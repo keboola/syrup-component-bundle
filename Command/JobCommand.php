@@ -9,6 +9,7 @@
 namespace Syrup\ComponentBundle\Command;
 
 
+use Doctrine\DBAL\Connection;
 use Keboola\Encryption\EncryptorInterface;
 use Monolog\Logger;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -85,10 +86,10 @@ class JobCommand extends ContainerAwareCommand
 		}
 
 		// Lock DB
-		/** @var \PDO $pdo */
-		$pdo = $this->getContainer()->get('pdo');
-		$pdo->exec('SET wait_timeout = 31536000;');
-		$lock = new Lock($pdo, $this->job->getLockName());
+		/** @var Connection $conn */
+		$conn = $this->getContainer()->get('doctrine.dbal.lock_connection');
+		$conn->exec('SET wait_timeout = 31536000;');
+		$lock = new Lock($conn, $this->job->getLockName());
 
 		if (!$lock->lock()) {
 			return self::STATUS_LOCK;
