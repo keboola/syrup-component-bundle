@@ -34,7 +34,7 @@ class Lock
 	{
 		$sql = 'SELECT GET_LOCK(:name, :timeout)';
 		$sth = $this->conn->prepare($sql);
-		$sth->execute(array(':name' => $this->prefixedLockName(), ':timeout' => $timeout));
+		$sth->execute(array('name' => $this->prefixedLockName(), 'timeout' => $timeout));
 		return $sth->fetchColumn();
 	}
 
@@ -42,7 +42,7 @@ class Lock
 	{
 		$sql = 'SELECT IS_FREE_LOCK(:name)';
 		$sth = $this->conn->prepare($sql);
-		$sth->execute(array(':name' => $this->prefixedLockName()));
+		$sth->execute(array('name' => $this->prefixedLockName()));
 		return $sth->fetchColumn();
 	}
 
@@ -50,7 +50,7 @@ class Lock
 	{
 		$sql = 'DO RELEASE_LOCK(:name)';
 		$sth = $this->conn->prepare($sql);
-		$sth->execute(array(':name' => $this->prefixedLockName()));
+		$sth->execute(array('name' => $this->prefixedLockName()));
 	}
 
 	protected function prefixedLockName()
