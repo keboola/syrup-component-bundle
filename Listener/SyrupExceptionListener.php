@@ -51,8 +51,14 @@ class SyrupExceptionListener
 			'runId'     => $this->formatter->getRunId()
 		);
 
+		$logData = array(
+			'exception'     => $exception,
+			'exceptionId'   => $exceptionId,
+		);
+
 		// SyrupExceptionInterface holds additional data
 		if ($exception instanceof SyrupExceptionInterface) {
+			$logData['data'] = $exception->getData();
 			$content['data'] = $exception->getData();
 		}
 
@@ -63,10 +69,7 @@ class SyrupExceptionListener
 		}
 		$this->logger->$method(
 			$exception->getMessage(),
-			array(
-				'exception'     => $exception,
-				'exceptionId'   => $exceptionId,
-			)
+			$logData
 		);
 	}
 
@@ -103,8 +106,14 @@ class SyrupExceptionListener
 			'runId'     => $this->formatter->getRunId()
 		);
 
+		$logData = array(
+			'exception'     => $exception,
+			'exceptionId'   => $exceptionId,
+		);
+
 		// SyrupExceptionInterface holds additional data
 		if ($exception instanceof SyrupExceptionInterface) {
+			$logData['data'] = $exception->getData();
 			$content['data'] = $exception->getData();
 		}
 
@@ -126,10 +135,7 @@ class SyrupExceptionListener
 		}
 		$this->logger->$method(
 			$exception->getMessage(),
-			array(
-				'exception'     => $exception,
-				'exceptionId'   => $exceptionId,
-			)
+			$logData
 		);
 	}
 }

@@ -113,9 +113,6 @@ class JobCommand extends ContainerAwareCommand
 		$jobExecutor = $this->getContainer()->get($jobExecutorName);
 		$jobExecutor->setStorageApi($this->sapiClient);
 
-		$logFunc = 'error';
-		$logException = null;
-
 		// Execute job
 		try {
 			$result = $jobExecutor->execute($this->job);
@@ -123,30 +120,22 @@ class JobCommand extends ContainerAwareCommand
 			$status = self::STATUS_SUCCESS;
 
 		} catch (UserException $e) {
-
-			// Update job with error message
+			$exceptionId = $this->logException('error', $e);
 			$result = [
-				'message' => $e->getMessage()
+				'message' => $e->getMessage(),
+				'exceptionId'   => $exceptionId
 			];
 			$jobStatus = Job::STATUS_ERROR;
 			$status = self::STATUS_SUCCESS;
-
-			$logFunc = 'error';
-			$logException = $e;
-
 		} catch (\Exception $e) {
-
-			// Update job with 'contact support' message
+			$exceptionId = $this->logException('alert', $e);
 			$result = [
-				'message' => 'Internal error occured please contact support@keboola.com'
+				'message'       => 'Internal error occured please contact support@keboola.com',
+				'exceptionId'   => $exceptionId
 			];
 			$jobStatus = Job::STATUS_ERROR;
 			$status = self::STATUS_ERROR;
-
-			$logFunc = 'alert';
-			$logException = $e;
 		}
-
 
 		// Update job with results
 		$endTime = time();
@@ -158,18 +147,6 @@ class JobCommand extends ContainerAwareCommand
 		$this->job->setDurationSeconds($duration);
 		$this->jobManager->updateJob($this->job);
 
-		// log error
-		if ($jobStatus == Job::STATUS_ERROR) {
-			$logMessage = ($logException == null)?'Error occured':$logException->getMessage();
-
-			$this->logger->$logFunc(
-				$logMessage,
-				[
-					'exception' => $logException,
-					'job'       => $this->job->getLogData()
-				]
-			);
-		}
 
 		// DB unlock
 		$lock->unlock();
@@ -196,5 +173,21 @@ class JobCommand extends ContainerAwareCommand
 	protected function getJob($jobId)
 	{
 		return $this->getJobManager()->getJob($jobId);
+	}
+
+	protected function logException($level, \Exception $exception)
+	{
+		$exceptionId = $this->job->getComponent() . '-' . md5(microtime());
+
+		$this->logger->$level(
+			$exception->getMessage(),
+			[
+				'exceptionId'   => $exceptionId,
+				'exception'     => $exception,
+				'job'           => $this->job->getLogData()
+			]
+		);
+
+		return $exceptionId;
 	}
 }
