@@ -1,3 +1,158 @@
+## 1.9.12
+ * [Feature]    Create index command will firt try to update mapping and if thats not possible it will create new index
+
+## 1.9.11
+ * [Fix]        aws-sdk version compatible with storage-api-client
+
+## 1.9.10
+ * [Feature]    Changed job return codes and usage of Lock DB
+
+## 1.9.9
+ * [Fix]        logData from console exception
+ * [Fix]        html mime type set in s3 exception uploader
+
+## 1.9.8
+ * [Fix]        Log exception data
+
+## 1.9.7
+ * [Feature]    Updated default mapping
+
+## 1.9.6
+ * [Fix]        Job object now holds information about index from which it was r
+
+## 1.9.5
+ * [Fix]        jobCommand error codes compatible with 1.8.x 
+ * [Feature]    update to syrup 1.6.x
+
+## 1.9.4
+ * [Fix]        Removed type with component name from jobManager methods
+
+## 1.9.3
+ * [Refactor]   Use keboola/php-temp service
+ * [Refactor]   Better - HTML - exception stack trace to s3
+
+## 1.9.2
+ * [Refactor]   Removed type from mappings - all components now have type 'jobs'
+
+## 1.9.1
+ 
+ * [Fix]        getJobs improved search
+
+## 1.9.0
+ * [Refactor]   Only jobs that terminates with InitializationException will be requeued
+ * [Feature]    Create index command now assemble and post mappings alongside index creation
+ * [Feature]    jobCommand logs when Job is nout found in ES
+ * [Fix]        jobManager getJobs method
+ * [Fix]        Create index command tiny fixes
+
+## =====================================================================
+
+## 1.8.10       
+ * [Fix]        Lock DB stuff
+ 
+## 1.8.9
+ * [Fix]        preform lock DB on locks DB specified in parameters not on default DB
+ 
+## 1.8.8
+ * [Fix]        Better logging and exceptionId in response in async job
+
+## 1.8.7
+ * [Fix]        Removed intentional fatal error
+
+## 1.8.6
+ * [Feature]    Updated syrup version in composer
+
+## 1.8.5        
+ * [Refactor]   Error handling
+ * [Fix]        Updated parameter.yml.dist for travis
+
+## 1.8.4
+ * [Fix]        Do not send exception trace to s3 for fatal errors
+
+## 1.8.3
+ * [Feature]    Add commands for creating-running job and registering queue credentials to DB
+
+## 1.8.2
+ * [Fix]        Do not send exception trace to s3 for fatal errors
+ * [Feature]    Improved handling of errors
+ 
+
+## 1.8.1
+ * [Refactor]   Elasticsearch mapping
+ * [Feature]    Host and pid params of the job are updated after job is picked from queue for prcoessing by worker
+
+## 1.8.0
+ * [Refactor]   SharedSapiService
+ * [Fix]        getpid() function replaced to work on windows also
+ * [Feature]    Require syrup 1.5.0 with separate db for locks
+
+## =====================================================================
+
+## 1.7.14
+ * [Feature]    JobManager refresh index after insert or update
+ * [Feature]    Command for creating new ES index
+
+## 1.7.13
+ * [Fix]    jobManager return null when job not found
+
+## 1.7.12
+ * [Fix]    Job lockname
+
+## 1.7.11
+ * [Refactor]   jobManager
+
+## 1.7.10 
+ * [Fix]    Job status logging exception
+ 
+## 1.7.9
+ * [Fix]    Job error status
+
+## 1.7.8
+ * [Fix]    Job hostname
+
+## 1.7.7
+ * [Fix]    Job date format
+
+## 1.7.6
+ * [Fix]    jobCommand returns correct exit code
+ 
+## 1.7.5
+ * [Fix]    Job lockname default
+
+## 1.7.4
+ * [Fix]    Small fixes
+ 
+## 1.7.3
+ * [Fix]    Job constructor
+
+## 1.7.2
+ * [Fix]    Small fixes 
+
+## 1.7.1
+ * [Fix]    Job manager update response
+
+## 1.7.0
+ * [Feature]    Extended job structure
+ * [BC Break]   Removed initComponent from ApiController
+ * [Refactor]   Queue Factory
+
+## =====================================================================
+
+## 1.6.5
+ * [Fix]    update to elasticsearch 1.2.
+
+## 1.6.4
+ * [Fix]    parameters.yml.dist
+
+## 1.6.3
+ * [Fix]    s3 uploader
+
+## 1.6.2
+ * [Fix]    s3 uploader
+
+## 1.6.1
+ * [Fix]    parameters.yml.dist
+
 ## 1.6.0 
  
  * [BC Break]   ComponentName is now defined as app_name in parameters.yml
