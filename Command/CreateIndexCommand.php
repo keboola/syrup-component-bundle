@@ -7,7 +7,6 @@
 
 namespace Syrup\ComponentBundle\Command;
 
-
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Bundle\TwigBundle\TwigEngine;
 use Symfony\Component\Console\Input\InputArgument;
@@ -58,12 +57,20 @@ class CreateIndexCommand extends ContainerAwareCommand
 			$mappings = $mapping['mappings'];
 		}
 
-		// create new index
 		/** @var JobManager $jobManager */
 		$jobManager = $this->getContainer()->get('syrup.job_manager');
-		$index = $jobManager->createIndex($settings, $mappings);
 
-		echo "Created index '" . $index ."'" . PHP_EOL;
+		// try put mapping first
+		try {
+			$jobManager->putMappings($mappings);
+			echo "Mapping updated successfuly" . PHP_EOL;
+		} catch (\Exception $e) {
+			echo "Can't updated mapping: " . $e->getMessage() . PHP_EOL;
+
+			$index = $jobManager->createIndex($settings, $mappings);
+			echo "Created new index '" . $index ."'" . PHP_EOL;
+		}
+
 	}
 
 }

@@ -29,6 +29,15 @@ class JobManager
 		$this->componentName = $componentName;
 	}
 
+	public function putMappings($mappings = null)
+	{
+		$params['index'] = $this->getLastIndex();
+		$params['type'] = 'jobs';
+		$params['body'] = $mappings;
+
+		$this->client->indices()->putMapping($params);
+	}
+
 	public function createIndex($settings = null, $mappings = null)
 	{
 		// Assemble new index name
