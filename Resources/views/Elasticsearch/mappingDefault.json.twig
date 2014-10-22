@@ -93,7 +93,10 @@
 					"dynamic": "strict",
 					"properties": {
 						"host": {
-							"type": "string"
+							"type": "string",
+							"fields": [
+								"raw": { "type": "string", "index": "not_analyzed" }
+							]
 						},
 						"pid": {
 							"type": "long"
