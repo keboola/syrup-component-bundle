@@ -63,16 +63,16 @@ class SyrupS3Uploader
 	public function uploadString($name, $content, $contentType = 'text/plain', $shortenUrl = true)
 	{
 		$s3FileName = $this->fileUniquePrefix() . $name;
-		$s3Path = $this->config['s3-upload-path'] . '/' . $s3FileName;
 
 		$this->s3->putObject(array(
 			'Bucket' => $this->config['s3-upload-path'],
 			'Key'    => $s3FileName,
 			'Body'   => $content,
-			'ACL'    => CannedAcl::PUBLIC_READ,
+			'ACL'    => CannedAcl::PRIVATE_ACCESS,
 			'ContentType'   => $contentType
 		));
-		$url = 'https://s3.amazonaws.com/' . $s3Path;
+
+		$url = 'https://connection.keboola.com/admin/utils/logs?file=' . $s3FileName;
 
 		if ($shortenUrl) {
 			try {

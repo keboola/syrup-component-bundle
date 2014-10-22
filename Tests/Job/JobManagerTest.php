@@ -108,7 +108,7 @@ class JobManagerTest extends WebTestCase
 		$id = self::$jobManager->indexJob($job);
 
 		$res = self::$elasticClient->get(array(
-			'index' => self::$jobManager->getIndex(),
+			'index' => self::$jobManager->getIndexCurrent(),
 			'type'  => 'jobs',
 			'id'    => $id
 		));
