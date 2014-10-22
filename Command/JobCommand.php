@@ -22,6 +22,7 @@ use Syrup\ComponentBundle\Job\Exception\InitializationException;
 use Syrup\ComponentBundle\Job\ExecutorInterface;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 use Syrup\ComponentBundle\Job\Metadata\JobManager;
+use Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter;
 use Syrup\ComponentBundle\Service\Db\Lock;
 
 class JobCommand extends ContainerAwareCommand
@@ -80,6 +81,11 @@ class JobCommand extends ContainerAwareCommand
 			'userAgent' => $this->job->getComponent(),
 		]);
 		$this->sapiClient->setRunId($this->job->getRunId());
+
+		//@todo this is awkward :(
+		/** @var SyrupJsonFormatter $logFormatter */
+		$logFormatter = $this->getContainer('syrup.monolog.json_formatter');
+		$logFormatter->setStorageApiClient($this->sapiClient);
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)

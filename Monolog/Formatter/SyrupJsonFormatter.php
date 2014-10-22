@@ -56,7 +56,6 @@ class SyrupJsonFormatter extends JsonFormatter
 		return $this->storageApi->getRunId();
 	}
 
-	/** @deprecated - will be removed in 1.4.0 - set SAPI client in constructor */
 	public function setStorageApiClient(Client $storageApi)
 	{
 		$this->storageApi = $storageApi;

@@ -12,6 +12,7 @@ use Syrup\ComponentBundle\Job\Metadata\Job;
 
 class Executor implements ExecutorInterface
 {
+	/** @var SapiClient */
 	protected $storageApi;
 
 	public function setStorageApi(SapiClient $sapi)
