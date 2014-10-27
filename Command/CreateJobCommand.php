@@ -39,7 +39,7 @@ class CreateJobCommand extends ContainerAwareCommand
 			->setDescription('Command to execute jobs')
 			->addArgument('token', InputArgument::REQUIRED, 'SAPI token')
 			->addArgument('component', InputArgument::REQUIRED, 'Component name')
-			->addArgument('command', InputArgument::REQUIRED, 'Job command name')
+			->addArgument('cmd', InputArgument::REQUIRED, 'Job command name')
 			->addArgument('params', InputArgument::OPTIONAL, 'Job command parameters as JSON', '{}')
 			->addArgument('queue', InputArgument::OPTIONAL, 'Optional queue name', 'default')
 			->addOption('no-run', 'n', InputOption::VALUE_NONE, "Dont run the job, just create it")
@@ -64,7 +64,7 @@ class CreateJobCommand extends ContainerAwareCommand
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		$command = $input->getArgument('command');
+		$command = $input->getArgument('cmd');
 		$params = json_decode($input->getArgument('params'), true);
 		$queueName = $input->getArgument('queue');
 
