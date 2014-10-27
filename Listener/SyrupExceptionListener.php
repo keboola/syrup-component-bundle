@@ -42,6 +42,11 @@ class SyrupExceptionListener
 		$exceptionId = $this->formatter->getAppName() . '-' . md5(microtime());
 
 		$code = ($exception->getCode() < 300 || $exception->getCode() >= 600) ? 500 : $exception->getCode();
+
+		if ($exception instanceof HttpExceptionInterface) {
+			$code = $exception->getStatusCode();
+		}
+
 		$content = array(
 			'status'    => 'error',
 			'error'     => ($code < 500) ? 'User error' : 'Application error',
