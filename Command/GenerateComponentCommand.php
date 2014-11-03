@@ -16,7 +16,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Syrup\ComponentBundle\Generator\ComponentGenerator;
 
-class GenerateComponent extends GeneratorCommand
+class GenerateComponentCommand extends GeneratorCommand
 {
 	/**
 	 * @see Command
