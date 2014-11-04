@@ -148,8 +148,6 @@ class JobCommand extends ContainerAwareCommand
 			$jobStatus = Job::STATUS_ERROR;
 			$status = self::STATUS_SUCCESS;
 
-			$this->logException('error', $e);
-
 		} catch (\Exception $e) {
 			$exceptionId = $this->logException('critical', $e);
 			$jobResult = [
