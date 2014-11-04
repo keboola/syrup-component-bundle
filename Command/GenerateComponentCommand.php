@@ -10,7 +10,6 @@ namespace Syrup\ComponentBundle\Command;
 
 use Sensio\Bundle\GeneratorBundle\Command\GeneratorCommand;
 use Sensio\Bundle\GeneratorBundle\Command\Validators;
-use Sensio\Bundle\GeneratorBundle\Generator\BundleGenerator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -28,7 +27,7 @@ class GenerateComponentCommand extends GeneratorCommand
 			->setDefinition(array(
 				new InputOption('namespace', '', InputOption::VALUE_REQUIRED, 'The namespace of the bundle to create'),
 				new InputOption('short-name', '', InputOption::VALUE_REQUIRED, 'Short name of the component (ie. ex-twitter, ex-google-drive, wr-db, ...)'),
-//				new InputOption('dir', '', InputOption::VALUE_REQUIRED, 'The directory where to create the bundle'),
+				new InputOption('dir', '', InputOption::VALUE_REQUIRED, 'The directory where to create the bundle'),
 //				new InputOption('bundle-name', '', InputOption::VALUE_REQUIRED, 'The optional bundle name'),
 //				new InputOption('format', '', InputOption::VALUE_REQUIRED, 'Use the format for configuration files (php, xml, yml, or annotation)'),
 //				new InputOption('structure', '', InputOption::VALUE_NONE, 'Whether to generate the whole directory structure'),
@@ -83,23 +82,28 @@ EOT
 
 		$namespace = Validators::validateBundleNamespace($input->getOption('namespace'));
 		$bundle = strtr($namespace, array('\\' => ''));
-
 		$bundle = Validators::validateBundleName($bundle);
-		$dir = getRealpath(__DIR__ . '/../../../../../../');
+
+		$dir = realpath(__DIR__ . '/../../../../../../');
+		if (null !== $input->getOption('dir')) {
+			$dir = $input->getOption('dir');
+		}
+
 		$dir = Validators::validateTargetDir($dir, $bundle, $namespace);
+
+		if (!$this->getContainer()->get('filesystem')->isAbsolutePath($dir)) {
+			$dir = getcwd().'/'.$dir;
+		}
+
 		$format = 'yml';
 		$format = Validators::validateFormat($format);
 		$structure = false;
 
 		$dialog->writeSection($output, 'Bundle generation');
 
-//		if (!$this->getContainer()->get('filesystem')->isAbsolutePath($dir)) {
-//			$dir = getcwd().'/'.$dir;
-//		}
-
-		/** @var BundleGenerator $generator */
+		/** @var ComponentGenerator $generator */
 		$generator = $this->getGenerator();
-		$generator->generate($namespace, $bundle, $dir, $format, $structure);
+		$generator->generate($namespace, $bundle, $dir, $format);
 
 		$output->writeln('Generating the bundle code: <info>OK</info>');
 
@@ -107,7 +111,7 @@ EOT
 		$runner = $dialog->getRunner($output, $errors);
 
 		// check that the namespace is already autoloaded
-		$runner($this->checkAutoloader($output, $namespace, $bundle, $dir));
+//		$runner($this->checkAutoloader($output, $namespace, $bundle));
 
 		// register the bundle in the Kernel class
 //		$runner($this->updateKernel($dialog, $input, $output, $this->getContainer()->get('kernel'), $namespace, $bundle));

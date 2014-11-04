@@ -20,15 +20,15 @@ class ComponentGenerator extends Generator
 		$this->filesystem = $filesystem;
 	}
 
-	public function generate($namespace, $bundle, $dir, $format, $structure)
+	public function generate($namespace, $bundle, $dir, $format)
 	{
-		$dir .= '/'.strtr($namespace, '\\', '/');
+//		$dir .= '/'.strtr($namespace, '\\', '/');
 		if (file_exists($dir)) {
 			if (!is_dir($dir)) {
 				throw new \RuntimeException(sprintf('Unable to generate the bundle as the target directory "%s" exists but is a file.', realpath($dir)));
 			}
 			$files = scandir($dir);
-			if ($files != array('.', '..')) {
+			if ($files != array('.', '..', 'composer.json', 'composer.lock', 'composer.phar', 'parameters.yml', 'vendor')) {
 				throw new \RuntimeException(sprintf('Unable to generate the bundle as the target directory "%s" is not empty.', realpath($dir)));
 			}
 			if (!is_writable($dir)) {
