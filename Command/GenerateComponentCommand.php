@@ -13,6 +13,8 @@ use Sensio\Bundle\GeneratorBundle\Command\Validators;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Yaml\Dumper;
+use Symfony\Component\Yaml\Parser;
 use Syrup\ComponentBundle\Generator\ComponentGenerator;
 
 class GenerateComponentCommand extends GeneratorCommand
@@ -27,7 +29,7 @@ class GenerateComponentCommand extends GeneratorCommand
 			->setDefinition(array(
 				new InputOption('namespace', '', InputOption::VALUE_REQUIRED, 'The namespace of the bundle to create'),
 				new InputOption('short-name', '', InputOption::VALUE_REQUIRED, 'Short name of the component (ie. ex-twitter, ex-google-drive, wr-db, ...)'),
-				new InputOption('dir', '', InputOption::VALUE_REQUIRED, 'The directory where to create the bundle'),
+				new InputOption('dir', '', InputOption::VALUE_OPTIONAL, 'The directory where to create the bundle'),
 //				new InputOption('bundle-name', '', InputOption::VALUE_REQUIRED, 'The optional bundle name'),
 //				new InputOption('format', '', InputOption::VALUE_REQUIRED, 'Use the format for configuration files (php, xml, yml, or annotation)'),
 //				new InputOption('structure', '', InputOption::VALUE_NONE, 'Whether to generate the whole directory structure'),
@@ -110,18 +112,40 @@ EOT
 		$errors = array();
 		$runner = $dialog->getRunner($output, $errors);
 
+		//update parameters.yml file in vendor
+		$shortName = $input->getOption('short-name');
+		$runner($this->updateParameters($output, $shortName, $dir, $namespace, $bundle));
+
 		// check that the namespace is already autoloaded
 //		$runner($this->checkAutoloader($output, $namespace, $bundle));
 
-		// register the bundle in the Kernel class
-//		$runner($this->updateKernel($dialog, $input, $output, $this->getContainer()->get('kernel'), $namespace, $bundle));
-
-		// routing
-//		$runner($this->updateRouting($dialog, $input, $output, $bundle, $format));
-
-		//@todo: update parameters.yml file
-
 		$dialog->writeGeneratorSummary($output, $errors);
+	}
+
+	protected function updateParameters(OutputInterface $output, $shortName, $dir, $namespace, $bundle)
+	{
+		$output->write('Updating parameters.yml file: ');
+
+		try {
+			$parametersPath = $dir . 'vendor/keboola/syrup/app/config/parameters.yml';
+
+			$yamlParser = new Parser();
+			$parameters = $yamlParser->parse(file_get_contents($parametersPath));
+			$parameters['parameters']['components'][$shortName]['bundle'] = $namespace . '\\' . $bundle;
+
+			$yamlDumper = new Dumper();
+			$yaml = $yamlDumper->dump($parameters);
+
+			file_put_contents($parametersPath, $yaml);
+
+			// update root paramters.yml
+			if (file_exists($dir . 'parameters.yml')) {
+				file_put_contents($dir . 'parameters.yml', $yaml);
+			}
+
+		} catch (\Exception $e) {
+			return array($e->getMessage());
+		}
 	}
 
 	protected function createGenerator()
