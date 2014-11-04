@@ -119,6 +119,8 @@ class SyrupJsonFormatter extends JsonFormatter
 			&& $record['level'] != Logger::CRITICAL
 			&& $this->storageApi != null
 			&& $this->appName != null
+			&& $record['channel'] != 'event'
+			&& $record['channel'] != 'request'
 		) {
 			$this->_logToSapi($record, $e);
 		}
