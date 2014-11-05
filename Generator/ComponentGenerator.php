@@ -52,5 +52,15 @@ class ComponentGenerator extends Generator
 		$this->renderFile('bundle/DefaultControllerTest.php.twig', $dir.'/Tests/Controller/DefaultControllerTest.php', $parameters);
 		$this->renderFile('bundle/index.html.twig.twig', $dir.'/Resources/views/Default/index.html.twig', $parameters);
 
+		if ('xml' === $format || 'annotation' === $format) {
+			$this->renderFile('bundle/services.xml.twig', $dir.'/Resources/config/services.xml', $parameters);
+		} else {
+			$this->renderFile('bundle/services.'.$format.'.twig', $dir.'/Resources/config/services.'.$format, $parameters);
+		}
+
+		if ('annotation' != $format) {
+			$this->renderFile('bundle/routing.'.$format.'.twig', $dir.'/Resources/config/routing.'.$format, $parameters);
+		}
+
 	}
 }
