@@ -16,6 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Syrup\ComponentBundle\Exception\SyrupExceptionInterface;
 use Syrup\ComponentBundle\Exception\UserException;
 use Keboola\StorageApi\Client as SapiClient;
 use Syrup\ComponentBundle\Job\Exception\InitializationException;
@@ -190,14 +191,18 @@ class JobCommand extends ContainerAwareCommand
 	{
 		$exceptionId = $this->job->getComponent() . '-' . md5(microtime());
 
-		$this->logger->$level(
-			$exception->getMessage(),
-			[
-				'exceptionId'   => $exceptionId,
-				'exception'     => $exception,
-				'job'           => $this->job->getLogData()
-			]
-		);
+		$logData = [
+			'exceptionId'   => $exceptionId,
+			'exception'     => $exception,
+			'job'           => $this->job->getLogData()
+		];
+
+		// SyrupExceptionInterface holds additional data
+		if ($exception instanceof SyrupExceptionInterface) {
+			$logData['data'] = $exception->getData();
+		}
+
+		$this->logger->$level($exception->getMessage(), $logData);
 
 		return $exceptionId;
 	}
