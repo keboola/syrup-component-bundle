@@ -13,6 +13,7 @@ use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\Debug\ExceptionHandler;
 use Syrup\ComponentBundle\Exception\NoRequestException;
 use Syrup\ComponentBundle\Exception\SyrupComponentException;
+use Syrup\ComponentBundle\Exception\UserException;
 use Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Event;
@@ -84,6 +85,8 @@ class SyrupJsonFormatter extends JsonFormatter
 				$record['error'] = 'User error';
 				break;
 			case Logger::CRITICAL:
+			case Logger::ALERT:
+			case Logger::EMERGENCY:
 				$record['error'] = 'Application error';
 				break;
 		}
@@ -115,8 +118,7 @@ class SyrupJsonFormatter extends JsonFormatter
 
 		// Log to SAPI events
 		if (
-			$record['level'] != Logger::DEBUG
-			&& $record['level'] != Logger::CRITICAL
+			($record['level'] == Logger::ERROR || $record['level'] == Logger::INFO)
 			&& $this->storageApi != null
 			&& $this->appName != null
 			&& $record['channel'] != 'event'
