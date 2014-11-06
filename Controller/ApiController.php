@@ -67,7 +67,11 @@ class ApiController extends BaseController
 	    $job = $this->createJob('run', $params);
 
 	    // Add job to Elasticsearch
-	    $jobId = $this->getJobManager()->indexJob($job);
+	    try {
+		    $jobId = $this->getJobManager()->indexJob($job);
+	    } catch (\Exception $e) {
+		    throw new ApplicationException("Failed to create job", $e);
+	    }
 
 	    // Add job to SQS
 	    $this->enqueue($jobId);
