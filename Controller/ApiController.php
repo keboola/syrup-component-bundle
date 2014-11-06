@@ -62,6 +62,9 @@ class ApiController extends BaseController
 	    // Get params from request
 	    $params = $this->getPostJson($request);
 
+	    // check params against ES mapping
+	    $this->checkMappingParams($params);
+
 	    // Create new job
 	    /** @var Job $job */
 	    $job = $this->createJob('run', $params);
@@ -112,6 +115,24 @@ class ApiController extends BaseController
 	protected function getJobManager()
 	{
 		return $this->container->get('syrup.job_manager');
+	}
+
+	protected function getMapping()
+	{
+		$mappingJson = $this->renderView('@elasticsearch/mapping.json.twig');
+
+		return json_decode($mappingJson, true);
+	}
+
+	protected function checkMappingParams($params)
+	{
+		$mappingParams = $this->getMapping()['mappings']['jobs']['properties']['params']['properties'];
+
+		foreach (array_keys($params) as $paramKey) {
+			if (!in_array($paramKey, array_keys($mappingParams))) {
+				throw new UserException(sprintf("Parameter '%s' is not allowed. Allowed params are '%s'", $paramKey, implode(',', array_keys($mappingParams))));
+			}
+		}
 	}
 
 	/**

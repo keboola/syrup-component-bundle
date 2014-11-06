@@ -42,7 +42,7 @@ class SyrupExceptionListener
 		$exception = $event->getException();
 		$exceptionId = $this->formatter->getAppName() . '-' . md5(microtime());
 
-		$code = $exception->getCode();
+		$code = ($exception->getCode() < 300 || $exception->getCode() >= 600) ? 500 : $exception->getCode();
 
 		if ($exception instanceof HttpExceptionInterface) {
 			$code = $exception->getStatusCode();
@@ -52,7 +52,7 @@ class SyrupExceptionListener
 			'status'    => 'error',
 			'error'     => 'Application error',
 			'code'      => $code,
-			'message'   => $exception->getMessage(),
+			'message'   => 'Contact support@keboola.com and attach this exception id.',
 			'exceptionId'   => $exceptionId,
 			'runId'     => $this->formatter->getRunId()
 		);
@@ -61,7 +61,7 @@ class SyrupExceptionListener
 		if ($exception instanceof UserException) {
 			$method = 'error';
 			$content['error'] = 'User error';
-			$content['message'] = 'Contact support@keboola.com and attach this exception id.';
+			$content['message'] = $exception->getMessage();
 		}
 
 		$logData = array(
@@ -88,7 +88,8 @@ class SyrupExceptionListener
 
 		// Customize your response object to display the exception details
 		$response = new Response();
-		$code = $exception->getCode();
+
+		$code = ($exception->getCode() < 300 || $exception->getCode() >= 600) ? 500 : $exception->getCode();
 
 		// HttpExceptionInterface is a special type of exception that
 		// holds status code and header details
@@ -101,7 +102,7 @@ class SyrupExceptionListener
 			'status'    => 'error',
 			'error'     => 'Application error',
 			'code'      => $code,
-			'message'   => $exception->getMessage(),
+			'message'   => 'Contact support@keboola.com and attach this exception id.',
 			'exceptionId'   => $exceptionId,
 			'runId'     => $this->formatter->getRunId()
 		);
@@ -110,7 +111,7 @@ class SyrupExceptionListener
 		if ($exception instanceof UserException) {
 			$method = 'error';
 			$content['error'] = 'User error';
-			$content['message'] = 'Contact support@keboola.com and attach this exception id.';
+			$content['message'] = $exception->getMessage();
 		}
 
 		$logData = array(
