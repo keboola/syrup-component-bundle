@@ -53,6 +53,10 @@ class CreateIndexCommand extends ContainerAwareCommand
 			$mappingJson = $templating->render('mapping.json.twig');
 			$mapping = json_decode($mappingJson, true);
 
+			if (null == $mapping) {
+				throw new ApplicationException("Error in mapping, check your mapping syntax");
+			}
+
 			$settings = $mapping['settings'];
 			$mappings = $mapping['mappings'];
 		}
