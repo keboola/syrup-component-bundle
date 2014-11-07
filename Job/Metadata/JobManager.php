@@ -228,6 +228,11 @@ class JobManager
 					],
 					'query' => $query
 				]
+			],
+			'sort' => [
+				'id' => [
+					'order' => 'desc'
+				]
 			]
 		];
 
