@@ -45,6 +45,9 @@ class JobCommand extends ContainerAwareCommand
 	/** @var Logger */
 	protected $logger;
 
+	/** @var Lock */
+	protected $lock;
+
 	protected function configure()
 	{
 		$this
@@ -56,52 +59,53 @@ class JobCommand extends ContainerAwareCommand
 
 	protected function initialize(InputInterface $input, OutputInterface $output)
 	{
-		$this->logger = $this->getContainer()->get('logger');
-
 		$jobId = $input->getArgument('jobId');
 
 		if (is_null($jobId)) {
 			throw new UserException("Missing jobId argument.");
 		}
 
-		// Get job from ES
-		$this->job = $this->getJobManager()->getJob($jobId);
+		try {
+			$this->logger = $this->getContainer()->get('logger');
 
-		if ($this->job == null) {
-			$this->logger->error("Job id '".$jobId."' not found.");
-			return self::STATUS_ERROR;
+			// Get job from ES
+			$this->job = $this->getJobManager()->getJob($jobId);
+
+			if ($this->job == null) {
+				$this->logger->error("Job id '".$jobId."' not found.");
+				return self::STATUS_ERROR;
+			}
+
+			// SAPI init
+			/** @var EncryptorInterface $encryptor */
+			$encryptor = $this->getContainer()->get('syrup.encryptor');
+
+			$this->sapiClient = new SapiClient([
+				'token'     => $encryptor->decrypt($this->job->getToken()['token']),
+				'url'       => $this->getContainer()->getParameter('storage_api.url'),
+				'userAgent' => $this->job->getComponent(),
+			]);
+			$this->sapiClient->setRunId($this->job->getRunId());
+
+			//@todo this is awkward :(
+			/** @var SyrupJsonFormatter $logFormatter */
+			$logFormatter = $this->getContainer()->get('syrup.monolog.json_formatter');
+			$logFormatter->setStorageApiClient($this->sapiClient);
+
+			// Lock DB
+			/** @var Connection $conn */
+			$conn = $this->getContainer()->get('doctrine.dbal.lock_connection');
+			$conn->exec('SET wait_timeout = 31536000;');
+			$this->lock = new Lock($conn, $this->job->getLockName());
+
+		} catch (\Exception $e) {
+			throw new InitializationException("Job initialization error", $e);
 		}
-
-		// SAPI init
-		/** @var EncryptorInterface $encryptor */
-		$encryptor = $this->getContainer()->get('syrup.encryptor');
-
-		$this->sapiClient = new SapiClient([
-			'token'     => $encryptor->decrypt($this->job->getToken()['token']),
-			'url'       => $this->getContainer()->getParameter('storage_api.url'),
-			'userAgent' => $this->job->getComponent(),
-		]);
-		$this->sapiClient->setRunId($this->job->getRunId());
-
-		//@todo this is awkward :(
-		/** @var SyrupJsonFormatter $logFormatter */
-		$logFormatter = $this->getContainer()->get('syrup.monolog.json_formatter');
-		$logFormatter->setStorageApiClient($this->sapiClient);
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		if ($this->job == null) {
-			return self::STATUS_ERROR;
-		}
-
-		// Lock DB
-		/** @var Connection $conn */
-		$conn = $this->getContainer()->get('doctrine.dbal.lock_connection');
-		$conn->exec('SET wait_timeout = 31536000;');
-		$lock = new Lock($conn, $this->job->getLockName());
-
-		if (!$lock->lock()) {
+		if (!$this->lock->lock()) {
 			return self::STATUS_LOCK;
 		}
 
@@ -170,7 +174,7 @@ class JobCommand extends ContainerAwareCommand
 		$this->jobManager->updateJob($this->job);
 
 		// DB unlock
-		$lock->unlock();
+		$this->lock->unlock();
 
 		return $status;
 	}

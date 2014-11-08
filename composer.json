@@ -29,22 +29,18 @@
 	},
 	"scripts": {
 		"post-install-cmd": [
+		  	"Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getParameters",
 			"Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getSharedParameters",
-			"Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
 			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/keboola/syrup/app vendor/keboola/syrup/app"
 		],
 		"post-update-cmd": [
+		  	"Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getParameters",
 		  	"Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getSharedParameters",
-			"Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
 			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/keboola/syrup/app vendor/keboola/syrup/app"
 		]
 	},
 	"extra": {
-		"incenteev-parameters": {
-			"keep-outdated": true,
-			"file": "vendor/keboola/syrup/app/config/parameters.yml",
-			"dist-file": "parameters.yml"
-		}
+		"syrup-app-name": "syrup-component-bundle"
 	},
 	"autoload": {
 		"psr-0": { "Syrup\\ComponentBundle": "" }
