@@ -18,6 +18,8 @@
 
     <target name="composerInstall" depends="prepare">
         <exec executable="php" failonerror="true">
+            <arg value="-d"/>
+            <arg value="memory_limit=-1"/>
             <arg value="composer.phar"/>
             <arg value="install"/>
             <arg value="-n"/>
