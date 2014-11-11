@@ -14,6 +14,7 @@ use Symfony\Component\Debug\ExceptionHandler;
 use Syrup\ComponentBundle\Exception\NoRequestException;
 use Syrup\ComponentBundle\Exception\SyrupComponentException;
 use Syrup\ComponentBundle\Exception\UserException;
+use Syrup\ComponentBundle\Job\Metadata\JobInterface;
 use Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Event;
@@ -31,6 +32,9 @@ class SyrupJsonFormatter extends JsonFormatter
 
 	/** @var SyrupS3Uploader */
 	protected $uploader;
+
+	/** @var JobInterface */
+	protected $job;
 
 	/**
 	 * @param String            $appName
@@ -55,6 +59,11 @@ class SyrupJsonFormatter extends JsonFormatter
 			return 'not set';
 		}
 		return $this->storageApi->getRunId();
+	}
+
+	public function setJob(JobInterface $job)
+	{
+		$this->job = $job;
 	}
 
 	public function setStorageApiClient(Client $storageApi)
@@ -114,6 +123,11 @@ class SyrupJsonFormatter extends JsonFormatter
 		if (isset($record['context']['exceptionId'])) {
 			$record['exceptionId'] = $record['context']['exceptionId'];
 			unset($record['context']['exceptionId']);
+		}
+
+		// Add Job data if exists
+		if ($this->job != null) {
+			$record['job'] = $this->job->getLogData();
 		}
 
 		// Log to SAPI events

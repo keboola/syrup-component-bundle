@@ -81,4 +81,6 @@ interface JobInterface
 	public function getIndex();
 
 	public function getType();
+
+	public function getLogData();
 }
