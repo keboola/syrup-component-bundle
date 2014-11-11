@@ -23,7 +23,6 @@
             <arg value="-n"/>
         </exec>
     </target>
-
     <target name="phpunit" description="Run unit tests with PHPUnit">
         <exec executable="phpunit" failonerror="true">
             <arg value="--configuration"/>
