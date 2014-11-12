@@ -14,6 +14,8 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 use Syrup\ComponentBundle\Job\Metadata\JobManager;
@@ -41,7 +43,6 @@ class CreateJobCommand extends ContainerAwareCommand
 			->addArgument('component', InputArgument::REQUIRED, 'Component name')
 			->addArgument('cmd', InputArgument::REQUIRED, 'Job command name')
 			->addArgument('params', InputArgument::OPTIONAL, 'Job command parameters as JSON', '{}')
-			->addArgument('queue', InputArgument::OPTIONAL, 'Optional queue name', 'default')
 			->addOption('no-run', 'norun', InputOption::VALUE_NONE, "Dont run the job, just create it")
 		;
 	}
@@ -66,7 +67,6 @@ class CreateJobCommand extends ContainerAwareCommand
 	{
 		$command = $input->getArgument('cmd');
 		$params = json_decode($input->getArgument('params'), true);
-		$queueName = $input->getArgument('queue');
 
 		// Create new job
 		/** @var Job $job */
@@ -77,17 +77,22 @@ class CreateJobCommand extends ContainerAwareCommand
 
 		$output->writeln('Created job id ' . $jobId);
 
-		// Add job to SQS
-		$this->enqueue($jobId, $queueName);
-
 		// Run Job
-		if (!$input->hasOption('no-run')) {
+		if (!$input->getOption('no-run')) {
 			$runJobCommand = $this->getApplication()->find('syrup:run-job');
 
-			$returnCode = $runJobCommand->run(new ArrayInput(['jobId' => $jobId]), $output);
+			$returnCode = $runJobCommand->run(
+				new ArrayInput([
+					'command'   => 'syrup:run-job',
+					'jobId'     => $jobId
+				]),
+				$output
+			);
 
 			if ($returnCode == 0) {
 				$output->writeln('Job successfully executed');
+			} elseif ($returnCode == 2 || $returnCode == 64) {
+				$output->writeln('DB is locked. Run job later using syrup:run-job');
 			} else {
 				$output->writeln('Error occured');
 			}
