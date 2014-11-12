@@ -91,7 +91,7 @@ class JobCommand extends ContainerAwareCommand
 			/** @var SyrupJsonFormatter $logFormatter */
 			$logFormatter = $this->getContainer()->get('syrup.monolog.json_formatter');
 			$logFormatter->setStorageApiClient($this->sapiClient);
-			$logFormatter->setJobId($jobId);
+			$logFormatter->setJob($this->job);
 
 			// Lock DB
 			/** @var Connection $conn */
