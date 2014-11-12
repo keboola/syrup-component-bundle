@@ -42,7 +42,7 @@ class CreateJobCommand extends ContainerAwareCommand
 			->addArgument('cmd', InputArgument::REQUIRED, 'Job command name')
 			->addArgument('params', InputArgument::OPTIONAL, 'Job command parameters as JSON', '{}')
 			->addArgument('queue', InputArgument::OPTIONAL, 'Optional queue name', 'default')
-			->addOption('no-run', 'n', InputOption::VALUE_NONE, "Dont run the job, just create it")
+			->addOption('no-run', 'norun', InputOption::VALUE_NONE, "Dont run the job, just create it")
 		;
 	}
 
