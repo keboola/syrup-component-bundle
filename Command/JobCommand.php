@@ -87,7 +87,6 @@ class JobCommand extends ContainerAwareCommand
 			]);
 			$this->sapiClient->setRunId($this->job->getRunId());
 
-			//@todo this is awkward :(
 			/** @var SyrupJsonFormatter $logFormatter */
 			$logFormatter = $this->getContainer()->get('syrup.monolog.json_formatter');
 			$logFormatter->setStorageApiClient($this->sapiClient);
@@ -199,7 +198,6 @@ class JobCommand extends ContainerAwareCommand
 		$logData = [
 			'exceptionId'   => $exceptionId,
 			'exception'     => $exception,
-			'job'           => $this->job->getLogData()
 		];
 
 		// SyrupExceptionInterface holds additional data
