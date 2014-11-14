@@ -271,9 +271,7 @@ class JobManager
 				'name'  => $this->getIndex()
 			]);
 
-			$keys = array_keys($indices);
-			sort($keys);
-			return array_pop($keys);
+			return IndexNameResolver::getLastIndexName(array_keys($indices));
 
 		} catch (Missing404Exception $e) {
 			return null;
