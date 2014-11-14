@@ -29,6 +29,10 @@ class JobManager
 		$this->componentName = $componentName;
 	}
 
+	/**
+	 * @param null $mappings
+	 * @return string Updated index name
+	 */
 	public function putMappings($mappings = null)
 	{
 		$params['index'] = $this->getLastIndex();
@@ -36,6 +40,7 @@ class JobManager
 		$params['body'] = $mappings;
 
 		$this->client->indices()->putMapping($params);
+		return $params['index'];
 	}
 
 	public function createIndex($settings = null, $mappings = null)

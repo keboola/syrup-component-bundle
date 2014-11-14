@@ -66,8 +66,8 @@ class CreateIndexCommand extends ContainerAwareCommand
 
 		// try put mapping first
 		try {
-			$jobManager->putMappings($mappings);
-			echo "Mapping updated successfuly" . PHP_EOL;
+			$indexName = $jobManager->putMappings($mappings);
+			echo "Mapping $indexName updated successfuly" . PHP_EOL;
 		} catch (\Exception $e) {
 			echo "Can't updated mapping: " . $e->getMessage() . PHP_EOL;
 
