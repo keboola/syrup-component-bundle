@@ -120,12 +120,19 @@ class SyrupJsonFormatter extends JsonFormatter
 			}
 		}
 
+		// exception id
 		if (isset($record['context']['exceptionId'])) {
 			$record['exceptionId'] = $record['context']['exceptionId'];
 			unset($record['context']['exceptionId']);
 		}
 
-		// Add Job data if exists
+		// requeste data
+		if (isset($record['context']['request'])) {
+			$record['request'] = $record['context']['request'];
+			unset($record['context']['request']);
+		}
+
+		// job data
 		if ($this->job != null) {
 			$record['job'] = $this->job->getLogData();
 		}

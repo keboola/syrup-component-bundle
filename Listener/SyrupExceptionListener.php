@@ -81,6 +81,12 @@ class SyrupExceptionListener
 
 	public function onKernelException(GetResponseForExceptionEvent $event)
 	{
+		$requestData = [
+			'url'   => $event->getRequest()->getUri(),
+			'query' => $event->getRequest()->query->all(),
+			'body'  => $event->getRequest()->getContent()
+		];
+
 		// You get the exception object from the received event
 		$exception = $event->getException();
 
@@ -103,6 +109,7 @@ class SyrupExceptionListener
 			'error'     => 'Application error',
 			'code'      => $code,
 			'message'   => 'Contact support@keboola.com and attach this exception id.',
+			'request'   => $requestData,
 			'exceptionId'   => $exceptionId,
 			'runId'     => $this->formatter->getRunId()
 		);
@@ -115,6 +122,7 @@ class SyrupExceptionListener
 		}
 
 		$logData = array(
+			'request'       => $requestData,
 			'exception'     => $exception,
 			'exceptionId'   => $exceptionId,
 		);
