@@ -125,11 +125,14 @@ class ApiController extends BaseController
 
 	protected function checkMappingParams($params)
 	{
-		$mappingParams = $this->getMapping()['mappings']['jobs']['properties']['params']['properties'];
+		$mapping = $this->getMapping();
+		if (isset($mapping['mappings']['jobs']['properties']['params']['properties'])) {
+			$mappingParams = $mapping['mappings']['jobs']['properties']['params']['properties'];
 
-		foreach (array_keys($params) as $paramKey) {
-			if (!in_array($paramKey, array_keys($mappingParams))) {
-				throw new UserException(sprintf("Parameter '%s' is not allowed. Allowed params are '%s'", $paramKey, implode(',', array_keys($mappingParams))));
+			foreach (array_keys($params) as $paramKey) {
+				if (!in_array($paramKey, array_keys($mappingParams))) {
+					throw new UserException(sprintf("Parameter '%s' is not allowed. Allowed params are '%s'", $paramKey, implode(',', array_keys($mappingParams))));
+				}
 			}
 		}
 	}
