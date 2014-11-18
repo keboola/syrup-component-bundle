@@ -35,7 +35,6 @@ class ApiController extends BaseController
 		parent::preExecute($request);
 
 		$this->initStorageApi();
-//		$this->initComponent($this->storageApi, $this->componentName);
 	}
 
 	/** @deprecated */
@@ -142,12 +141,11 @@ class ApiController extends BaseController
 	 */
 	protected function createJob($command, $params)
 	{
-		$request = $this->container->get('request');
 		$tokenData = $this->storageApi->verifyToken();
 
 		return new Job([
 			'id'    => $this->storageApi->generateId(),
-			'runId'     => $this->getRunId($request),
+			'runId'     => $this->storageApi->getRunId(),
 			'project'   => [
 				'id'        => $tokenData['owner']['id'],
 				'name'      => $tokenData['owner']['name']
@@ -226,7 +224,7 @@ class ApiController extends BaseController
 		$ssEvent = new JobEvent([
 			'component' => $this->component->getFullName(),
 			'action'    => $actionName,
-			'url'       => $this->getRequest()->getUri(),
+			'url'       => $this->container->get('request')->getUri(),
 			'projectId' => $logData['owner']['id'],
 			'projectName'    => $logData['owner']['name'],
 			'tokenId'   => $logData['id'],
@@ -245,14 +243,6 @@ class ApiController extends BaseController
 				"exception" => $e->getTraceAsString()
 			]);
 		}
-	}
-
-	protected function getRunId(Request $request)
-	{
-		if ($request->headers->has('x-kbc-runid')) {
-			return $request->headers->get('x-kbc-runid');
-		}
-		return $this->storageApi->generateId();
 	}
 
 	/**

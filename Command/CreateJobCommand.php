@@ -107,7 +107,7 @@ class CreateJobCommand extends ContainerAwareCommand
 
 		return new Job([
 			'id'        => $this->storageApi->generateId(),
-			'runId'     => $this->storageApi->generateId(),
+			'runId'     => $this->storageApi->generateRunId(),
 			'project'   => [
 				'id'        => $tokenData['owner']['id'],
 				'name'      => $tokenData['owner']['name']

@@ -57,9 +57,9 @@ class StorageApiService
 			$this->client->verifyToken();
 
 			if ($this->request->headers->has('X-KBC-RunId')) {
-				$kbcRunId = $this->request->headers->get('X-KBC-RunId');
+				$kbcRunId = $this->client->generateRunId($this->request->headers->get('X-KBC-RunId'));
 			} else {
-				$kbcRunId = $this->client->generateId();
+				$kbcRunId = $this->client->generateRunId();
 			}
 
 			$this->client->setRunId($kbcRunId);
