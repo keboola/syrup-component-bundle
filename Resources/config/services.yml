@@ -53,7 +53,7 @@ services:
 
     syrup.queue_factory:
         class: Syrup\ComponentBundle\Service\Queue\QueueFactory
-        arguments: [@doctrine.dbal.default_connection, %queue%]
+        arguments: [@doctrine.dbal.syrup_connection, %queue%]
 
     syrup.job_manager:
         class: Syrup\ComponentBundle\Job\Metadata\JobManager
