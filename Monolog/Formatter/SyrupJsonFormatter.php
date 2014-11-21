@@ -112,9 +112,9 @@ class SyrupJsonFormatter extends JsonFormatter
 			$e = $record['context']['exception'];
 			unset($record['context']['exception']);
 			if ($e instanceof \Exception) {
-				$e = FlattenException::create($e);
+				$flattenException = FlattenException::create($e);
 				$eHandler = new ExceptionHandler(true, 'UTF-8');
-				$serialized = $eHandler->getContent($e);
+				$serialized = $eHandler->getContent($flattenException);
 
 				$record['attachment'] = $this->uploader->uploadString('exception', $serialized, 'text/html');
 			}

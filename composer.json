@@ -12,15 +12,14 @@
 	],
 	"repositories": [],
 	"require": {
-		"php": ">=5.3.5",
+		"php": ">=5.4.0",
 		"keboola/storage-api-client": "~2.11.0",
-		"guzzle/guzzle": ">=3.0.0",
 		"keboola/csv": "1.1.*",
 		"aws/aws-sdk-php": "2.6.*",
 		"keboola/php-encryption": "~0.2.0",
 		"elasticsearch/elasticsearch": "~1.0",
 		"sensio/generator-bundle": "~2.3",
-		"keboola/syrup": "~1.6.7",
+		"keboola/syrup": "~1.7.0",
 		"pimple/pimple": "2.0.*",
 		"keboola/php-temp": ">=0.1.0"
 	},

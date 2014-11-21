@@ -8,8 +8,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Keboola\StorageApi\Client;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Keboola\StorageApi\Event as SapiEvent;
-use Syrup\ComponentBundle\Component\Component;
-use Syrup\ComponentBundle\Component\ComponentFactory;
 use Syrup\ComponentBundle\Exception\ApplicationException;
 use Syrup\ComponentBundle\Exception\UserException;
 use Syrup\ComponentBundle\Filesystem\Temp;
@@ -35,17 +33,6 @@ class ApiController extends BaseController
 		parent::preExecute($request);
 
 		$this->initStorageApi();
-	}
-
-	/** @deprecated */
-	protected function initComponent(Client $storageApi, $componentName)
-	{
-		/** @var ComponentFactory $componentFactory */
-		$componentFactory = $this->container->get('syrup.component_factory');
-		$this->component = $componentFactory->get($storageApi, $componentName);
-		$this->component->setContainer($this->container);
-
-		return $this->component;
 	}
 
 	/**
@@ -102,6 +89,10 @@ class ApiController extends BaseController
 
 	/** Jobs */
 
+	/**
+	 * @param $jobId
+	 * @return string
+	 */
 	protected function getJobUrl($jobId)
 	{
 		$queueParams = $this->container->getParameter('queue');
@@ -225,7 +216,7 @@ class ApiController extends BaseController
 		$logData = $this->storageApi->getLogData();
 
 		$ssEvent = new JobEvent([
-			'component' => $this->component->getFullName(),
+			'component' => $this->componentName,
 			'action'    => $actionName,
 			'url'       => $this->container->get('request')->getUri(),
 			'projectId' => $logData['owner']['id'],

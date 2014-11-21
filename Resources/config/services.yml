@@ -11,10 +11,6 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
 
-    syrup.component_factory:
-        class: Syrup\ComponentBundle\Component\ComponentFactory
-        arguments: [@logger, @doctrine, %components%]
-
     syrup.monolog.s3_uploader:
         class: Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader
         arguments: [%uploader%]
