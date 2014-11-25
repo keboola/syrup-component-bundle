@@ -1,3 +1,10 @@
+## 1.10.0
+ * [BC break]   Removed deprecated ApiController::initComponent method
+ * [BC break]   Removed Component dir and all classes in int Component, ComponentFactory, ComponentInterface
+ * [Refactor]   Syrup has now special DB connection 'syrup', while 'default' DB connection should be used in components 
+
+## =====================================================================
+
 ## 1.9.12
  * [Feature]    Create index command will firt try to update mapping and if thats not possible it will create new index
 
