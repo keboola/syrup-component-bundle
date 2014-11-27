@@ -63,7 +63,12 @@ class ApiController extends BaseController
 	    }
 
 	    // Add job to SQS
-	    $this->enqueue($jobId);
+	    $queueName = 'default';
+	    $queueParams = $this->container->getParameter('queue');
+	    if (isset($queueParams['sqs'])) {
+		    $queueName = $queueParams['sqs'];
+	    }
+	    $this->enqueue($jobId, $queueName);
 
 	    // Response with link to job resource
 	    return $this->createJsonResponse([
