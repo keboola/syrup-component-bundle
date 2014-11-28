@@ -82,7 +82,7 @@ class Job implements JobInterface
 
 	public function setId($id)
 	{
-		$this->data['id'] = $id;
+		$this->data['id'] = (int) $id;
 		return $this;
 	}
 
