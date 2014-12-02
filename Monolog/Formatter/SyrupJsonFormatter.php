@@ -138,8 +138,8 @@ class SyrupJsonFormatter extends JsonFormatter
 		}
 
 		// Log to SAPI events
-		if (
-			($record['level'] == Logger::ERROR || $record['level'] == Logger::INFO)
+        if (
+          ($record['level'] == Logger::ERROR || $record['level'] == Logger::CRITICAL || $record['level'] == Logger::WARNING || $record['level'] == Logger::INFO)
 			&& $this->storageApi != null
 			&& $this->appName != null
 			&& $record['channel'] != 'event'
@@ -169,7 +169,7 @@ class SyrupJsonFormatter extends JsonFormatter
 	{
 		$sapiEvent = new Event();
 		$sapiEvent->setComponent($this->appName);
-		$sapiEvent->setMessage($record['message']);
+        $sapiEvent->setMessage($record['message']);
 		$sapiEvent->setRunId($this->storageApi->getRunId());
 		$sapiEvent->setParams($record['context']);
 

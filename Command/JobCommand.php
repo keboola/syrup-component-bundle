@@ -114,6 +114,9 @@ class JobCommand extends ContainerAwareCommand
 		// Update job status to 'processing'
 		$this->job->setStatus(Job::STATUS_PROCESSING);
 		$this->job->setStartTime(date('c', $startTime));
+        $this->job->setEndTime(null);
+        $this->job->setDurationSeconds(null);
+        $this->job->setResult(null);
 		$this->job->setProcess([
 			'host'  => gethostname(),
 			'pid'   => getmypid()
@@ -135,7 +138,7 @@ class JobCommand extends ContainerAwareCommand
 			$status = self::STATUS_SUCCESS;
 
 		} catch (InitializationException $e) {
-			// job will be requeud
+			// job will be requeued
 			$exceptionId = $this->logException('error', $e);
 			$jobResult = [
 				'message'       => $e->getMessage(),
@@ -154,12 +157,21 @@ class JobCommand extends ContainerAwareCommand
 			$status = self::STATUS_SUCCESS;
 
 		} catch (\Exception $e) {
+            // make sure that the job is recorded as failed
+            $jobStatus = Job::STATUS_ERROR;
+            $jobResult = [
+                'message' => 'Internal error occurred, evaluating details'
+            ];
+            $this->job->setStatus($jobStatus);
+            $this->job->setResult($jobResult);
+            $this->jobManager->updateJob($this->job);
+
+            // try to log the exception
 			$exceptionId = $this->logException('critical', $e);
 			$jobResult = [
-				'message' => 'Internal error occured please contact support@keboola.com',
+				'message' => 'Internal error occurred, please contact support@keboola.com',
 				'exceptionId'   => $exceptionId
 			];
-			$jobStatus = Job::STATUS_ERROR;
 			$status = self::STATUS_ERROR;
 		}
 
