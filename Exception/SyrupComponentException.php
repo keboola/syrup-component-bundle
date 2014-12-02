@@ -15,6 +15,13 @@ class SyrupComponentException extends HttpException implements SyrupExceptionInt
 
 	protected $data = array();
 
+	public function __construct($statusCode, $message = null, $previous = null, $data = [])
+	{
+		$this->setData($data);
+
+		parent::__construct($statusCode, $message, $previous);
+	}
+
 	/**
 	 * @return array
 	 */
