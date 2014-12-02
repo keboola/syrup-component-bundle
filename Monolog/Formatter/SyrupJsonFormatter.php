@@ -139,8 +139,7 @@ class SyrupJsonFormatter extends JsonFormatter
 
 		// Log to SAPI events
         if (
-          ($record['level'] == Logger::ERROR || $record['level'] == Logger::CRITICAL || $record['level'] == Logger::WARNING || $record['level'] == Logger::INFO)
-			&& $this->storageApi != null
+			$this->storageApi != null
 			&& $this->appName != null
 			&& $record['channel'] != 'event'
 			&& $record['channel'] != 'request'
@@ -185,10 +184,14 @@ class SyrupJsonFormatter extends JsonFormatter
 
 		switch($record['level']) {
 			case Logger::ERROR:
+				$type = Event::TYPE_ERROR;
+				break;
 			case Logger::CRITICAL:
 			case Logger::EMERGENCY:
 			case Logger::ALERT:
 				$type = Event::TYPE_ERROR;
+				$sapiEvent->setMessage("Application error occured");
+				$sapiEvent->setParams([]);
 				break;
 			case Logger::WARNING:
 			case Logger::NOTICE:
