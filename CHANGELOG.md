@@ -1,3 +1,16 @@
+## 1.10.5
+ * [Refactor]   SyrupComponentException now accepts 4th argument to constructor - $data - array of addtionial information for logging        
+
+## 1.10.4
+ * [Fix]        Better event logging to SAPI
+ * [Fix]        Better handling of job status and job results during fatal errors and on repeated runs of the same job
+
+## 1.10.3
+ * [Feature]    SQS queue is now configurable from parameters
+
+## 1.10.2   
+ * [Fix]        OPTIONS request double headers error
+
 ## 1.10.0
  * [BC break]   Removed deprecated ApiController::initComponent method
  * [BC break]   Removed Component dir and all classes in int Component, ComponentFactory, ComponentInterface
