@@ -9,10 +9,12 @@ namespace Syrup\ComponentBundle\Monolog\Formatter;
 
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Logger;
-use Syrup\ComponentBundle\Exception\NoRequestException;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\Debug\ExceptionHandler;
+use Syrup\ComponentBundle\Exception\NoRequestException;
 use Syrup\ComponentBundle\Exception\SyrupComponentException;
+use Syrup\ComponentBundle\Exception\UserException;
+use Syrup\ComponentBundle\Job\Metadata\JobInterface;
 use Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Event;
@@ -30,6 +32,9 @@ class SyrupJsonFormatter extends JsonFormatter
 
 	/** @var SyrupS3Uploader */
 	protected $uploader;
+
+	/** @var JobInterface */
+	protected $job;
 
 	/**
 	 * @param String            $appName
@@ -56,7 +61,11 @@ class SyrupJsonFormatter extends JsonFormatter
 		return $this->storageApi->getRunId();
 	}
 
-	/** @deprecated - will be removed in 1.4.0 - set SAPI client in constructor */
+	public function setJob(JobInterface $job)
+	{
+		$this->job = $job;
+	}
+
 	public function setStorageApiClient(Client $storageApi)
 	{
 		$this->storageApi = $storageApi;
@@ -85,6 +94,8 @@ class SyrupJsonFormatter extends JsonFormatter
 				$record['error'] = 'User error';
 				break;
 			case Logger::CRITICAL:
+			case Logger::ALERT:
+			case Logger::EMERGENCY:
 				$record['error'] = 'Application error';
 				break;
 		}
@@ -101,24 +112,38 @@ class SyrupJsonFormatter extends JsonFormatter
 			$e = $record['context']['exception'];
 			unset($record['context']['exception']);
 			if ($e instanceof \Exception) {
-                $e = FlattenException::create($e);
-                $eHandler = new ExceptionHandler(true, 'UTF-8');
-                $serialized = $eHandler->getContent($e);
-				$record['attachment'] = $this->uploader->uploadString('exception', $serialized);
+				$flattenException = FlattenException::create($e);
+				$eHandler = new ExceptionHandler(true, 'UTF-8');
+				$serialized = $eHandler->getContent($flattenException);
+
+				$record['attachment'] = $this->uploader->uploadString('exception', $serialized, 'text/html');
 			}
 		}
 
+		// exception id
 		if (isset($record['context']['exceptionId'])) {
 			$record['exceptionId'] = $record['context']['exceptionId'];
 			unset($record['context']['exceptionId']);
 		}
 
+		// requeste data
+		if (isset($record['context']['request'])) {
+			$record['request'] = $record['context']['request'];
+			unset($record['context']['request']);
+		}
+
+		// job data
+		if ($this->job != null) {
+			$record['job'] = $this->job->getLogData();
+		}
+
 		// Log to SAPI events
 		if (
-			$record['level'] != Logger::DEBUG
-			&& $record['level'] != Logger::CRITICAL
+			($record['level'] == Logger::ERROR || $record['level'] == Logger::INFO)
 			&& $this->storageApi != null
 			&& $this->appName != null
+			&& $record['channel'] != 'event'
+			&& $record['channel'] != 'request'
 		) {
 			$this->_logToSapi($record, $e);
 		}

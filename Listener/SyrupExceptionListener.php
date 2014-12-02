@@ -8,12 +8,19 @@
 namespace Syrup\ComponentBundle\Listener;
 
 use Symfony\Component\Console\Event\ConsoleExceptionEvent;
+use Symfony\Component\Debug\Exception\DummyException;
+use Symfony\Component\Debug\ErrorHandler;
+use Symfony\Component\Debug\Exception\FatalErrorException;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Monolog\Logger;
+use Syrup\ComponentBundle\Exception\ApplicationException;
 use Syrup\ComponentBundle\Exception\SyrupExceptionInterface;
+use Syrup\ComponentBundle\Exception\UserException;
 use Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter;
+use Syrup\CoreBundle\Debug\ExceptionHandler;
 
 class SyrupExceptionListener
 {
@@ -36,42 +43,58 @@ class SyrupExceptionListener
 		$exceptionId = $this->formatter->getAppName() . '-' . md5(microtime());
 
 		$code = ($exception->getCode() < 300 || $exception->getCode() >= 600) ? 500 : $exception->getCode();
+
+		if ($exception instanceof HttpExceptionInterface) {
+			$code = $exception->getStatusCode();
+		}
+
 		$content = array(
 			'status'    => 'error',
-			'error'     => ($code < 500) ? 'User error' : 'Application error',
+			'error'     => 'Application error',
 			'code'      => $code,
-			'message'   => ($code < 500) ? $exception->getMessage() : 'Contact support@keboola.com and attach this exception id.',
+			'message'   => 'Contact support@keboola.com and attach this exception id.',
 			'exceptionId'   => $exceptionId,
 			'runId'     => $this->formatter->getRunId()
 		);
 
+		$method = 'critical';
+		if ($exception instanceof UserException) {
+			$method = 'error';
+			$content['error'] = 'User error';
+			$content['message'] = $exception->getMessage();
+		}
+
+		$logData = array(
+			'exception'     => $exception,
+			'exceptionId'   => $exceptionId,
+		);
+
 		// SyrupExceptionInterface holds additional data
 		if ($exception instanceof SyrupExceptionInterface) {
+			$logData['data'] = $exception->getData();
 			$content['data'] = $exception->getData();
 		}
 
 		// Log exception
-		$method = 'error';
-		if ($code >= 500) {
-			$method = 'critical';
-		}
-		$this->logger->$method(
-			$exception->getMessage(),
-			array(
-				'exception'     => $exception,
-				'exceptionId'   => $exceptionId,
-			)
-		);
+		$this->logger->$method($exception->getMessage(), $logData);
 	}
 
 	public function onKernelException(GetResponseForExceptionEvent $event)
 	{
+		$requestData = [
+			'url'   => $event->getRequest()->getUri(),
+			'query' => $event->getRequest()->query->all(),
+			'body'  => $event->getRequest()->getContent()
+		];
+
 		// You get the exception object from the received event
 		$exception = $event->getException();
+
 		$exceptionId = $this->formatter->getAppName() . '-' . md5(microtime());
 
 		// Customize your response object to display the exception details
 		$response = new Response();
+
 		$code = ($exception->getCode() < 300 || $exception->getCode() >= 600) ? 500 : $exception->getCode();
 
 		// HttpExceptionInterface is a special type of exception that
@@ -83,16 +106,31 @@ class SyrupExceptionListener
 
 		$content = array(
 			'status'    => 'error',
-			'error'     => ($code < 500) ? 'User error' : 'Application error',
+			'error'     => 'Application error',
 			'code'      => $code,
-			'message'   => ($code < 500) ? $exception->getMessage() : 'Contact support@keboola.com and attach this exception id.',
+			'message'   => 'Contact support@keboola.com and attach this exception id.',
+			'request'   => $requestData,
 			'exceptionId'   => $exceptionId,
 			'runId'     => $this->formatter->getRunId()
+		);
+
+		$method = 'critical';
+		if ($exception instanceof UserException) {
+			$method = 'error';
+			$content['error'] = 'User error';
+			$content['message'] = $exception->getMessage();
+		}
+
+		$logData = array(
+			'request'       => $requestData,
+			'exception'     => $exception,
+			'exceptionId'   => $exceptionId,
 		);
 
 		// SyrupExceptionInterface holds additional data
 		if ($exception instanceof SyrupExceptionInterface) {
 			$content['data'] = $exception->getData();
+			$logData['data'] = $exception->getData();
 		}
 
 		$response->setContent(json_encode($content));
@@ -107,16 +145,6 @@ class SyrupExceptionListener
 		$event->setResponse($response);
 
 		// Log exception
-		$method = 'error';
-		if ($code >= 500) {
-			$method = 'critical';
-		}
-		$this->logger->$method(
-			$exception->getMessage(),
-			array(
-				'exception'     => $exception,
-				'exceptionId'   => $exceptionId,
-			)
-		);
+		$this->logger->$method($exception->getMessage(), $logData);
 	}
 }

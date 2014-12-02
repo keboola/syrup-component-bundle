@@ -9,24 +9,29 @@
 namespace Syrup\ComponentBundle\Command;
 
 
+use Doctrine\DBAL\Connection;
 use Keboola\Encryption\EncryptorInterface;
 use Monolog\Logger;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Syrup\ComponentBundle\Exception\SyrupExceptionInterface;
 use Syrup\ComponentBundle\Exception\UserException;
 use Keboola\StorageApi\Client as SapiClient;
+use Syrup\ComponentBundle\Job\Exception\InitializationException;
 use Syrup\ComponentBundle\Job\ExecutorInterface;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 use Syrup\ComponentBundle\Job\Metadata\JobManager;
+use Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter;
 use Syrup\ComponentBundle\Service\Db\Lock;
 
 class JobCommand extends ContainerAwareCommand
 {
-	const STATUS_SUCCESS = 0;
-	const STATUS_ERROR = 1;
-	const STATUS_LOCK = 2;
+	const STATUS_SUCCESS    = 0;
+	const STATUS_ERROR      = 1;
+	const STATUS_LOCK       = 64;
+	const STATUS_RETRY      = 65;
 
 	/** @var JobManager */
 	protected $jobManager;
@@ -39,6 +44,9 @@ class JobCommand extends ContainerAwareCommand
 
 	/** @var Logger */
 	protected $logger;
+
+	/** @var Lock */
+	protected $lock;
 
 	protected function configure()
 	{
@@ -57,40 +65,47 @@ class JobCommand extends ContainerAwareCommand
 			throw new UserException("Missing jobId argument.");
 		}
 
-		// Get job from ES
-		$this->job = $this->getJob($jobId);
+		try {
+			$this->logger = $this->getContainer()->get('logger');
 
-		if ($this->job == null) {
-			return self::STATUS_ERROR;
+			// Get job from ES
+			$this->job = $this->getJobManager()->getJob($jobId);
+
+			if ($this->job == null) {
+				$this->logger->error("Job id '".$jobId."' not found.");
+				return self::STATUS_ERROR;
+			}
+
+			// SAPI init
+			/** @var EncryptorInterface $encryptor */
+			$encryptor = $this->getContainer()->get('syrup.encryptor');
+
+			$this->sapiClient = new SapiClient([
+				'token'     => $encryptor->decrypt($this->job->getToken()['token']),
+				'url'       => $this->getContainer()->getParameter('storage_api.url'),
+				'userAgent' => $this->job->getComponent(),
+			]);
+			$this->sapiClient->setRunId($this->job->getRunId());
+
+			/** @var SyrupJsonFormatter $logFormatter */
+			$logFormatter = $this->getContainer()->get('syrup.monolog.json_formatter');
+			$logFormatter->setStorageApiClient($this->sapiClient);
+			$logFormatter->setJob($this->job);
+
+			// Lock DB
+			/** @var Connection $conn */
+			$conn = $this->getContainer()->get('doctrine.dbal.lock_connection');
+			$conn->exec('SET wait_timeout = 31536000;');
+			$this->lock = new Lock($conn, $this->job->getLockName());
+
+		} catch (\Exception $e) {
+			throw new InitializationException("Job initialization error", $e);
 		}
-
-		// SAPI init
-		/** @var EncryptorInterface $encryptor */
-		$encryptor = $this->getContainer()->get('syrup.encryptor');
-
-		$this->sapiClient = new SapiClient([
-			'token'     => $encryptor->decrypt($this->job->getToken()['token']),
-			'url'       => $this->getContainer()->getParameter('storage_api.url'),
-			'userAgent' => $this->job->getComponent(),
-		]);
-		$this->sapiClient->setRunId($this->job->getRunId());
-
-		$this->logger = $this->getContainer()->get('logger');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		if ($this->job == null) {
-			return self::STATUS_ERROR;
-		}
-
-		// Lock DB
-		/** @var \PDO $pdo */
-		$pdo = $this->getContainer()->get('pdo');
-		$pdo->exec('SET wait_timeout = 31536000;');
-		$lock = new Lock($pdo, $this->job->getLockName());
-
-		if (!$lock->lock()) {
+		if (!$this->lock->lock()) {
 			return self::STATUS_LOCK;
 		}
 
@@ -99,6 +114,11 @@ class JobCommand extends ContainerAwareCommand
 		// Update job status to 'processing'
 		$this->job->setStatus(Job::STATUS_PROCESSING);
 		$this->job->setStartTime(date('c', $startTime));
+		$this->job->setProcess([
+			'host'  => gethostname(),
+			'pid'   => getmypid()
+		]);
+
 		$this->jobManager->updateJob($this->job);
 
 		// Instantiate jobExecutor based on component name
@@ -108,66 +128,53 @@ class JobCommand extends ContainerAwareCommand
 		$jobExecutor = $this->getContainer()->get($jobExecutorName);
 		$jobExecutor->setStorageApi($this->sapiClient);
 
-		$logFunc = 'error';
-		$logException = null;
-
 		// Execute job
 		try {
-			$result = $jobExecutor->execute($this->job);
+			$jobResult = $jobExecutor->execute($this->job);
 			$jobStatus = Job::STATUS_SUCCESS;
 			$status = self::STATUS_SUCCESS;
 
-		} catch (UserException $e) {
+		} catch (InitializationException $e) {
+			// job will be requeud
+			$exceptionId = $this->logException('error', $e);
+			$jobResult = [
+				'message'       => $e->getMessage(),
+				'exceptionId'   => $exceptionId
+			];
+			$jobStatus = Job::STATUS_PROCESSING;
+			$status = self::STATUS_RETRY;
 
-			// Update job with error message
-			$result = [
-				'message' => $e->getMessage()
+		} catch (UserException $e) {
+			$exceptionId = $this->logException('error', $e);
+			$jobResult = [
+				'message'       => $e->getMessage(),
+				'exceptionId'   => $exceptionId
 			];
 			$jobStatus = Job::STATUS_ERROR;
 			$status = self::STATUS_SUCCESS;
 
-			$logFunc = 'error';
-			$logException = $e;
-
 		} catch (\Exception $e) {
-
-			// Update job with 'contact support' message
-			$result = [
-				'message' => 'Internal error occured please contact support@keboola.com'
+			$exceptionId = $this->logException('critical', $e);
+			$jobResult = [
+				'message' => 'Internal error occured please contact support@keboola.com',
+				'exceptionId'   => $exceptionId
 			];
 			$jobStatus = Job::STATUS_ERROR;
 			$status = self::STATUS_ERROR;
-
-			$logFunc = 'alert';
-			$logException = $e;
 		}
-
 
 		// Update job with results
 		$endTime = time();
 		$duration = $endTime - $startTime;
 
 		$this->job->setStatus($jobStatus);
-		$this->job->setResult($result);
+		$this->job->setResult($jobResult);
 		$this->job->setEndTime(date('c', $endTime));
 		$this->job->setDurationSeconds($duration);
 		$this->jobManager->updateJob($this->job);
 
-		// log error
-		if ($jobStatus == Job::STATUS_ERROR) {
-			$logMessage = ($logException == null)?'Error occured':$logException->getMessage();
-
-			$this->logger->$logFunc(
-				$logMessage,
-				[
-					'exception' => $logException,
-					'job'       => $this->job->getLogData()
-				]
-			);
-		}
-
 		// DB unlock
-		$lock->unlock();
+		$this->lock->unlock();
 
 		return $status;
 	}
@@ -184,12 +191,22 @@ class JobCommand extends ContainerAwareCommand
 		return $this->jobManager;
 	}
 
-	/**
-	 * @param $jobId
-	 * @return null|Job
-	 */
-	protected function getJob($jobId)
+	protected function logException($level, \Exception $exception)
 	{
-		return $this->getJobManager()->getJob($jobId);
+		$exceptionId = $this->job->getComponent() . '-' . md5(microtime());
+
+		$logData = [
+			'exceptionId'   => $exceptionId,
+			'exception'     => $exception,
+		];
+
+		// SyrupExceptionInterface holds additional data
+		if ($exception instanceof SyrupExceptionInterface) {
+			$logData['data'] = $exception->getData();
+		}
+
+		$this->logger->$level($exception->getMessage(), $logData);
+
+		return $exceptionId;
 	}
 }

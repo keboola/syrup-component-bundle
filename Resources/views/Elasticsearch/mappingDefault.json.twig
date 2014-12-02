@@ -12,7 +12,7 @@
 		}
 	},
 	"mappings": {
-		"jobs_default": {
+		"jobs": {
 			"_all" : {
 				"enabled" : true,
 				"analyzer": "snowball"
@@ -39,7 +39,10 @@
 							"type": "long"
 						},
 						"name": {
-							"type": "string"
+							"type": "string",
+							"fields": {
+								"raw":   { "type": "string", "index": "not_analyzed" }
+							}
 						}
 					}
 				},
@@ -50,7 +53,10 @@
 							"type": "long"
 						},
 						"description": {
-							"type": "string"
+							"type": "string",
+							"fields": {
+								"raw":   { "type": "string", "index": "not_analyzed" }
+							}
 						},
 						"token": {
 							"index": "not_analyzed",
@@ -66,6 +72,7 @@
 					"index": "not_analyzed",
 					"type": "string"
 				},
+				{% block params %}
 				"params": {
 					"dynamic": "strict",
 					"properties": {
@@ -74,6 +81,7 @@
 						}
 					}
 				},
+				{% endblock %}
 				"result": {
 					"type": "object",
 					"enabled": false
@@ -85,7 +93,10 @@
 					"dynamic": "strict",
 					"properties": {
 						"host": {
-							"type": "string"
+							"type": "string",
+							"fields": {
+								"raw": { "type": "string", "index": "not_analyzed" }
+							}
 						},
 						"pid": {
 							"type": "long"

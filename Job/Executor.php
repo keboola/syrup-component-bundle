@@ -22,6 +22,6 @@ class Executor implements ExecutorInterface
 
 	public function execute(Job $job)
 	{
-		print "doing stuff";
+		// do stuff
 	}
 }

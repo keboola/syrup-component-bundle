@@ -7,24 +7,17 @@
 
 namespace Syrup\ComponentBundle\Controller;
 
-
-use Keboola\Encryption\AesEncryptor;
-use Keboola\Encryption\EncryptorInterface;
 use Monolog\Logger;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Syrup\ComponentBundle\Component\Component;
 use Syrup\ComponentBundle\Exception\UserException;
 use Syrup\ComponentBundle\Filesystem\Temp;
 
 class BaseController extends Controller
 {
-	/** @var Component */
-	protected $component;
-
 	/** @var Logger */
 	protected $logger;
 

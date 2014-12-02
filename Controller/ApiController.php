@@ -8,8 +8,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Keboola\StorageApi\Client;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Keboola\StorageApi\Event as SapiEvent;
-use Syrup\ComponentBundle\Component\Component;
-use Syrup\ComponentBundle\Component\ComponentFactory;
+use Syrup\ComponentBundle\Exception\ApplicationException;
+use Syrup\ComponentBundle\Exception\UserException;
 use Syrup\ComponentBundle\Filesystem\Temp;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 use Syrup\ComponentBundle\Job\Metadata\JobInterface;
@@ -33,18 +33,6 @@ class ApiController extends BaseController
 		parent::preExecute($request);
 
 		$this->initStorageApi();
-//		$this->initComponent($this->storageApi, $this->componentName);
-	}
-
-	/** @deprecated */
-	protected function initComponent(Client $storageApi, $componentName)
-	{
-		/** @var ComponentFactory $componentFactory */
-		$componentFactory = $this->container->get('syrup.component_factory');
-		$this->component = $componentFactory->get($storageApi, $componentName);
-		$this->component->setContainer($this->container);
-
-		return $this->component;
 	}
 
 	/**
@@ -60,15 +48,27 @@ class ApiController extends BaseController
 	    // Get params from request
 	    $params = $this->getPostJson($request);
 
+	    // check params against ES mapping
+	    $this->checkMappingParams($params);
+
 	    // Create new job
 	    /** @var Job $job */
 	    $job = $this->createJob('run', $params);
 
 	    // Add job to Elasticsearch
-	    $jobId = $this->getJobManager()->indexJob($job);
+	    try {
+		    $jobId = $this->getJobManager()->indexJob($job);
+	    } catch (\Exception $e) {
+		    throw new ApplicationException("Failed to create job", $e);
+	    }
 
 	    // Add job to SQS
-	    $this->enqueue($jobId);
+	    $queueName = 'default';
+	    $queueParams = $this->container->getParameter('queue');
+	    if (isset($queueParams['sqs'])) {
+		    $queueName = $queueParams['sqs'];
+	    }
+	    $this->enqueue($jobId, $queueName);
 
 	    // Response with link to job resource
 	    return $this->createJsonResponse([
@@ -87,13 +87,16 @@ class ApiController extends BaseController
 		$response->headers->set('Access-Control-Allow-Headers', 'content-type, x-requested-with, x-requested-by, x-storageapi-url, x-storageapi-token, x-kbc-runid');
 		$response->headers->set('Access-Control-Max-Age', '86400');
 		$response->headers->set('Content-Type', 'application/json');
-		$response->send();
 
 		return $response;
 	}
 
 	/** Jobs */
 
+	/**
+	 * @param $jobId
+	 * @return string
+	 */
 	protected function getJobUrl($jobId)
 	{
 		$queueParams = $this->container->getParameter('queue');
@@ -108,6 +111,27 @@ class ApiController extends BaseController
 		return $this->container->get('syrup.job_manager');
 	}
 
+	protected function getMapping()
+	{
+		$mappingJson = $this->renderView('@elasticsearch/mapping.json.twig');
+
+		return json_decode($mappingJson, true);
+	}
+
+	protected function checkMappingParams($params)
+	{
+		$mapping = $this->getMapping();
+		if (isset($mapping['mappings']['jobs']['properties']['params']['properties'])) {
+			$mappingParams = $mapping['mappings']['jobs']['properties']['params']['properties'];
+
+			foreach (array_keys($params) as $paramKey) {
+				if (!in_array($paramKey, array_keys($mappingParams))) {
+					throw new UserException(sprintf("Parameter '%s' is not allowed. Allowed params are '%s'", $paramKey, implode(',', array_keys($mappingParams))));
+				}
+			}
+		}
+	}
+
 	/**
 	 * @param string $command
 	 * @param array $params
@@ -115,12 +139,11 @@ class ApiController extends BaseController
 	 */
 	protected function createJob($command, $params)
 	{
-		$request = $this->container->get('request');
 		$tokenData = $this->storageApi->verifyToken();
 
 		return new Job([
 			'id'    => $this->storageApi->generateId(),
-			'runId'     => $this->getRunId($request),
+			'runId'     => $this->storageApi->getRunId(),
 			'project'   => [
 				'id'        => $tokenData['owner']['id'],
 				'name'      => $tokenData['owner']['name']
@@ -135,7 +158,7 @@ class ApiController extends BaseController
 			'params'    => $params,
 			'process'   => [
 				'host'  => gethostname(),
-				'pid'   => posix_getpid()
+				'pid'   => getmypid()
 			],
 			'createdTime'   => date('c')
 		]);
@@ -197,9 +220,9 @@ class ApiController extends BaseController
 		$logData = $this->storageApi->getLogData();
 
 		$ssEvent = new JobEvent([
-			'component' => $this->component->getFullName(),
+			'component' => $this->componentName,
 			'action'    => $actionName,
-			'url'       => $this->getRequest()->getUri(),
+			'url'       => $this->container->get('request')->getUri(),
 			'projectId' => $logData['owner']['id'],
 			'projectName'    => $logData['owner']['name'],
 			'tokenId'   => $logData['id'],
@@ -218,14 +241,6 @@ class ApiController extends BaseController
 				"exception" => $e->getTraceAsString()
 			]);
 		}
-	}
-
-	protected function getRunId(Request $request)
-	{
-		if ($request->headers->has('x-kbc-runid')) {
-			return $request->headers->get('x-kbc-runid');
-		}
-		return $this->storageApi->generateId();
 	}
 
 	/**

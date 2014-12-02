@@ -11,10 +11,6 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
 
-    syrup.component_factory:
-        class: Syrup\ComponentBundle\Component\ComponentFactory
-        arguments: [@logger, @doctrine, %components%]
-
     syrup.monolog.s3_uploader:
         class: Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader
         arguments: [%uploader%]
@@ -57,11 +53,11 @@ services:
 
     syrup.queue_factory:
         class: Syrup\ComponentBundle\Service\Queue\QueueFactory
-        arguments: [@doctrine.dbal.default_connection, %queue%]
+        arguments: [@doctrine.dbal.syrup_connection, %queue%]
 
     syrup.job_manager:
         class: Syrup\ComponentBundle\Job\Metadata\JobManager
-        arguments: [@syrup.elasticsearch, %job_manager%]
+        arguments: [@syrup.elasticsearch, %job_manager%, %app_name%]
 
     syrup.job_executor:
         class: Syrup\ComponentBundle\Job\Executor

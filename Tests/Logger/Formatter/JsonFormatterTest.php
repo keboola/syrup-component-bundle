@@ -11,13 +11,12 @@ namespace Syrup\Logger\Formatter;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Syrup\ComponentBundle\Exception\ApplicationException;
 use Syrup\ComponentBundle\Exception\UserException;
+use Syrup\ComponentBundle\Job\Metadata\Job;
 use Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter;
 
 class JsonFormatterTest extends WebTestCase
 {
 	protected $appName = 'syrup-component-bundle';
-
-	protected $componentName = 'phpunit';
 
 	protected function assertRecord(array $record)
 	{
@@ -25,7 +24,6 @@ class JsonFormatterTest extends WebTestCase
 		$this->assertArrayHasKey('level', $record);
 		$this->assertArrayHasKey('channel', $record);
 		$this->assertArrayHasKey('context', $record);
-		$this->assertArrayHasKey('app', $record);
 		$this->assertArrayHasKey('component', $record);
 		$this->assertArrayHasKey('priority', $record);
 		$this->assertArrayHasKey('pid', $record);
@@ -33,8 +31,7 @@ class JsonFormatterTest extends WebTestCase
 		$this->assertArrayHasKey('error', $record);
 		$this->assertArrayHasKey('attachment', $record);
 
-		$this->assertEquals($this->appName, $record['app']);
-		$this->assertEquals($this->componentName, $record['component']);
+		$this->assertEquals($this->appName, $record['component']);
 	}
 
 	public function testFormatter()
@@ -62,7 +59,29 @@ class JsonFormatterTest extends WebTestCase
 			$s3uploader,
 			$storageApiService
 		);
-		$formatter->setComponentName($this->componentName);
+
+		// test job
+		$formatter->setJob(new Job([
+			'id'    => 1234,
+			'runId'     => 1235,
+			'project'   => [
+				'id'        => 123,
+				'name'      => 'test'
+			],
+			'token'     => [
+				'id'            => 12345,
+				'description'   => 'test',
+				'token'         => '12345-test-token'
+			],
+			'component' => 'syrup-component-bundle',
+			'command'   => 'test',
+			'params'    => [],
+			'process'   => [
+				'host'  => gethostname(),
+				'pid'   => getmypid()
+			],
+			'createdTime'   => date('c')
+		]));
 
 		$record = json_decode($formatter->format($this->createUserExceptionRecord()), true);
 
@@ -71,6 +90,9 @@ class JsonFormatterTest extends WebTestCase
 		$this->assertEquals('ERROR', $record['priority']);
 		$this->assertEquals('User error', $record['error']);
 		$this->assertNotEmpty($record['attachment']);
+		$this->assertNotEmpty($record['job']);
+		$this->assertEquals(1234, $record['job']['id']);
+		$this->assertEquals(1235, $record['job']['runId']);
 
 		$record = json_decode($formatter->format($this->createAppExceptionRecord()), true);
 
@@ -79,6 +101,9 @@ class JsonFormatterTest extends WebTestCase
 		$this->assertEquals('CRITICAL', $record['priority']);
 		$this->assertEquals('Application error', $record['error']);
 		$this->assertNotEmpty($record['attachment']);
+		$this->assertNotEmpty($record['job']);
+		$this->assertEquals(1234, $record['job']['id']);
+		$this->assertEquals(1235, $record['job']['runId']);
 	}
 
 	public function createUserExceptionRecord()

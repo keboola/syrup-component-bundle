@@ -12,35 +12,36 @@
 	],
 	"repositories": [],
 	"require": {
-		"php": ">=5.3.5",
+		"php": ">=5.4.0",
 		"keboola/storage-api-client": "~2.11.0",
-		"guzzle/guzzle": ">=3.0.0",
 		"keboola/csv": "1.1.*",
-		"aws/aws-sdk-php": "2.*",
+		"aws/aws-sdk-php": "2.6.*",
 		"keboola/php-encryption": "~0.2.0",
 		"elasticsearch/elasticsearch": "~1.0",
 		"sensio/generator-bundle": "~2.3",
-		"keboola/syrup": "~1.4.4",
-		"pimple/pimple": "2.0.*"
+		"keboola/syrup": "~1.7.0",
+		"pimple/pimple": "2.0.*",
+		"keboola/php-temp": ">=0.1.0"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "3.7.*"
 	},
 	"scripts": {
 		"post-install-cmd": [
-			"Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
-			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/keboola/syrup/app"
+		  	"Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getParameters",
+			"Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getSharedParameters",
+			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/keboola/syrup/app vendor/keboola/syrup/app"
 		],
 		"post-update-cmd": [
-			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/keboola/syrup/app"
+		  	"Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getParameters",
+		  	"Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getSharedParameters",
+			"./vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php vendor/keboola/syrup/app vendor/keboola/syrup/app"
 		]
 	},
 	"extra": {
-		"incenteev-parameters": {
-			"keep-outdated": true,
-			"file": "vendor/keboola/syrup/app/config/parameters.yml",
-			"dist-file": "parameters.yml"
-		}
+	  	"symfony-app-dir": "vendor/keboola/syrup/app",
+	  	"symfony-web-dir": "vendor/keboola/syrup/web",
+		"syrup-app-name": "syrup-component-bundle"
 	},
 	"autoload": {
 		"psr-0": { "Syrup\\ComponentBundle": "" }
