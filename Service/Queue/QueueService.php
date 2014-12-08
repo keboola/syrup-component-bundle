@@ -47,8 +47,9 @@ class QueueService
 	public function receive($messagesCount = 1)
 	{
 		$result = $this->client->receiveMessage(array(
-			'QueueUrl' => $this->queueUrl,
-			'WaitTimeSeconds' => 20,
+			'QueueUrl'          => $this->queueUrl,
+			'WaitTimeSeconds'   => 20,
+			'VisibilityTimeout' => 3600,
 			'MaxNumberOfMessages' => $messagesCount,
 		));
 
