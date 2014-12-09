@@ -65,9 +65,9 @@ class JobCommand extends ContainerAwareCommand
 			throw new UserException("Missing jobId argument.");
 		}
 
-		try {
-			$this->logger = $this->getContainer()->get('logger');
+		$this->logger = $this->getContainer()->get('logger');
 
+		try {
 			// Get job from ES
 			$this->job = $this->getJobManager()->getJob($jobId);
 
@@ -99,7 +99,14 @@ class JobCommand extends ContainerAwareCommand
 			$this->lock = new Lock($conn, $this->job->getLockName());
 
 		} catch (\Exception $e) {
-			throw new InitializationException("Job initialization error", $e);
+
+			// Initialization error -> job will be requeued
+			$this->logException('error', $e);
+
+			// Don't update job status or result -> error could be related to ES
+			// Don't unlock DB, error happend either before lock creation or when creating the lock, so the DB isn't locked
+
+			return self::STATUS_RETRY;
 		}
 	}
 
@@ -205,7 +212,12 @@ class JobCommand extends ContainerAwareCommand
 
 	protected function logException($level, \Exception $exception)
 	{
-		$exceptionId = $this->job->getComponent() . '-' . md5(microtime());
+		$component = 'unknown';
+		if ($this->job != null) {
+			$component = $this->job->getComponent();
+		}
+
+		$exceptionId = $component . '-' . md5(microtime());
 
 		$logData = [
 			'exceptionId'   => $exceptionId,
