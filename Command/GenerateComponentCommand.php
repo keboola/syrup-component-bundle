@@ -13,6 +13,7 @@ use Sensio\Bundle\GeneratorBundle\Command\Validators;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
 use Syrup\ComponentBundle\Generator\ComponentGenerator;
@@ -30,9 +31,6 @@ class GenerateComponentCommand extends GeneratorCommand
 				new InputOption('namespace', '', InputOption::VALUE_REQUIRED, 'The namespace of the bundle to create'),
 				new InputOption('short-name', '', InputOption::VALUE_REQUIRED, 'Short name of the component (ie. ex-twitter, ex-google-drive, wr-db, ...)'),
 				new InputOption('dir', '', InputOption::VALUE_OPTIONAL, 'The directory where to create the bundle'),
-//				new InputOption('bundle-name', '', InputOption::VALUE_REQUIRED, 'The optional bundle name'),
-//				new InputOption('format', '', InputOption::VALUE_REQUIRED, 'Use the format for configuration files (php, xml, yml, or annotation)'),
-//				new InputOption('structure', '', InputOption::VALUE_NONE, 'Whether to generate the whole directory structure'),
 			))
 			->setDescription('Generates a component')
 			->setHelp(<<<EOT
@@ -66,10 +64,12 @@ EOT
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		$dialog = $this->getDialogHelper();
+		$helper = $this->getQuestionHelper();
+
+		$question = new ConfirmationQuestion('Do you confirm generation?', true);
 
 		if ($input->isInteractive()) {
-			if (!$dialog->askConfirmation($output, $dialog->getQuestion('Do you confirm generation', 'yes', '?'), true)) {
+			if (!$helper->ask($input, $output, $question)) {
 				$output->writeln('<error>Command aborted</error>');
 
 				return 1;
@@ -99,9 +99,8 @@ EOT
 
 		$format = 'yml';
 		$format = Validators::validateFormat($format);
-		$structure = false;
 
-		$dialog->writeSection($output, 'Bundle generation');
+		$helper->writeSection($output, 'Bundle generation');
 
 		/** @var ComponentGenerator $generator */
 		$generator = $this->getGenerator();
@@ -110,16 +109,13 @@ EOT
 		$output->writeln('Generating the bundle code: <info>OK</info>');
 
 		$errors = array();
-		$runner = $dialog->getRunner($output, $errors);
+		$runner = $helper->getRunner($output, $errors);
 
 		//update parameters.yml file in vendor
 		$shortName = $input->getOption('short-name');
 		$runner($this->updateParameters($output, $shortName, $dir, $namespace, $bundle));
 
-		// check that the namespace is already autoloaded
-//		$runner($this->checkAutoloader($output, $namespace, $bundle));
-
-		$dialog->writeGeneratorSummary($output, $errors);
+		$helper->writeGeneratorSummary($output, $errors);
 	}
 
 	protected function updateParameters(OutputInterface $output, $shortName, $dir, $namespace, $bundle)
