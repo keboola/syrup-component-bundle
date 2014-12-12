@@ -141,6 +141,7 @@ class SyrupJsonFormatter extends JsonFormatter
         if (
 			$this->storageApi != null
 			&& $this->appName != null
+			&& $record['level'] != Logger::DEBUG
 			&& $record['channel'] != 'event'
 			&& $record['channel'] != 'request'
 			&& $record['channel'] != 'doctrine'
