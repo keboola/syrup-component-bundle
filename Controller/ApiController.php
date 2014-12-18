@@ -142,7 +142,7 @@ class ApiController extends BaseController
 		$tokenData = $this->storageApi->verifyToken();
 
 		return new Job([
-			'id'    => $this->storageApi->generateId(),
+			'id'    => (int) $this->storageApi->generateId(),
 			'runId'     => $this->storageApi->getRunId(),
 			'project'   => [
 				'id'        => $tokenData['owner']['id'],

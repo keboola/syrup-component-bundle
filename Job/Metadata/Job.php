@@ -57,6 +57,9 @@ class Job implements JobInterface
 		$this->data['status'] = self::STATUS_WAITING;
 		$this->data = array_merge($this->data, $data);
 
+		// make sure jobId is integer
+		$this->setId($this->data['id']);
+
 		if (null == $this->data['lockName']) {
 			$this->setLockName($this->getComponent() . '-' . $this->getProject()['id']);
 		}
@@ -77,7 +80,7 @@ class Job implements JobInterface
 
 	public function getId()
 	{
-		return $this->data['id'];
+		return (int) $this->data['id'];
 	}
 
 	public function setId($id)
