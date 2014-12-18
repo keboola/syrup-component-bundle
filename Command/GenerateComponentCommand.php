@@ -130,7 +130,7 @@ EOT
 			$parameters['parameters']['components'][$shortName]['bundle'] = $namespace . '\\' . $bundle;
 
 			$yamlDumper = new Dumper();
-			$yaml = $yamlDumper->dump($parameters);
+			$yaml = $yamlDumper->dump($parameters, 3);
 
 			file_put_contents($parametersPath, $yaml);
 
