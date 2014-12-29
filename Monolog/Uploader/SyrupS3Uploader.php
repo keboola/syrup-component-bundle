@@ -87,7 +87,7 @@ class SyrupS3Uploader
 
 	protected function fileUniquePrefix()
 	{
-		return date('Y/m/') . date('Y-m-d-H-i-s') . '-' . uniqid() . '-';
+		return date('Y/m/d/') . date('Y-m-d-H-i-s') . '-' . uniqid() . '-';
 	}
 
 	protected function shortenUrl($url)
