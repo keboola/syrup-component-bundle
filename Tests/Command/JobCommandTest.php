@@ -36,6 +36,7 @@ class JobCommandTest extends KernelTestCase
 
 		$encryptedToken = $kernel->getContainer()->get('syrup.encryptor')->encrypt($token);
 
+		// bc test
 		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
 
 		$application = new Application($kernel);
@@ -50,6 +51,31 @@ class JobCommandTest extends KernelTestCase
 		);
 
 		$this->assertEquals(0, $commandTester->getStatusCode());
+
+		$job = $jobManager->getJob($jobId);
+		$this->assertEquals($job->getStatus(), Job::STATUS_SUCCESS);
+
+		// replace executor with testing executor
+		$kernel->getContainer()->set('syrup.job_executor', new \Syrup\ComponentBundle\Tests\Job\Executor());
+
+		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
+
+		$application = new Application($kernel);
+		$application->add(new JobCommand());
+
+		$command = $application->find('syrup:run-job');
+		$commandTester = new CommandTester($command);
+		$commandTester->execute(
+			array(
+				'jobId'   => $jobId
+			)
+		);
+
+		$this->assertEquals(0, $commandTester->getStatusCode());
+
+		$job = $jobManager->getJob($jobId);
+		$this->assertArrayHasKey('testing', $job->getResult());
+		$this->assertEquals($job->getStatus(), Job::STATUS_WARNING);
 	}
 
 	protected function createJob($token)
