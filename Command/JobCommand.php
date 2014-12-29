@@ -22,6 +22,7 @@ use Keboola\StorageApi\Client as SapiClient;
 use Syrup\ComponentBundle\Job\Exception\InitializationException;
 use Syrup\ComponentBundle\Job\ExecutorInterface;
 use Syrup\ComponentBundle\Job\Metadata\Job;
+use Syrup\ComponentBundle\Job\Metadata\JobInterface;
 use Syrup\ComponentBundle\Job\Metadata\JobManager;
 use Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter;
 use Syrup\ComponentBundle\Service\Db\Lock;
@@ -141,9 +142,20 @@ class JobCommand extends ContainerAwareCommand
 		// Execute job
 		try {
 			$jobResult = $jobExecutor->execute($this->job);
-			$jobStatus = Job::STATUS_SUCCESS;
-			$status = self::STATUS_SUCCESS;
 
+			if ($jobResult instanceof JobInterface) {
+				if ($this->job->getId() !== $jobResult->getId()) {
+					throw new \Exception(sprintf('Invalid job returned - job id #%s', $jobResult->getId()));
+				}
+
+				$jobStatus = $jobResult->getStatus();
+				$jobResult = $jobResult->getResult();
+			} else {
+				// bc break fix
+				$jobStatus = Job::STATUS_SUCCESS;
+			}
+
+			$status = self::STATUS_SUCCESS;
 		} catch (InitializationException $e) {
 			// job will be requeued
 			$exceptionId = $this->logException('error', $e);
