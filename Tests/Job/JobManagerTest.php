@@ -121,13 +121,28 @@ class JobManagerTest extends WebTestCase
 	public function testUpdateJob()
 	{
 		$newJob = $this->createJob();
+
 		$id = self::$jobManager->indexJob($newJob);
+
 
 		$job = self::$jobManager->getJob($id);
 
 		$job->setStatus(Job::STATUS_CANCELLED);
 
 		self::$jobManager->updateJob($job);
+
+		$job = self::$jobManager->getJob($id);
+
+		$this->assertEquals($job->getStatus(), Job::STATUS_CANCELLED);
+
+
+		$job->setStatus(Job::STATUS_WARNING);
+
+		self::$jobManager->updateJob($job);
+
+		$job = self::$jobManager->getJob($id);
+
+		$this->assertEquals($job->getStatus(), Job::STATUS_WARNING);
 	}
 
 	public function testGetJob()

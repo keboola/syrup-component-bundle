@@ -14,5 +14,9 @@ interface ExecutorInterface
 {
 	public function setStorageApi(Client $sapi);
 
+	/**
+	 * @param Job $job
+	 * @return array|Job
+	 */
 	public function execute(Job $job);
 }

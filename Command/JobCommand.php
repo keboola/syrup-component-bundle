@@ -16,6 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Syrup\ComponentBundle\Exception\JobWarningException;
 use Syrup\ComponentBundle\Exception\SyrupExceptionInterface;
 use Syrup\ComponentBundle\Exception\UserException;
 use Keboola\StorageApi\Client as SapiClient;
@@ -143,7 +144,6 @@ class JobCommand extends ContainerAwareCommand
 			$jobResult = $jobExecutor->execute($this->job);
 			$jobStatus = Job::STATUS_SUCCESS;
 			$status = self::STATUS_SUCCESS;
-
 		} catch (InitializationException $e) {
 			// job will be requeued
 			$exceptionId = $this->logException('error', $e);
@@ -163,6 +163,18 @@ class JobCommand extends ContainerAwareCommand
 			$jobStatus = Job::STATUS_ERROR;
 			$status = self::STATUS_SUCCESS;
 
+		} catch (JobWarningException $e) {
+			$exceptionId = $this->logException('warning', $e);
+			$jobResult = [
+				'message'       => $e->getMessage(),
+				'exceptionId'   => $exceptionId
+			];
+
+			if ($e->getData())
+				$jobResult += $e->getData();
+
+			$jobStatus = Job::STATUS_WARNING;
+			$status = self::STATUS_SUCCESS;
 		} catch (\Exception $e) {
             // make sure that the job is recorded as failed
             $jobStatus = Job::STATUS_ERROR;

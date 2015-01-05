@@ -18,6 +18,7 @@ class Job implements JobInterface
 	const STATUS_SUCCESS    = 'success';
 	const STATUS_CANCELLED  = 'cancelled';
 	const STATUS_ERROR      = 'error';
+	const STATUS_WARNING    = 'warning';
 
 	protected $index;
 
@@ -309,7 +310,8 @@ class Job implements JobInterface
 			self::STATUS_PROCESSING,
 			self::STATUS_SUCCESS,
 			self::STATUS_ERROR,
-			self::STATUS_CANCELLED
+			self::STATUS_CANCELLED,
+			self::STATUS_WARNING
 		);
 
 		if (!in_array($this->getStatus(), $allowedStatuses)) {
