@@ -8,11 +8,11 @@
 
 namespace Syrup\ComponentBundle\Monolog\Uploader;
 
+use Aws\Common\Enum\ClientOptions;
 use Aws\S3\Enum\CannedAcl;
 use Aws\S3\S3Client;
-use Aws\Common\Aws;
 use Guzzle\Http\Client;
-use Monolog\Logger;
+use Keboola\StorageApi\Aws\Plugin\Backoff\BackoffPlugin;
 
 class SyrupS3Uploader
 {
@@ -87,7 +87,7 @@ class SyrupS3Uploader
 
 	protected function fileUniquePrefix()
 	{
-		return date('Y/m/') . date('Y-m-d-H-i-s') . '-' . uniqid() . '-';
+		return date('Y/m/d/') . date('Y-m-d-H-i-s') . '-' . uniqid() . '-';
 	}
 
 	protected function shortenUrl($url)
@@ -113,7 +113,8 @@ class SyrupS3Uploader
 	{
 		$s3 = S3Client::factory(array(
 			'key' => $this->config['aws-access-key'],
-			'secret' => $this->config['aws-secret-key']
+			'secret' => $this->config['aws-secret-key'],
+			ClientOptions::BACKOFF => BackoffPlugin::factory()
 		));
 
 		return $s3;
