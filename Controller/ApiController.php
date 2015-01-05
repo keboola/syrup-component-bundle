@@ -188,7 +188,7 @@ class ApiController extends BaseController
 	}
 
 	/** Stuff */
-o
+
 	/**
 	 * @return EncryptorInterface
 	 */
