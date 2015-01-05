@@ -146,7 +146,7 @@ class SyrupJsonFormatter extends JsonFormatter
 			&& $record['channel'] != 'request'
 			&& $record['channel'] != 'doctrine'
 		) {
-			$this->_logToSapi($record, $e);
+			$this->logToSapi($record);
 		}
 
 		unset($record['level_name']);
@@ -166,7 +166,7 @@ class SyrupJsonFormatter extends JsonFormatter
 		return json_encode($records);
 	}
 
-	protected function _logToSapi($record, $e = null)
+	protected function logToSapi($record)
 	{
 		$sapiEvent = new Event();
 		$sapiEvent->setComponent($this->appName);
@@ -174,15 +174,17 @@ class SyrupJsonFormatter extends JsonFormatter
 		$sapiEvent->setRunId($this->storageApi->getRunId());
 		$sapiEvent->setParams($record['context']);
 
-		if ($e instanceof \Exception) {
-			$sapiEvent->setDescription($e->getMessage());
-		}
-
+		$results = [];
 		if (isset($record['exceptionId'])) {
-			$sapiEvent->setResults(array(
-				'exceptionId' => $record['exceptionId']
-			));
+			$results['exceptionId'] = $record['exceptionId'];
 		}
+		if (isset($record['request'])) {
+			$results['request'] = $record['request'];
+		}
+		if (isset($record['job'])) {
+			$results['job'] = $record['job'];
+		}
+		$sapiEvent->setResults($results);
 
 		switch($record['level']) {
 			case Logger::ERROR:
@@ -192,7 +194,7 @@ class SyrupJsonFormatter extends JsonFormatter
 			case Logger::EMERGENCY:
 			case Logger::ALERT:
 				$type = Event::TYPE_ERROR;
-				$sapiEvent->setMessage("Application error occured");
+				$sapiEvent->setMessage("Application error. Contact support@keboola.com");
 				$sapiEvent->setParams([]);
 				break;
 			case Logger::WARNING:
