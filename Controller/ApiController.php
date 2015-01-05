@@ -56,11 +56,13 @@ class ApiController extends BaseController
 	    $job = $this->createJob('run', $params);
 
 	    // Add job to Elasticsearch
+	    $this->logger->info('Creating job in ES');
 	    try {
 		    $jobId = $this->getJobManager()->indexJob($job);
 	    } catch (\Exception $e) {
 		    throw new ApplicationException("Failed to create job", $e);
 	    }
+	    $this->logger->info(sprintf('Job %s created in ES', $jobId));
 
 	    // Add job to SQS
 	    $queueName = 'default';
@@ -69,6 +71,7 @@ class ApiController extends BaseController
 		    $queueName = $queueParams['sqs'];
 	    }
 	    $this->enqueue($jobId, $queueName);
+	    $this->logger->info(sprintf('Job %s queued to %s queue', $jobId, $queueName));
 
 	    // Response with link to job resource
 	    return $this->createJsonResponse([
