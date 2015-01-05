@@ -84,7 +84,7 @@ class ApiController extends BaseController
 		$response->headers->set('Accept', 'application/json');
 		$response->headers->set('Access-Control-Allow-Origin', '*');
 		$response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-		$response->headers->set('Access-Control-Allow-Headers', 'content-type, x-requested-with, x-requested-by, x-storageapi-url, x-storageapi-token, x-kbc-runid');
+		$response->headers->set('Access-Control-Allow-Headers', 'content-type, x-requested-with, x-requested-by, x-storageapi-url, x-storageapi-token, x-kbc-runid, x-user-agent');
 		$response->headers->set('Access-Control-Max-Age', '86400');
 		$response->headers->set('Content-Type', 'application/json');
 
@@ -188,7 +188,7 @@ class ApiController extends BaseController
 	}
 
 	/** Stuff */
-
+o
 	/**
 	 * @return EncryptorInterface
 	 */
