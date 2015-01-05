@@ -194,7 +194,8 @@ class SyrupJsonFormatter extends JsonFormatter
 			case Logger::EMERGENCY:
 			case Logger::ALERT:
 				$type = Event::TYPE_ERROR;
-				$sapiEvent->setMessage("Application error. Contact support@keboola.com");
+				$sapiEvent->setMessage("Application error");
+				$sapiEvent->setDescription("Contact support@keboola.com");
 				$sapiEvent->setParams([]);
 				break;
 			case Logger::WARNING:
