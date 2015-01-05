@@ -1,6 +1,7 @@
 <?php
 namespace Syrup\ComponentBundle\Tests\Job;
 
+use Syrup\ComponentBundle\Exception\JobWarningException;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 
 class Executor extends \Syrup\ComponentBundle\Job\Executor
@@ -9,9 +10,6 @@ class Executor extends \Syrup\ComponentBundle\Job\Executor
 	{
 		parent::execute($job);
 
-		$job->setResult(array('testing' => 'value'));
-		$job->setStatus(Job::STATUS_WARNING);
-
-		return $job;
+		throw new JobWarningException(400, 'One of orchestration tasks failed', null, array('testing' => 'value'));
 	}
 }

@@ -36,7 +36,7 @@ class JobCommandTest extends KernelTestCase
 
 		$encryptedToken = $kernel->getContainer()->get('syrup.encryptor')->encrypt($token);
 
-		// bc test
+		// job execution test
 		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
 
 		$application = new Application($kernel);
