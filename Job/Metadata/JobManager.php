@@ -248,6 +248,7 @@ class JobManager
 			$res = $hit['_source'];
 			$res['_index'] = $hit['_index'];
 			$res['_type'] = $hit['_type'];
+			$res['id'] = (int) $res['id'];
 			$results[] = $res;
 		}
 

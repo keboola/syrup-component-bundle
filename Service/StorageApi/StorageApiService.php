@@ -11,7 +11,7 @@ namespace Syrup\ComponentBundle\Service\StorageApi;
 use Keboola\StorageApi\Client;
 use Symfony\Component\HttpFoundation\Request;
 use Syrup\ComponentBundle\Exception\NoRequestException;
-use Syrup\ComponentBundle\Exception\SyrupComponentException;
+use Syrup\ComponentBundle\Exception\UserException;
 
 class StorageApiService
 {
@@ -41,7 +41,7 @@ class StorageApiService
 			}
 
 			if (!$this->request->headers->has('X-StorageApi-Token')) {
-				throw new SyrupComponentException(400, 'Missing StorageAPI token.');
+				throw new UserException('Missing StorageAPI token');
 			}
 
 			if ($this->request->headers->has('X-StorageApi-Url')) {
