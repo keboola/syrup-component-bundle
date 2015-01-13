@@ -1,3 +1,40 @@
+## 1.10.17
+ * [Fix]        Job id forced to int in JobManager::getJobs method
+ * [Fix]        "Missing SotrageApi token" exception is now a UserException
+ 
+## 1.10.16
+ * [Refactor]   Logging to SAPI, small text change
+
+## 1.10.15
+ * [Refactor]   Logging to SAPI events: Removed description added job and request info
+ 
+## 1.10.14
+ * [Feat]       Log some information when creating new Job
+
+## 1.10.13
+ * [Fix]        Typo
+
+## 1.10.12      
+ * [Feat]       New job status "warning"
+
+## 1.10.11
+ * [Fix]        GenerateComponentCommand: parameters.yml indentation
+
+## 1.10.10
+ * [Fix]        Don't log debug level to sapi events
+ 
+## 1.10.9
+ * [Fix]        Component generator was using deprecated dialogHelper
+
+## 1.10.8
+ * [Refactor]   Retry job on initialization error
+
+## 1.10.7
+ * [Fix]        SQS queue receive VisibilityTimeout set to 3600s to prevent duplication of messages from SQS
+ 
+## 1.10.6
+ * [Fix]        Don't log channel doctrine to sapi events
+
 ## 1.10.5
  * [Refactor]   SyrupComponentException now accepts 4th argument to constructor - $data - array of addtionial information for logging        
 

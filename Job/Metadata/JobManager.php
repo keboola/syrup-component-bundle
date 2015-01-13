@@ -194,8 +194,16 @@ class JobManager
 		return null;
 	}
 
-	public function getJobs($projectId, $component = null, $runId = null, $queryString=null, $offset=0, $limit=self::PAGING)
-	{
+	public function getJobs(
+		$projectId,
+		$component = null,
+		$runId = null,
+		$queryString = null,
+		$since = null,
+		$until = null,
+		$offset=0,
+		$limit=self::PAGING
+	) {
 		$filter = [];
 		$filter[] = ['term' => ['project.id' => $projectId]];
 
@@ -214,11 +222,29 @@ class JobManager
 			];
 		}
 
+		$rangeFilter = [];
+		if ($since != null) {
+			if ($until == null) {
+				$until = 'now';
+			}
+
+			$rangeFilter = [
+				'range' => ['createdTime'  => [
+					'gte' => date('c', strtotime($since)),
+					'lte' => date('c', strtotime($until)),
+				]]
+			];
+		}
+
 		$params = [];
 		$params['index'] = $this->config['index_prefix'] . '_syrup_*';
 
 		if (!is_null($component)) {
 			$params['index'] = $this->config['index_prefix'] . '_syrup_' . $component;
+		}
+
+		if (!empty($rangeFilter)) {
+			$filter[] = $rangeFilter;
 		}
 
 		$params['body'] = [
