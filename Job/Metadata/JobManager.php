@@ -201,8 +201,8 @@ class JobManager
 		$queryString = null,
 		$since = null,
 		$until = null,
-		$offset=0,
-		$limit=self::PAGING
+		$offset = 0,
+		$limit = self::PAGING
 	) {
 		$filter = [];
 		$filter[] = ['term' => ['project.id' => $projectId]];

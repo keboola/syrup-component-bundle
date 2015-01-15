@@ -58,61 +58,62 @@ class JobCommand extends ContainerAwareCommand
 		;
 	}
 
-	protected function initialize(InputInterface $input, OutputInterface $output)
+	protected function init($jobId)
+	{
+		// Get job from ES
+		$this->job = $this->getJobManager()->getJob($jobId);
+
+		if ($this->job == null) {
+			$this->logger->error("Job id '".$jobId."' not found.");
+			return self::STATUS_ERROR;
+		}
+
+		// SAPI init
+		/** @var EncryptorInterface $encryptor */
+		$encryptor = $this->getContainer()->get('syrup.encryptor');
+
+		$this->sapiClient = new SapiClient([
+			'token'     => $encryptor->decrypt($this->job->getToken()['token']),
+			'url'       => $this->getContainer()->getParameter('storage_api.url'),
+			'userAgent' => $this->job->getComponent(),
+		]);
+		$this->sapiClient->setRunId($this->job->getRunId());
+
+		/** @var SyrupJsonFormatter $logFormatter */
+		$logFormatter = $this->getContainer()->get('syrup.monolog.json_formatter');
+		$logFormatter->setStorageApiClient($this->sapiClient);
+		$logFormatter->setJob($this->job);
+
+		// Lock DB
+		/** @var Connection $conn */
+		$conn = $this->getContainer()->get('doctrine.dbal.lock_connection');
+		$conn->exec('SET wait_timeout = 31536000;');
+		$this->lock = new Lock($conn, $this->job->getLockName());
+	}
+
+	protected function execute(InputInterface $input, OutputInterface $output)
 	{
 		$jobId = $input->getArgument('jobId');
-
-		if (is_null($jobId)) {
-			throw new UserException("Missing jobId argument.");
-		}
 
 		$this->logger = $this->getContainer()->get('logger');
 
 		try {
-			// Get job from ES
-			$this->job = $this->getJobManager()->getJob($jobId);
-
-			if ($this->job == null) {
-				$this->logger->error("Job id '".$jobId."' not found.");
-				return self::STATUS_ERROR;
-			}
-
-			// SAPI init
-			/** @var EncryptorInterface $encryptor */
-			$encryptor = $this->getContainer()->get('syrup.encryptor');
-
-			$this->sapiClient = new SapiClient([
-				'token'     => $encryptor->decrypt($this->job->getToken()['token']),
-				'url'       => $this->getContainer()->getParameter('storage_api.url'),
-				'userAgent' => $this->job->getComponent(),
-			]);
-			$this->sapiClient->setRunId($this->job->getRunId());
-
-			/** @var SyrupJsonFormatter $logFormatter */
-			$logFormatter = $this->getContainer()->get('syrup.monolog.json_formatter');
-			$logFormatter->setStorageApiClient($this->sapiClient);
-			$logFormatter->setJob($this->job);
-
-			// Lock DB
-			/** @var Connection $conn */
-			$conn = $this->getContainer()->get('doctrine.dbal.lock_connection');
-			$conn->exec('SET wait_timeout = 31536000;');
-			$this->lock = new Lock($conn, $this->job->getLockName());
-
+			$this->init($jobId);
 		} catch (\Exception $e) {
 
 			// Initialization error -> job will be requeued
 			$this->logException('error', $e);
 
 			// Don't update job status or result -> error could be related to ES
-			// Don't unlock DB, error happend either before lock creation or when creating the lock, so the DB isn't locked
+			// Don't unlock DB, error happened either before lock creation or when creating the lock, so the DB isn't locked
 
 			return self::STATUS_RETRY;
 		}
-	}
 
-	protected function execute(InputInterface $input, OutputInterface $output)
-	{
+		if (is_null($jobId)) {
+			throw new UserException("Missing jobId argument.");
+		}
+
 		if (!$this->lock->lock()) {
 			return self::STATUS_LOCK;
 		}

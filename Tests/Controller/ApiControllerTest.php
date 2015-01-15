@@ -5,7 +5,6 @@ namespace Syrup\ComponentBundle\Tests\Controller;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\HttpFoundation\Request;
 use Syrup\ComponentBundle\Controller\ApiController;
-use Syrup\ComponentBundle\Exception\UserException;
 use Syrup\ComponentBundle\Test\WebTestCase;
 
 /**

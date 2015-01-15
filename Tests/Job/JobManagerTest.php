@@ -172,7 +172,9 @@ class JobManagerTest extends WebTestCase
 			$retries++;
 
 			$projectId = $job->getProject()['id'];
+
 			$res = self::$jobManager->getJobs($projectId, self::$component, null, null, '-1 day', 'now');
+
 			if (count($res) >= 2) {
 				break;
 			}
