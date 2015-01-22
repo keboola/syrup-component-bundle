@@ -3,7 +3,7 @@
 <project name="SyrupComponentBundle" default="build">
 
     <target name="build"
-            depends="prepare,composerInstall,phpunit"/>
+            depends="prepare,composerInstall,initTestEnvironment,phpunit"/>
 
     <target name="clean" description="Cleanup build artifacts">
         <delete file="${basedir}/composer.phar"/>
@@ -25,6 +25,14 @@
             <arg value="-n"/>
         </exec>
     </target>
+    <target name="initTestEnvironment" depends="composerInstall">
+        <exec executable="php" failonerror="true">
+            <arg value="${basedir}/vendor/keboola/syrup/app/console"/>
+            <arg value="cache:clear"/>
+            <arg value="--env=test"/>
+        </exec>
+    </target>
+
     <target name="phpunit" description="Run unit tests with PHPUnit">
         <exec executable="phpunit" failonerror="true">
             <arg value="--configuration"/>
