@@ -46,5 +46,6 @@
 	"autoload": {
 		"psr-0": { "Syrup\\ComponentBundle": "" }
 	},
-	"target-dir": "Syrup/ComponentBundle"
+	"target-dir": "Syrup/ComponentBundle",
+  	"minimum-stability": "stable"
 }
