@@ -121,7 +121,8 @@ class JobManager
 		if (!$response['created']) {
 			$e = new ApplicationException("Unable to index job");
 			$e->setData(array(
-				'job'   => $jobData
+				'job' => $jobData,
+				'elasticResponse' => $response
 			));
 			throw $e;
 		}
