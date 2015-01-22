@@ -1,11 +1,6 @@
-## 1.11.0      
- * [Fix]        1.10.18 was a BC break, therefore new tag 1.11.0
- * [Chore]      Added elastic search response to JobManager::indexJob
-
-## 1.10.19
- * [Refactor]   JobCommand initialization method replaced with simpler init method, which is called from execute method. This ensures better error handling during init. 
-
-## 1.10.18
+## 1.11.0
+ * [Chore]      Added elastic search response to JobManager::indexJob logging
+ * [Refactor]   JobCommand initialization method replaced with simpler init method, which is called from execute method. This ensures better error handling during init.
  * [BC Break]   JobManager::getJobs now supports 'since' and 'until' arguments to limit query result
 
 ## 1.10.17
