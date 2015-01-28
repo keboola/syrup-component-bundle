@@ -97,11 +97,18 @@ class SyrupExceptionListener
 
 		$code = ($exception->getCode() < 300 || $exception->getCode() >= 600) ? 500 : $exception->getCode();
 
+		// exception is by default Application Exception
+		$isUserException = false;
+
 		// HttpExceptionInterface is a special type of exception that
 		// holds status code and header details
 		if ($exception instanceof HttpExceptionInterface) {
 			$code = $exception->getStatusCode();
 			$response->headers->replace($exception->getHeaders());
+
+			if ($code < 500) {
+				$isUserException = true;
+			}
 		}
 
 		$content = array(
@@ -115,7 +122,7 @@ class SyrupExceptionListener
 		);
 
 		$method = 'critical';
-		if ($exception instanceof UserException) {
+		if ($isUserException) {
 			$method = 'error';
 			$content['error'] = 'User error';
 			$content['message'] = $exception->getMessage();
