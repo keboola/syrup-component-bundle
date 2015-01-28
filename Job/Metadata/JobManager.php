@@ -196,20 +196,28 @@ class JobManager
 	}
 
 	public function getJobs(
-		$projectId,
+		$projectId = null,
 		$component = null,
 		$runId = null,
 		$queryString = null,
 		$since = null,
 		$until = null,
 		$offset = 0,
-		$limit = self::PAGING
+		$limit = self::PAGING,
+		$status = null
 	) {
 		$filter = [];
-		$filter[] = ['term' => ['project.id' => $projectId]];
+
+		if ($projectId != null) {
+			$filter[] = ['term' => ['project.id' => $projectId]];
+		}
 
 		if ($runId != null) {
 			$filter[] = ['term' => ['runId' => $runId]];
+		}
+
+		if ($status != null) {
+			$filter[] = ['term' => ['status' => $status]];
 		}
 
 		$query = ['match_all' => []];
