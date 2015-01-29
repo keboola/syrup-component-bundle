@@ -16,33 +16,38 @@ use Syrup\ComponentBundle\Job\Metadata\JobManager;
 
 class JobCommandTest extends KernelTestCase
 {
-	/** @var SapiClient */
-	protected $sapi;
+    /**
+     * @var Application
+     */
+    protected $application;
+
+    /** @var SapiClient */
+	protected $storageApiClient;
+
+    protected function setUp()
+    {
+        $this->createKernel();
+        $this->bootKernel();
+
+        $this->storageApiClient = new SapiClient([
+            'token' => self::$kernel->getContainer()->getParameter('storage_api.test.token'),
+            'userAgent' => 'Syrup Component Bundle TEST'
+        ]);
+
+        $this->application = new Application(self::$kernel);
+        $this->application->add(new JobCommand());
+    }
 
 	public function testRunjob()
 	{
-		$kernel = $this->createKernel();
-		$kernel->boot();
-
 		/** @var JobManager $jobManager */
-		$jobManager = $kernel->getContainer()->get('syrup.job_manager');
-
-		$token = $kernel->getContainer()->getParameter('storage_api.test.token');
-
-		$this->sapi = new SapiClient([
-			'token' => $token,
-			'userAgent' => 'Syrup Component Bundle TEST'
-		]);
-
-		$encryptedToken = $kernel->getContainer()->get('syrup.encryptor')->encrypt($token);
+		$jobManager = self::$kernel->getContainer()->get('syrup.job_manager');
+		$encryptedToken = self::$kernel->getContainer()->get('syrup.encryptor')->encrypt(self::$kernel->getContainer()->getParameter('storage_api.test.token'));
 
 		// job execution test
 		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
 
-		$application = new Application($kernel);
-		$application->add(new JobCommand());
-
-		$command = $application->find('syrup:run-job');
+		$command = $this->application->find('syrup:run-job');
 		$commandTester = new CommandTester($command);
 		$commandTester->execute(
 			array(
@@ -56,14 +61,13 @@ class JobCommandTest extends KernelTestCase
 		$this->assertEquals($job->getStatus(), Job::STATUS_SUCCESS);
 
 		// replace executor with testing executor
-		$kernel->getContainer()->set('syrup.job_executor', new \Syrup\ComponentBundle\Tests\Job\Executor());
+        self::$kernel->getContainer()->set('syrup.job_executor', new \Syrup\ComponentBundle\Tests\Job\Executor());
 
 		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
 
-		$application = new Application($kernel);
-		$application->add(new JobCommand());
 
-		$command = $application->find('syrup:run-job');
+
+		$command = $this->application->find('syrup:run-job');
 		$commandTester = new CommandTester($command);
 		$commandTester->execute(
 			array(
@@ -81,8 +85,8 @@ class JobCommandTest extends KernelTestCase
 	protected function createJob($token)
 	{
 		return new Job([
-			'id'    => $this->sapi->generateId(),
-			'runId'     => $this->sapi->generateId(),
+			'id'    => $this->storageApiClient->generateId(),
+			'runId'     => $this->storageApiClient->generateId(),
 			'project'   => [
 				'id'        => '123',
 				'name'      => 'Syrup Component Bundle TEST'

@@ -1,0 +1,18 @@
+branches:
+  only:
+  - master
+sudo: false
+language: php
+php:
+- '5.6'
+- '5.4'
+services:
+- mysql
+- elasticsearch
+before_script:
+- mysql -e 'create database syrup;'
+- composer self-update
+- composer install -n --no-scripts
+notifications:
+  slack:
+    secure: I73TdwZCz04fIrLIM8kctaZd6uyVhqBZXs1L6wFC2lhyUFX+L5kxKRldOyBrQp1v5SL+wkuok+CBPmqxa1e75fWYA7Zsi/VpH+XFnG2zCjuq1+v9wXjiWMVp75aL24kcsm6WiXqqpEIrpnaO99+nXDuT9+Os/+0COW0wN1sfwjg=
