@@ -94,3 +94,4 @@ $db->insert('queues', [
 ]);
 
 passthru(sprintf('php "%s/../vendor/keboola/syrup/app/console" cache:clear --env=test --no-warmup', __DIR__));
+passthru(sprintf('php "%s/../vendor/keboola/syrup/app/console" syrup:create-index -d', __DIR__));
