@@ -54,22 +54,26 @@ class ApiController extends BaseController
 	    $job = $this->createJob('run', $params);
 
 	    // Add job to Elasticsearch
-	    $this->logger->info('Creating job in ES');
 	    try {
 		    $jobId = $this->getJobManager()->indexJob($job);
 	    } catch (\Exception $e) {
 		    throw new ApplicationException("Failed to create job", $e);
 	    }
-	    $this->logger->info(sprintf('Job %s created in ES', $jobId));
 
 	    // Add job to SQS
 	    $queueName = 'default';
 	    $queueParams = $this->container->getParameter('queue');
+
 	    if (isset($queueParams['sqs'])) {
 		    $queueName = $queueParams['sqs'];
 	    }
-	    $this->enqueue($jobId, $queueName);
-	    $this->logger->info(sprintf('Job %s queued to %s queue', $jobId, $queueName));
+	    $messageId = $this->enqueue($jobId, $queueName);
+
+	    $this->logger->info(sprintf('Job %s created', $jobId), [
+		    'jobId'         => $jobId,
+		    'sqsQueue'      => $queueName,
+		    'sqsMessageId'  => $messageId
+	    ]);
 
 	    // Response with link to job resource
 	    return $this->createJsonResponse([
@@ -167,10 +171,10 @@ class ApiController extends BaseController
 
 	/**
 	 * Add JobId to queue
-	 *
 	 * @param        $jobId
 	 * @param string $queueName
 	 * @param array  $otherData
+	 * @return int $messageId
 	 */
 	protected function enqueue($jobId, $queueName = 'default', $otherData = [])
 	{
@@ -185,7 +189,8 @@ class ApiController extends BaseController
 
 		/** @var QueueService $queue */
 		$queue = $this->container->get('syrup.queue_factory')->get($queueName);
-		$queue->enqueue($data);
+
+		return $queue->enqueue($data);
 	}
 
 	/** Stuff */

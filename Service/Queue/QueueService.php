@@ -27,8 +27,10 @@ class QueueService
 		$this->queueUrl = $config['url'];
 	}
 
-
 	/**
+	 * @param     $body
+	 * @param int $delay
+	 * @return int $messageId
 	 */
 	public function enqueue($body, $delay = 0)
 	{

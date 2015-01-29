@@ -171,8 +171,9 @@ class JobCommand extends ContainerAwareCommand
 				'exceptionId'   => $exceptionId
 			];
 
-			if ($e->getData())
+			if ($e->getData()) {
 				$jobResult += $e->getData();
+			}
 
 			$jobStatus = Job::STATUS_WARNING;
 			$status = self::STATUS_SUCCESS;
