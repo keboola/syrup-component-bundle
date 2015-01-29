@@ -93,5 +93,7 @@ $db->insert('queues', [
     'url' => 'https://sqs.us-east-1.amazonaws.com/147946154733/syrup_devel'
 ]);
 
+passthru('php vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php '
+    . 'vendor/keboola/syrup/app vendor');
 passthru(sprintf('php "%s/../vendor/keboola/syrup/app/console" cache:clear --env=test', __DIR__));
 passthru(sprintf('php "%s/../vendor/keboola/syrup/app/console" syrup:create-index -d', __DIR__));
