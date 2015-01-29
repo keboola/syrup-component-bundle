@@ -17,7 +17,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Syrup\ComponentBundle\Exception\JobException;
-use Syrup\ComponentBundle\Exception\JobWarningException;
 use Syrup\ComponentBundle\Exception\SyrupExceptionInterface;
 use Syrup\ComponentBundle\Exception\UserException;
 use Keboola\StorageApi\Client as SapiClient;

@@ -1,5 +1,6 @@
 <?php
 namespace Syrup\ComponentBundle\Exception;
+
 use Syrup\ComponentBundle\Job\Metadata\Job;
 
 /***
