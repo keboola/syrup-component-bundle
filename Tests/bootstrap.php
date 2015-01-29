@@ -70,15 +70,16 @@ $paramsYaml = \Symfony\Component\Yaml\Yaml::dump([
     ]
 ]);
 file_put_contents(__DIR__ . '/../vendor/keboola/syrup/app/config/parameters.yml', $paramsYaml);
+touch(__DIR__ . '/../vendor/keboola/syrup/app/config/parameters_shared.yml');
 
-$db = \Doctrine\DBAL\DriverManager::getConnection(array(
+$db = \Doctrine\DBAL\DriverManager::getConnection([
     'driver' => 'pdo_mysql',
     'host' => SYRUP_DATABASE_HOST,
     'dbname' => SYRUP_DATABASE_NAME,
     'user' => SYRUP_DATABASE_USER,
     'password' => SYRUP_DATABASE_PASSWORD,
     'port' => SYRUP_DATABASE_PORT
-));
+]);
 
 $stmt = $db->prepare(file_get_contents(__DIR__ . '/db.sql'));
 $stmt->execute();
@@ -91,3 +92,5 @@ $db->insert('queues', [
     'region' => 'us-east-1',
     'url' => 'https://sqs.us-east-1.amazonaws.com/147946154733/syrup_devel'
 ]);
+
+passthru(sprintf('php "%s/../vendor/keboola/syrup/app/console" cache:clear --env=test --no-warmup', __DIR__));
