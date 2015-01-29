@@ -16,6 +16,7 @@ setupConst('SYRUP_BITLY_LOGIN');
 setupConst('SYRUP_BITLY_KEY');
 setupConst('SYRUP_SAPI_TEST_TOKEN');
 setupConst('SYRUP_ELASTICSEARCH_HOST');
+setupConst('SYRUP_SQS_URL');
 
 $paramsYaml = \Symfony\Component\Yaml\Yaml::dump([
     'parameters' => [
@@ -90,7 +91,7 @@ $db->insert('queues', [
     'access_key' => getenv('SYRUP_AWS_KEY'),
     'secret_key' => getenv('SYRUP_AWS_SECRET'),
     'region' => 'us-east-1',
-    'url' => 'https://sqs.us-east-1.amazonaws.com/147946154733/syrup_devel'
+    'url' => SYRUP_SQS_URL
 ]);
 
 passthru('php vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php '
