@@ -88,8 +88,8 @@ $stmt->closeCursor();
 
 $db->insert('queues', [
     'id' => 'default',
-    'access_key' => getenv('SYRUP_AWS_KEY'),
-    'secret_key' => getenv('SYRUP_AWS_SECRET'),
+    'access_key' => SYRUP_AWS_KEY,
+    'secret_key' => SYRUP_AWS_SECRET,
     'region' => 'us-east-1',
     'url' => SYRUP_SQS_URL
 ]);
