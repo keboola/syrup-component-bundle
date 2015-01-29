@@ -1,8 +1,8 @@
 vendor
 composer.phar
-composer.lock
 phpunit.xml
 .idea
 parameters.yml
 *.kdev4
 .DS_Store
+build

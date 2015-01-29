@@ -7,12 +7,13 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          processIsolation="false"
-         stopOnFailure="false"
+         stopOnFailure="true"
+         stopOnError="true"
          syntaxCheck="false"
-         bootstrap="vendor/autoload.php">
+         bootstrap="Tests/bootstrap.php">
     <php>
         <server name="KERNEL_DIR" value="vendor/keboola/syrup/app/" />
-        <ini name="date.timezone" value="Europe/Prague"></ini>
+        <ini name="date.timezone" value="Europe/Prague"/>
     </php>
     <testsuites>
         <testsuite name="Syrup Component Bundle Tests">
@@ -23,6 +24,19 @@
             <directory>Tests/Logger</directory>
             <directory>Tests/Service</directory>
         </testsuite>
+        <testsuite name="unit">
+            <directory>Tests/Encryptor</directory>
+        </testsuite>
     </testsuites>
-
+    <filter>
+        <blacklist>
+            <directory>vendor</directory>
+        </blacklist>
+    </filter>
+    <!--logging>
+        <log type="coverage-html" target="build/coverage" title="syrup-component-bundle"
+             charset="UTF-8" yui="true" highlight="true" lowUpperBound="35" highLowerBound="70"/>
+        <log type="coverage-clover" target="build/logs/clover.xml"/>
+        <log type="junit" target="build/logs/junit.xml" logIncompleteSkipped="false"/>
+    </logging-->
 </phpunit>

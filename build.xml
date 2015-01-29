@@ -6,10 +6,20 @@
             depends="prepare,composerInstall,initTestEnvironment,phpunit"/>
 
     <target name="clean" description="Cleanup build artifacts">
+        <delete dir="${basedir}/build/api"/>
+        <delete dir="${basedir}/build/code-browser"/>
+        <delete dir="${basedir}/build/coverage"/>
+        <delete dir="${basedir}/build/logs"/>
+        <delete dir="${basedir}/build/pdepend"/>
         <delete file="${basedir}/composer.phar"/>
     </target>
 
     <target name="prepare" depends="clean" description="Prepare for build">
+        <mkdir dir="${basedir}/build/api"/>
+        <mkdir dir="${basedir}/build/code-browser"/>
+        <mkdir dir="${basedir}/build/coverage"/>
+        <mkdir dir="${basedir}/build/logs"/>
+        <mkdir dir="${basedir}/build/pdepend"/>
         <exec executable="bash">
             <arg value="-c"/>
             <arg value="curl -s http://getcomposer.org/installer | php"/>
@@ -18,19 +28,19 @@
 
     <target name="composerInstall" depends="prepare">
         <exec executable="php" failonerror="true">
-            <arg value="-d"/>
-            <arg value="memory_limit=-1"/>
             <arg value="composer.phar"/>
             <arg value="install"/>
-            <arg value="-n"/>
+            <arg value="--no-scripts"/>
         </exec>
     </target>
     <target name="initTestEnvironment" depends="composerInstall">
-        <exec executable="php" failonerror="true">
+        <touch file="${basedir}/vendor/keboola/syrup/app/config/parameters.yml" />
+        <touch file="${basedir}/vendor/keboola/syrup/app/config/parameters_shared.yml" />
+        <!--exec executable="php" failonerror="true">
             <arg value="${basedir}/vendor/keboola/syrup/app/console"/>
             <arg value="cache:clear"/>
-            <arg value="--env=test"/>
-        </exec>
+            <arg value="-\-env=test"/>
+        </exec-->
     </target>
 
     <target name="phpunit" description="Run unit tests with PHPUnit">
