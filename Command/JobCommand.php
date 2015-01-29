@@ -16,6 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Syrup\ComponentBundle\Exception\JobException;
 use Syrup\ComponentBundle\Exception\JobWarningException;
 use Syrup\ComponentBundle\Exception\SyrupExceptionInterface;
 use Syrup\ComponentBundle\Exception\UserException;
@@ -163,17 +164,23 @@ class JobCommand extends ContainerAwareCommand
 			$jobStatus = Job::STATUS_ERROR;
 			$status = self::STATUS_SUCCESS;
 
-		} catch (JobWarningException $e) {
-			$exceptionId = $this->logException('warning', $e);
+		} catch (JobException $e) {
+			$logLevel = 'error';
+			if ($e->getStatus() === Job::STATUS_WARNING) {
+				$logLevel = Job::STATUS_WARNING;
+			}
+
+			$exceptionId = $this->logException($logLevel, $e);
 			$jobResult = [
 				'message'       => $e->getMessage(),
 				'exceptionId'   => $exceptionId
 			];
 
-			if ($e->getData())
-				$jobResult += $e->getData();
+			if ($e->getResult()) {
+				$jobResult += $e->getResult();
+			}
 
-			$jobStatus = Job::STATUS_WARNING;
+			$jobStatus = $e->getStatus();
 			$status = self::STATUS_SUCCESS;
 		} catch (\Exception $e) {
             // make sure that the job is recorded as failed
