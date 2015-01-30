@@ -1,8 +1,13 @@
 syrup-component-bundle
 ======================
 
+[![Build Status](https://travis-ci.org/keboola/syrup-component-bundle.svg?branch=master)](https://travis-ci.org/keboola/syrup-component-bundle)
+
 Syrup's backbone
 
 http://documentation.keboola.com/syrup/component-bundle
 
-Syrup Component Bundle provides all basic functionality which is common to all Syrup Components like logging, routing, exception handling, providing services as Storage API, Shared Config, file handling and so on.
+Syrup Component Bundle provides all basic functionality which is common to all Syrup Components like logging, routing,
+exception handling, providing services as Storage API, Shared Config, file handling and so on.
+
+See [wiki for more information](https://github.com/keboola/syrup-component-bundle/wiki)
