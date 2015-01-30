@@ -65,10 +65,7 @@ class JobCommandTest extends KernelTestCase
 
 		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
 
-		$application = new Application($kernel);
-		$application->add(new JobCommand());
-
-		$command = $application->find('syrup:run-job');
+		$this->application->find('syrup:run-job');
 		$commandTester = new CommandTester($command);
 		$commandTester->execute(
 			array(
@@ -87,10 +84,7 @@ class JobCommandTest extends KernelTestCase
 
 		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
 
-		$application = new Application($kernel);
-		$application->add(new JobCommand());
-
-		$command = $application->find('syrup:run-job');
+		$this->application->find('syrup:run-job');
 		$commandTester = new CommandTester($command);
 		$commandTester->execute(
 			array(
@@ -109,10 +103,7 @@ class JobCommandTest extends KernelTestCase
 
 		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
 
-		$application = new Application($kernel);
-		$application->add(new JobCommand());
-
-		$command = $application->find('syrup:run-job');
+		$this->application->find('syrup:run-job');
 		$commandTester = new CommandTester($command);
 		$commandTester->execute(
 			array(
