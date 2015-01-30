@@ -60,14 +60,15 @@ class JobCommandTest extends KernelTestCase
 		$job = $jobManager->getJob($jobId);
 		$this->assertEquals($job->getStatus(), Job::STATUS_SUCCESS);
 
-		// replace executor with testing executor
-        self::$kernel->getContainer()->set('syrup.job_executor', new \Syrup\ComponentBundle\Tests\Job\Executor());
+		// replace executor with warning executor
+		$kernel->getContainer()->set('syrup.job_executor', new \Syrup\ComponentBundle\Tests\Job\WarningExecutor());
 
 		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
 
+		$application = new Application($kernel);
+		$application->add(new JobCommand());
 
-
-		$command = $this->application->find('syrup:run-job');
+		$command = $application->find('syrup:run-job');
 		$commandTester = new CommandTester($command);
 		$commandTester->execute(
 			array(
@@ -80,6 +81,50 @@ class JobCommandTest extends KernelTestCase
 		$job = $jobManager->getJob($jobId);
 		$this->assertArrayHasKey('testing', $job->getResult());
 		$this->assertEquals($job->getStatus(), Job::STATUS_WARNING);
+
+		// replace executor with success executor
+		$kernel->getContainer()->set('syrup.job_executor', new \Syrup\ComponentBundle\Tests\Job\SuccessExecutor());
+
+		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
+
+		$application = new Application($kernel);
+		$application->add(new JobCommand());
+
+		$command = $application->find('syrup:run-job');
+		$commandTester = new CommandTester($command);
+		$commandTester->execute(
+			array(
+				'jobId'   => $jobId
+			)
+		);
+
+		$this->assertEquals(0, $commandTester->getStatusCode());
+
+		$job = $jobManager->getJob($jobId);
+		$this->assertArrayHasKey('testing', $job->getResult());
+		$this->assertEquals($job->getStatus(), Job::STATUS_SUCCESS);
+
+		// replace executor with error executor
+		$kernel->getContainer()->set('syrup.job_executor', new \Syrup\ComponentBundle\Tests\Job\ErrorExecutor());
+
+		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
+
+		$application = new Application($kernel);
+		$application->add(new JobCommand());
+
+		$command = $application->find('syrup:run-job');
+		$commandTester = new CommandTester($command);
+		$commandTester->execute(
+			array(
+				'jobId'   => $jobId
+			)
+		);
+
+		$this->assertEquals(0, $commandTester->getStatusCode());
+
+		$job = $jobManager->getJob($jobId);
+		$this->assertArrayHasKey('testing', $job->getResult());
+		$this->assertEquals($job->getStatus(), Job::STATUS_ERROR);
 	}
 
 	protected function createJob($token)
