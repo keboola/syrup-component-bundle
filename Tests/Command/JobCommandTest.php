@@ -61,7 +61,7 @@ class JobCommandTest extends KernelTestCase
 		$this->assertEquals($job->getStatus(), Job::STATUS_SUCCESS);
 
 		// replace executor with warning executor
-		$kernel->getContainer()->set('syrup.job_executor', new \Syrup\ComponentBundle\Tests\Job\WarningExecutor());
+		self::$kernel->getContainer()->set('syrup.job_executor', new \Syrup\ComponentBundle\Tests\Job\WarningExecutor());
 
 		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
 
@@ -83,7 +83,7 @@ class JobCommandTest extends KernelTestCase
 		$this->assertEquals($job->getStatus(), Job::STATUS_WARNING);
 
 		// replace executor with success executor
-		$kernel->getContainer()->set('syrup.job_executor', new \Syrup\ComponentBundle\Tests\Job\SuccessExecutor());
+		self::$kernel->getContainer()->set('syrup.job_executor', new \Syrup\ComponentBundle\Tests\Job\SuccessExecutor());
 
 		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
 
@@ -105,7 +105,7 @@ class JobCommandTest extends KernelTestCase
 		$this->assertEquals($job->getStatus(), Job::STATUS_SUCCESS);
 
 		// replace executor with error executor
-		$kernel->getContainer()->set('syrup.job_executor', new \Syrup\ComponentBundle\Tests\Job\ErrorExecutor());
+		self::$kernel->getContainer()->set('syrup.job_executor', new \Syrup\ComponentBundle\Tests\Job\ErrorExecutor());
 
 		$jobId = $jobManager->indexJob($this->createJob($encryptedToken));
 
