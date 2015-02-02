@@ -1,3 +1,6 @@
+## 1.12.1       
+ * [Chore]      Added HookExecutorInterface, method HookExecutorInterface::postExecution implemented in JobCommand (runs after job is executed)
+
 ## 1.12.0       
  * [Test]       Added CI tests
  * [BC Break]   JobWarningException renamed to JobException, this exception can store Job result, which is saved to ES, when Job terminates with this exception
