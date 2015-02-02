@@ -1,3 +1,7 @@
+## 1.12.0       
+ * [Test]       Added CI tests
+ * [BC Break]   JobWarningException renamed to JobException, this exception can store Job result, which is saved to ES, when Job terminates with this exception
+
 ## 1.11.0
  * [Chore]      Added elastic search response to JobManager::indexJob logging
  * [Refactor]   JobCommand initialization method replaced with simpler init method, which is called from execute method. This ensures better error handling during init.
@@ -5,7 +9,7 @@
 
 ## 1.10.17
  * [Fix]        Job id forced to int in JobManager::getJobs method
- * [Fix]        "Missing SotrageApi token" exception is now a UserException
+ * [Fix]        "Missing StorageApi token" exception is now a UserException
  
 ## 1.10.16
  * [Refactor]   Logging to SAPI, small text change

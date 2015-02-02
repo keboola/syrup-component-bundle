@@ -22,6 +22,7 @@ use Syrup\ComponentBundle\Exception\UserException;
 use Keboola\StorageApi\Client as SapiClient;
 use Syrup\ComponentBundle\Job\Exception\InitializationException;
 use Syrup\ComponentBundle\Job\ExecutorInterface;
+use Syrup\ComponentBundle\Job\HookExecutorInterface;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 use Syrup\ComponentBundle\Job\Metadata\JobManager;
 use Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter;
@@ -210,6 +211,16 @@ class JobCommand extends ContainerAwareCommand
 		$this->job->setEndTime(date('c', $endTime));
 		$this->job->setDurationSeconds($duration);
 		$this->jobManager->updateJob($this->job);
+
+		// postExecution action
+		try {
+			if ($jobExecutor instanceof HookExecutorInterface) {
+				/** @var HookExecutorInterface $jobExecutor */
+				$jobExecutor->postExecution($this->job);
+			}
+		} catch (\Exception $e) {
+			$this->logException('critical', $e);
+		}
 
 		// DB unlock
 		$this->lock->unlock();
