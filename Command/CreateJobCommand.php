@@ -20,6 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 use Syrup\ComponentBundle\Job\Metadata\JobManager;
 use Syrup\ComponentBundle\Service\Queue\QueueService;
+use Syrup\ComponentBundle\Service\StorageApi\StorageApiService;
 
 class CreateJobCommand extends ContainerAwareCommand
 {
@@ -57,6 +58,9 @@ class CreateJobCommand extends ContainerAwareCommand
 			'token'     => $token,
 			'userAgent' => $this->componentName
 		]);
+		/** @var StorageApiService $storageApiService */
+		$storageApiService = $this->getContainer()->get('storage_api');
+		$storageApiService->setClient($this->storageApi);
 
 		$this->encryptor = $this->getContainer()->get('syrup.encryptor');
 

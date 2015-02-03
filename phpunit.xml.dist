@@ -25,7 +25,8 @@
             <directory>Tests/Service</directory>
         </testsuite>
         <testsuite name="unit">
-            <directory>Tests/Encryptor</directory>
+            <directory>Tests/Aws</directory>
+            <directory>Tests/Monolog</directory>
         </testsuite>
     </testsuites>
     <filter>

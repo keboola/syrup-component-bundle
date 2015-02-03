@@ -129,15 +129,17 @@ class SyrupExceptionListener
 		}
 
 		$logData = array(
-			'request'       => $requestData,
 			'exception'     => $exception,
 			'exceptionId'   => $exceptionId,
 		);
 
 		// SyrupExceptionInterface holds additional data
 		if ($exception instanceof SyrupExceptionInterface) {
-			$content['data'] = $exception->getData();
-			$logData['data'] = $exception->getData();
+			$data = $exception->getData();
+			if ($data) {
+				$content['data'] = $exception->getData();
+				$logData['data'] = $exception->getData();
+			}
 		}
 
 		$response->setContent(json_encode($content));

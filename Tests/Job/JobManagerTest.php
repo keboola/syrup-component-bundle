@@ -14,8 +14,6 @@ use Syrup\ComponentBundle\Job\Metadata\JobManager;
 
 class JobManagerTest extends WebTestCase
 {
-	protected static $component = 'syrup-component-bundle';
-
 	/** @var JobManager */
 	protected static $jobManager;
 
@@ -38,9 +36,9 @@ class JobManagerTest extends WebTestCase
 		self::$jobManager = self::$kernel->getContainer()->get('syrup.job_manager');
 
 		self::$sapiClient = new SapiClient([
-			'token'     => self::$kernel->getContainer()->getParameter('storage_api.test.token'),
-			'url'       => self::$kernel->getContainer()->getParameter('storage_api.test.url'),
-			'userAgent' => 'syrup-component-bundle-test',
+			'token' => self::$kernel->getContainer()->getParameter('storage_api.test.token'),
+			'url' => self::$kernel->getContainer()->getParameter('storage_api.test.url'),
+			'userAgent' => SYRUP_APP_NAME,
 		]);
 
 		self::$encryptor = self::$kernel->getContainer()->get('syrup.encryptor');
@@ -49,12 +47,12 @@ class JobManagerTest extends WebTestCase
 		$sapiData = self::$sapiClient->getLogData();
 		$projectId = $sapiData['owner']['id'];
 
-		$jobs = self::$jobManager->getJobs($projectId, self::$component);
+		$jobs = self::$jobManager->getJobs($projectId, SYRUP_APP_NAME);
 		foreach ($jobs as $job) {
 			self::$elasticClient->delete([
 				'index' => $job['_index'],
-				'type'  => $job['_type'],
-				'id'    => $job['id']
+				'type' => $job['_type'],
+				'id' => $job['id']
 			]);
 		}
 	}
@@ -75,7 +73,7 @@ class JobManagerTest extends WebTestCase
 				'description'   => $tokenData['description'],
 				'token'         => self::$encryptor->encrypt(self::$sapiClient->getTokenString())
 			],
-			'component' => self::$component,
+			'component' => SYRUP_APP_NAME,
 			'command'   => 'run',
 			'process'   => [
 				'host'  => 'test',
@@ -173,7 +171,7 @@ class JobManagerTest extends WebTestCase
 
 			$projectId = $job->getProject()['id'];
 
-			$res = self::$jobManager->getJobs($projectId, self::$component, null, null, '-1 day', 'now');
+			$res = self::$jobManager->getJobs($projectId, SYRUP_APP_NAME, null, null, '-1 day', 'now');
 
 			if (count($res) >= 2) {
 				break;

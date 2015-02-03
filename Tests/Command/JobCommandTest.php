@@ -9,7 +9,6 @@ use Keboola\StorageApi\Client as SapiClient;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Syrup\ComponentBundle\Command\JobCommand;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 use Syrup\ComponentBundle\Job\Metadata\JobManager;

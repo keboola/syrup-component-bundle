@@ -27,6 +27,7 @@ use Syrup\ComponentBundle\Job\Metadata\Job;
 use Syrup\ComponentBundle\Job\Metadata\JobManager;
 use Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter;
 use Syrup\ComponentBundle\Service\Db\Lock;
+use Syrup\ComponentBundle\Service\StorageApi\StorageApiService;
 
 class JobCommand extends ContainerAwareCommand
 {
@@ -79,6 +80,9 @@ class JobCommand extends ContainerAwareCommand
 			'userAgent' => $this->job->getComponent(),
 		]);
 		$this->sapiClient->setRunId($this->job->getRunId());
+		/** @var StorageApiService $storageApiService */
+		$storageApiService = $this->getContainer()->get('storage_api');
+		$storageApiService->setClient($this->sapiClient);
 
 		/** @var SyrupJsonFormatter $logFormatter */
 		$logFormatter = $this->getContainer()->get('syrup.monolog.json_formatter');
