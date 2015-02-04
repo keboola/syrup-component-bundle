@@ -100,6 +100,7 @@ class LogProcessor
 				$serialized = $eHandler->getContent($flattenException);
 
 				$record['exception'] = [
+					'class' => get_class($e),
 					'message' => $e->getMessage(),
 					'code' => $e->getCode(),
 					'attachment' => $this->s3Uploader->uploadString('exception', $serialized, 'text/html')

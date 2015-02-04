@@ -18,7 +18,7 @@ class UploaderTest extends \PHPUnit_Framework_TestCase
 	 * @covers Syrup\ComponentBundle\Aws\S3\Uploader::uploadString
 	 * @covers Syrup\ComponentBundle\Aws\S3\Uploader::uploadFile
 	 */
-	public function testProcessor()
+	public function testS3Uploader()
 	{
 		$s3Uploader = new Uploader([
 			'aws-access-key' => SYRUP_AWS_KEY,

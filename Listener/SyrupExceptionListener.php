@@ -44,28 +44,6 @@ class SyrupExceptionListener
 		$exception = $event->getException();
 		$exceptionId = $this->appName . '-' . md5(microtime());
 
-		$code = ($exception->getCode() < 300 || $exception->getCode() >= 600) ? 500 : $exception->getCode();
-
-		if ($exception instanceof HttpExceptionInterface) {
-			$code = $exception->getStatusCode();
-		}
-
-		$content = array(
-			'status' => 'error',
-			'error' => 'Application error',
-			'code' => $code,
-			'message' => 'Contact support@keboola.com and attach this exception id.',
-			'exceptionId' => $exceptionId,
-			'runId' => $this->runId
-		);
-
-		$method = 'critical';
-		if ($exception instanceof UserException) {
-			$method = 'error';
-			$content['error'] = 'User error';
-			$content['message'] = $exception->getMessage();
-		}
-
 		$logData = array(
 			'exception' => $exception,
 			'exceptionId' => $exceptionId,
@@ -74,10 +52,10 @@ class SyrupExceptionListener
 		// SyrupExceptionInterface holds additional data
 		if ($exception instanceof SyrupExceptionInterface) {
 			$logData['data'] = $exception->getData();
-			$content['data'] = $exception->getData();
 		}
 
 		// Log exception
+		$method = ($exception instanceof UserException) ? 'error' : 'critical';
 		$this->logger->$method($exception->getMessage(), $logData);
 	}
 
@@ -89,9 +67,7 @@ class SyrupExceptionListener
 			'body' => $event->getRequest()->getContent()
 		];
 
-		// You get the exception object from the received event
 		$exception = $event->getException();
-
 		$exceptionId = $this->appName . '-' . md5(microtime());
 
 		// Customize your response object to display the exception details
@@ -139,8 +115,7 @@ class SyrupExceptionListener
 		if ($exception instanceof SyrupExceptionInterface) {
 			$data = $exception->getData();
 			if ($data) {
-				$content['data'] = $exception->getData();
-				$logData['data'] = $exception->getData();
+				$logData['data'] = $data;
 			}
 		}
 
