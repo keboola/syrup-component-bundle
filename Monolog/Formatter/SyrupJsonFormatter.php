@@ -20,6 +20,11 @@ use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Event;
 use Syrup\ComponentBundle\Service\StorageApi\StorageApiService;
 
+/**
+ * Class SyrupJsonFormatter
+ * @package Syrup\ComponentBundle\Monolog\Formatter
+ * @deprecated
+ */
 class SyrupJsonFormatter extends JsonFormatter
 {
 	protected $appName;

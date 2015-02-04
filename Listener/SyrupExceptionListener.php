@@ -8,19 +8,14 @@
 namespace Syrup\ComponentBundle\Listener;
 
 use Symfony\Component\Console\Event\ConsoleExceptionEvent;
-use Symfony\Component\Debug\Exception\DummyException;
-use Symfony\Component\Debug\ErrorHandler;
-use Symfony\Component\Debug\Exception\FatalErrorException;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Monolog\Logger;
-use Syrup\ComponentBundle\Exception\ApplicationException;
+use Syrup\ComponentBundle\Exception\NoRequestException;
 use Syrup\ComponentBundle\Exception\SyrupExceptionInterface;
 use Syrup\ComponentBundle\Exception\UserException;
-use Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter;
-use Syrup\CoreBundle\Debug\ExceptionHandler;
+use Syrup\ComponentBundle\Service\StorageApi\StorageApiService;
 
 class SyrupExceptionListener
 {
@@ -29,18 +24,25 @@ class SyrupExceptionListener
 	 */
 	protected $logger;
 
-	protected $formatter;
+	protected $appName;
+	protected $runId;
 
-	public function __construct(Logger $logger, SyrupJsonFormatter $formatter)
+	public function __construct($appName, StorageApiService $storageApiService, Logger $logger)
 	{
+		$this->appName = $appName;
+		try {
+			$storageApiClient = $storageApiService->getClient();
+			$this->runId = $storageApiClient->getRunId();
+		} catch (NoRequestException $e) {
+		} catch (UserException $e) {
+		}
 		$this->logger = $logger;
-		$this->formatter = $formatter;
 	}
 
 	public function onConsoleException(ConsoleExceptionEvent $event)
 	{
 		$exception = $event->getException();
-		$exceptionId = $this->formatter->getAppName() . '-' . md5(microtime());
+		$exceptionId = $this->appName . '-' . md5(microtime());
 
 		$code = ($exception->getCode() < 300 || $exception->getCode() >= 600) ? 500 : $exception->getCode();
 
@@ -49,12 +51,12 @@ class SyrupExceptionListener
 		}
 
 		$content = array(
-			'status'    => 'error',
-			'error'     => 'Application error',
-			'code'      => $code,
-			'message'   => 'Contact support@keboola.com and attach this exception id.',
-			'exceptionId'   => $exceptionId,
-			'runId'     => $this->formatter->getRunId()
+			'status' => 'error',
+			'error' => 'Application error',
+			'code' => $code,
+			'message' => 'Contact support@keboola.com and attach this exception id.',
+			'exceptionId' => $exceptionId,
+			'runId' => $this->runId
 		);
 
 		$method = 'critical';
@@ -65,8 +67,8 @@ class SyrupExceptionListener
 		}
 
 		$logData = array(
-			'exception'     => $exception,
-			'exceptionId'   => $exceptionId,
+			'exception' => $exception,
+			'exceptionId' => $exceptionId,
 		);
 
 		// SyrupExceptionInterface holds additional data
@@ -82,15 +84,15 @@ class SyrupExceptionListener
 	public function onKernelException(GetResponseForExceptionEvent $event)
 	{
 		$requestData = [
-			'url'   => $event->getRequest()->getUri(),
+			'url' => $event->getRequest()->getUri(),
 			'query' => $event->getRequest()->query->all(),
-			'body'  => $event->getRequest()->getContent()
+			'body' => $event->getRequest()->getContent()
 		];
 
 		// You get the exception object from the received event
 		$exception = $event->getException();
 
-		$exceptionId = $this->formatter->getAppName() . '-' . md5(microtime());
+		$exceptionId = $this->appName . '-' . md5(microtime());
 
 		// Customize your response object to display the exception details
 		$response = new Response();
@@ -112,13 +114,13 @@ class SyrupExceptionListener
 		}
 
 		$content = array(
-			'status'    => 'error',
-			'error'     => 'Application error',
-			'code'      => $code,
-			'message'   => 'Contact support@keboola.com and attach this exception id.',
-			'request'   => $requestData,
-			'exceptionId'   => $exceptionId,
-			'runId'     => $this->formatter->getRunId()
+			'status'  => 'error',
+			'error'  => 'Application error',
+			'code' => $code,
+			'message' => 'Contact support@keboola.com and attach this exception id.',
+			'request' => $requestData,
+			'exceptionId' => $exceptionId,
+			'runId' => $this->runId
 		);
 
 		$method = 'critical';
@@ -129,8 +131,8 @@ class SyrupExceptionListener
 		}
 
 		$logData = array(
-			'exception'     => $exception,
-			'exceptionId'   => $exceptionId,
+			'exception' => $exception,
+			'exceptionId' => $exceptionId,
 		);
 
 		// SyrupExceptionInterface holds additional data

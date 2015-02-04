@@ -208,7 +208,7 @@ class ApiController extends BaseController
 		$sapiEvent = new SapiEvent();
 		$sapiEvent->setComponent($componentName);
 		$sapiEvent->setMessage($message);
-		$sapiEvent->setRunId($this->container->get('syrup.monolog.json_formatter')->getRunId());
+		$sapiEvent->setRunId($this->storageApi->getRunId());
 		$sapiEvent->setType($type);
 
 		$this->storageApi->createEvent($sapiEvent);

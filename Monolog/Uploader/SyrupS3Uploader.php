@@ -14,6 +14,11 @@ use Aws\S3\S3Client;
 use Guzzle\Http\Client;
 use Keboola\StorageApi\Aws\Plugin\Backoff\BackoffPlugin;
 
+/**
+ * Class SyrupS3Uploader
+ * @package Syrup\ComponentBundle\Monolog\Uploader
+ * @deprecated use Syrup\ComponentBundle\Aws\S3\Uploader instead
+ */
 class SyrupS3Uploader
 {
 	/**
