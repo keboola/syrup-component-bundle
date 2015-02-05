@@ -1424,16 +1424,16 @@
         },
         {
             "name": "keboola/syrup",
-            "version": "1.8.0",
+            "version": "1.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/syrup.git",
-                "reference": "1709d1d77462cd0a36178efeb81be28a614da2cd"
+                "reference": "b1e63d1b2c73012391047f71f6d3ac4fdeb6755f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/syrup/zipball/1709d1d77462cd0a36178efeb81be28a614da2cd",
-                "reference": "1709d1d77462cd0a36178efeb81be28a614da2cd",
+                "url": "https://api.github.com/repos/keboola/syrup/zipball/b1e63d1b2c73012391047f71f6d3ac4fdeb6755f",
+                "reference": "b1e63d1b2c73012391047f71f6d3ac4fdeb6755f",
                 "shasum": ""
             },
             "require": {
@@ -1464,7 +1464,7 @@
                 "MIT"
             ],
             "description": "Syrup - Concentrated extract(or)s",
-            "time": "2015-02-05 14:19:17"
+            "time": "2015-02-05 14:45:10"
         },
         {
             "name": "kriswallsmith/assetic",
