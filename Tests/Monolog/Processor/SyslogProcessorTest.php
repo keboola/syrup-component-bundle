@@ -9,19 +9,17 @@ namespace SyrupComponentBundle\Tests\Monolog\Processor;
 
 use Syrup\ComponentBundle\Aws\S3\Uploader;
 use Symfony\Component\HttpFoundation\Request;
-use Syrup\ComponentBundle\Job\Metadata\Job;
-use Syrup\ComponentBundle\Monolog\Processor\LogProcessor;
+use Syrup\ComponentBundle\Monolog\Processor\SyslogProcessor;
 use Syrup\ComponentBundle\Service\StorageApi\StorageApiService;
 use Syrup\ComponentBundle\Tests\Monolog\TestCase;
 
 
-class LogProcessorTest extends TestCase
+class SyslogProcessorTest extends TestCase
 {
 
 	/**
-	 * @covers Syrup\ComponentBundle\Monolog\Processor\LogProcessor::__invoke
-	 * @covers Syrup\ComponentBundle\Monolog\Processor\LogProcessor::processRecord
-	 * @covers Syrup\ComponentBundle\Monolog\Processor\LogProcessor::setJob
+	 * @covers Syrup\ComponentBundle\Monolog\Processor\SyslogProcessor::__invoke
+	 * @covers Syrup\ComponentBundle\Monolog\Processor\SyslogProcessor::processRecord
 	 */
 	public function testProcessor()
 	{
@@ -36,12 +34,7 @@ class LogProcessorTest extends TestCase
 		$storageApiService = new StorageApiService();
 		$storageApiService->setRequest($request);
 
-		$processor = new LogProcessor(SYRUP_APP_NAME, $storageApiService, $s3Uploader);
-		$processor->setJob(new Job([
-			'id' => uniqid(),
-			'runId' => uniqid(),
-			'lockName' => uniqid()
-		]));
+		$processor = new SyslogProcessor(SYRUP_APP_NAME, $storageApiService, $s3Uploader);
 		$record = $processor($this->getRecord());
 		$this->assertArrayHasKey('component', $record);
 		$this->assertEquals(SYRUP_APP_NAME, $record['component']);
@@ -55,8 +48,6 @@ class LogProcessorTest extends TestCase
 		$this->assertArrayHasKey('owner', $record['token']);
 		$this->assertArrayHasKey('id', $record['token']['owner']);
 		$this->assertArrayHasKey('name', $record['token']['owner']);
-		$this->assertArrayHasKey('job', $record);
-		$this->assertArrayHasKey('id', $record['job']);
 	}
 
 }

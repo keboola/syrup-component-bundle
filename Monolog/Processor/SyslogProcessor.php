@@ -13,16 +13,13 @@ use Syrup\ComponentBundle\Service\StorageApi\StorageApiService;
 /**
  * Injects info about component and used Storage Api token
  */
-class LogProcessor
+class SyslogProcessor
 {
 
 	private $componentName;
 	private $tokenData;
 	private $runId;
-	/**
-	 * @var JobInterface
-	 */
-	private $job;
+
 	/**
 	 * @var Uploader
 	 */
@@ -41,9 +38,14 @@ class LogProcessor
 		}
 	}
 
-	public function setJob(JobInterface $job)
+	public function setRunId($runId)
 	{
-		$this->job = $job;
+		$this->runId = $runId;
+	}
+
+	public function setTokenData($tokenData)
+	{
+		$this->tokenData = $tokenData;
 	}
 
 	/**
@@ -104,10 +106,6 @@ class LogProcessor
 		}
 		if (!count($record['extra'])) {
 			unset($record['extra']);
-		}
-
-		if ($this->job) {
-			$record['job'] = $this->job->getLogData();
 		}
 
 		return $record;

@@ -44,19 +44,19 @@ class StorageApiHandler extends \Monolog\Handler\AbstractHandler
 		$event->setComponent($this->appName);
 		$event->setMessage($record['message']);
 		$event->setRunId($this->storageApiClient->getRunId());
-		if (isset($record['context']) && count($record['context'])) {
-			$event->setParams($record['context']);
+
+		$params = [];
+		if (isset($record['http'])) {
+			$params['http'] = $record['http'];
 		}
+		$event->setParams($params);
 
 		$results = [];
-		if (isset($record['exceptionId'])) {
-			$results['exceptionId'] = $record['exceptionId'];
+		if (isset($record['context']['exceptionId'])) {
+			$results['exceptionId'] = $record['context']['exceptionId'];
 		}
-		if (isset($record['request'])) {
-			$results['request'] = $record['request'];
-		}
-		if (isset($record['job'])) {
-			$results['job'] = $record['job'];
+		if (isset($record['context']['job'])) {
+			$results['job'] = $record['context']['job'];
 		}
 		$event->setResults($results);
 
@@ -70,7 +70,6 @@ class StorageApiHandler extends \Monolog\Handler\AbstractHandler
 				$type = Event::TYPE_ERROR;
 				$event->setMessage("Application error");
 				$event->setDescription("Contact support@keboola.com");
-				$event->setParams([]);
 				break;
 			case Logger::WARNING:
 			case Logger::NOTICE:

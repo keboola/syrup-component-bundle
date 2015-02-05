@@ -23,7 +23,7 @@ use Syrup\ComponentBundle\Command\JobCommand;
 use Syrup\ComponentBundle\Exception\UserException;
 use Syrup\ComponentBundle\Listener\SyrupExceptionListener;
 use Syrup\ComponentBundle\Monolog\Formatter\JsonFormatter;
-use Syrup\ComponentBundle\Monolog\Processor\LogProcessor;
+use Syrup\ComponentBundle\Monolog\Processor\SyslogProcessor;
 use Syrup\ComponentBundle\Service\StorageApi\StorageApiService;
 
 class SyrupExceptionListenerTest extends KernelTestCase
@@ -48,7 +48,7 @@ class SyrupExceptionListenerTest extends KernelTestCase
 		]);
 		$this->testLogHandler = new TestHandler();
 		$this->testLogHandler->setFormatter(new JsonFormatter());
-		$this->testLogHandler->pushProcessor(new LogProcessor(SYRUP_APP_NAME, $storageApiService, $uploader));
+		$this->testLogHandler->pushProcessor(new SyslogProcessor(SYRUP_APP_NAME, $storageApiService, $uploader));
 		$logger = new \Monolog\Logger('test', [$this->testLogHandler]);
 		$this->listener = new SyrupExceptionListener(SYRUP_APP_NAME, $storageApiService, $logger);
 	}
