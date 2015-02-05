@@ -8,10 +8,7 @@
 namespace Syrup\ComponentBundle\Tests\Controller;
 
 
-use Symfony\Bundle\FrameworkBundle\Client;
-use Symfony\Component\HttpFoundation\Request;
 use Syrup\ComponentBundle\Controller\BaseController;
-use Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter;
 use Syrup\ComponentBundle\Test\WebTestCase;
 
 class BaseControllerTest extends WebTestCase

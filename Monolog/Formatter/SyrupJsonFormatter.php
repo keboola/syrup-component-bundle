@@ -7,20 +7,22 @@
 
 namespace Syrup\ComponentBundle\Monolog\Formatter;
 
-use Monolog\Formatter\JsonFormatter;
 use Monolog\Logger;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\Debug\ExceptionHandler;
-use Syrup\ComponentBundle\Exception\NoRequestException;
 use Syrup\ComponentBundle\Exception\SyrupComponentException;
-use Syrup\ComponentBundle\Exception\UserException;
 use Syrup\ComponentBundle\Job\Metadata\JobInterface;
 use Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Event;
 use Syrup\ComponentBundle\Service\StorageApi\StorageApiService;
 
-class SyrupJsonFormatter extends JsonFormatter
+/**
+ * Class SyrupJsonFormatter
+ * @package Syrup\ComponentBundle\Monolog\Formatter
+ * @deprecated
+ */
+class SyrupJsonFormatter extends \Monolog\Formatter\JsonFormatter
 {
 	protected $appName;
 

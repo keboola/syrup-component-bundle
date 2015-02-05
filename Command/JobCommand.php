@@ -74,16 +74,30 @@ class JobCommand extends ContainerAwareCommand
 		$encryptor = $this->getContainer()->get('syrup.encryptor');
 
 		$this->sapiClient = new SapiClient([
-			'token'     => $encryptor->decrypt($this->job->getToken()['token']),
-			'url'       => $this->getContainer()->getParameter('storage_api.url'),
+			'token' => $encryptor->decrypt($this->job->getToken()['token']),
+			'url' => $this->getContainer()->getParameter('storage_api.url'),
 			'userAgent' => $this->job->getComponent(),
 		]);
 		$this->sapiClient->setRunId($this->job->getRunId());
+		/** @var \Syrup\ComponentBundle\Service\StorageApi\StorageApiService $storageApiService */
+		$storageApiService = $this->getContainer()->get('storage_api');
+		$storageApiService->setClient($this->sapiClient);
 
+		/** @var \Syrup\ComponentBundle\Monolog\Processor\JobProcessor $logProcessor */
+		$logProcessor = $this->getContainer()->get('syrup.monolog.job_processor');
+		$logProcessor->setJob($this->job);
+
+		/** @var \Syrup\ComponentBundle\Monolog\Processor\SyslogProcessor $logProcessor */
+		$logProcessor = $this->getContainer()->get('syrup.monolog.syslog_processor');
+		$logProcessor->setRunId($this->job->getRunId());
+		$logProcessor->setTokenData($this->sapiClient->getLogData());
+
+		//@TODO DEPRECATED
 		/** @var SyrupJsonFormatter $logFormatter */
 		$logFormatter = $this->getContainer()->get('syrup.monolog.json_formatter');
 		$logFormatter->setStorageApiClient($this->sapiClient);
 		$logFormatter->setJob($this->job);
+		//@TODO DEPRECATED
 
 		// Lock DB
 		/** @var Connection $conn */

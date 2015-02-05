@@ -23,7 +23,7 @@ class StorageApiService
 
 	protected $storageApiUrl;
 
-	public function __construct($storageApiUrl)
+	public function __construct($storageApiUrl = 'https://connection.keboola.com')
 	{
 		$this->storageApiUrl = $storageApiUrl;
 	}
@@ -31,6 +31,11 @@ class StorageApiService
 	public function setRequest($request = null)
 	{
 		$this->request = $request;
+	}
+
+	public function setClient(Client $client)
+	{
+		$this->client = $client;
 	}
 
 	public function getClient()

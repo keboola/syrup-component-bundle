@@ -69,10 +69,10 @@ class ApiController extends BaseController
 	    }
 	    $messageId = $this->enqueue($jobId, $queueName);
 
-	    $this->logger->info(sprintf('Job %s created', $jobId), [
-		    'jobId'         => $jobId,
-		    'sqsQueue'      => $queueName,
-		    'sqsMessageId'  => $messageId
+	    $this->logger->info('Job created', [
+		    'sqsQueue' => $queueName,
+		    'sqsMessageId' => $messageId,
+		    'job' => $job->getLogData()
 	    ]);
 
 	    // Response with link to job resource
@@ -208,7 +208,7 @@ class ApiController extends BaseController
 		$sapiEvent = new SapiEvent();
 		$sapiEvent->setComponent($componentName);
 		$sapiEvent->setMessage($message);
-		$sapiEvent->setRunId($this->container->get('syrup.monolog.json_formatter')->getRunId());
+		$sapiEvent->setRunId($this->storageApi->getRunId());
 		$sapiEvent->setType($type);
 
 		$this->storageApi->createEvent($sapiEvent);

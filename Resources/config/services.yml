@@ -1,7 +1,7 @@
 services:
     syrup.componentbundle.listener.exception:
         class: Syrup\ComponentBundle\Listener\SyrupExceptionListener
-        arguments: [@logger, @syrup.monolog.json_formatter]
+        arguments: [%app_name%, @storage_api, @logger]
         tags:
             - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
             - { name: kernel.event_listener, event: console.exception, method: onConsoleException }
@@ -11,13 +11,40 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
 
+#   deprecated
     syrup.monolog.s3_uploader:
         class: Syrup\ComponentBundle\Monolog\Uploader\SyrupS3Uploader
         arguments: [%uploader%]
 
+#   deprecated
     syrup.monolog.json_formatter:
         class: Syrup\ComponentBundle\Monolog\Formatter\SyrupJsonFormatter
         arguments: [%app_name%, @syrup.monolog.s3_uploader, @storage_api]
+
+
+    syrup.s3_uploader:
+            class: Syrup\ComponentBundle\Aws\S3\Uploader
+            arguments: [%uploader%]
+
+    syrup.monolog.sapi_handler:
+        class: Syrup\ComponentBundle\Monolog\Handler\StorageApiHandler
+        arguments: [%app_name%, @storage_api]
+    syrup.monolog.syslog_processor:
+        class: Syrup\ComponentBundle\Monolog\Processor\SyslogProcessor
+        arguments: [%app_name%, @storage_api, @syrup.s3_uploader]
+        tags:
+            - { name: monolog.processor, method: processRecord, handler: syrup_syslog }
+    syrup.monolog.request_processor:
+        class: Syrup\ComponentBundle\Monolog\Processor\RequestProcessor
+        arguments: [@request_stack, @syrup.s3_uploader]
+        tags:
+            - { name: monolog.processor, method: processRecord }
+    syrup.monolog.job_processor:
+        class: Syrup\ComponentBundle\Monolog\Processor\JobProcessor
+        tags:
+            - { name: monolog.processor, method: processRecord }
+    syrup.monolog.formatter:
+        class: Syrup\ComponentBundle\Monolog\Formatter\JsonFormatter
 
     syrup.routing_loader:
         class: Syrup\ComponentBundle\Routing\Loader

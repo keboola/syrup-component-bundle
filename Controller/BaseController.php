@@ -37,16 +37,7 @@ class BaseController extends Controller
 		$this->initLogger();
 		$this->initTemp();
 
-		if ($request->isMethod('POST') || $request->isMethod('PUT')) {
-			$params = $request->getContent();
-		} else {
-			$params = $request->query->all();
-		}
-
-		$this->logger->debug('Component ' . $this->componentName . ' started action ' . $actionName, array(
-			'method'    => $request->getMethod(),
-			'params'    => $params
-		));
+		$this->logger->debug('Component ' . $this->componentName . ' started action ' . $actionName);
 	}
 
 	protected function initTemp()
