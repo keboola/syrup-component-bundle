@@ -116,6 +116,8 @@ class SyrupExceptionListenerTest extends KernelTestCase
 		$records = $this->testLogHandler->getRecords();
 		$this->assertCount(1, $records);
 		$record = array_pop($records);
+		$this->assertArrayHasKey('priority', $record);
+		$this->assertEquals('ERROR', $record['priority']);
 		$this->assertArrayHasKey('exception', $record);
 		$this->assertArrayHasKey('class', $record['exception']);
 		$this->assertEquals('Syrup\ComponentBundle\Exception\UserException', $record['exception']['class']);
@@ -135,6 +137,8 @@ class SyrupExceptionListenerTest extends KernelTestCase
 		$records = $this->testLogHandler->getRecords();
 		$this->assertCount(2, $records);
 		$record = array_pop($records);
+		$this->assertArrayHasKey('priority', $record);
+		$this->assertEquals('CRITICAL', $record['priority']);
 		$this->assertArrayHasKey('exception', $record);
 		$this->assertArrayHasKey('class', $record['exception']);
 		$this->assertEquals('Keboola\StorageApi\ClientException', $record['exception']['class']);
