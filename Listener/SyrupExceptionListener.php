@@ -86,10 +86,10 @@ class SyrupExceptionListener
 		$content = array(
 			'status'  => 'error',
 			'error'  => 'Application error',
-			'code' => $code,
+			'code' => (int)$code,
 			'message' => 'Contact support@keboola.com and attach this exception id.',
 			'exceptionId' => $exceptionId,
-			'runId' => $this->runId
+			'runId' => (int)$this->runId
 		);
 
 		$method = 'critical';
