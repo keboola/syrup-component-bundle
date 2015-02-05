@@ -78,8 +78,6 @@ class SyrupExceptionListenerTest extends KernelTestCase
 		$this->assertArrayHasKey('message', $record['exception']);
 		$this->assertArrayHasKey('code', $record['exception']);
 		$this->assertArrayHasKey('attachment', $record['exception']);
-		$this->assertArrayHasKey('error', $record);
-		$this->assertEquals('Application error', $record['error']);
 
 		$message = uniqid();
 		$level = 500;
@@ -102,8 +100,6 @@ class SyrupExceptionListenerTest extends KernelTestCase
 		$this->assertArrayHasKey('exception', $record);
 		$this->assertArrayHasKey('class', $record['exception']);
 		$this->assertEquals('Syrup\ComponentBundle\Exception\UserException', $record['exception']['class']);
-		$this->assertArrayHasKey('error', $record);
-		$this->assertEquals('User error', $record['error']);
 	}
 
 	/**
@@ -123,8 +119,6 @@ class SyrupExceptionListenerTest extends KernelTestCase
 		$this->assertArrayHasKey('exception', $record);
 		$this->assertArrayHasKey('class', $record['exception']);
 		$this->assertEquals('Syrup\ComponentBundle\Exception\UserException', $record['exception']['class']);
-		$this->assertArrayHasKey('error', $record);
-		$this->assertEquals('User error', $record['error']);
 		$response = $event->getResponse();
 		$this->assertEquals(400, $response->getStatusCode());
 		$jsonResponse = json_decode($response->getContent(), true);
@@ -144,8 +138,6 @@ class SyrupExceptionListenerTest extends KernelTestCase
 		$this->assertArrayHasKey('exception', $record);
 		$this->assertArrayHasKey('class', $record['exception']);
 		$this->assertEquals('Keboola\StorageApi\ClientException', $record['exception']['class']);
-		$this->assertArrayHasKey('error', $record);
-		$this->assertEquals('Application error', $record['error']);
 		$response = $event->getResponse();
 		$this->assertEquals(500, $response->getStatusCode());
 		$jsonResponse = json_decode($response->getContent(), true);

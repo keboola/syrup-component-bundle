@@ -33,8 +33,7 @@ class LogProcessor
 		$this->componentName = $componentName;
 		$this->s3Uploader = $s3Uploader;
 		try {
-			// does not work for commands
-			// @TODO manually set SAPI client to StorageApiService in command
+			// does not work for some commands
 			$storageApiClient = $storageApiService->getClient();
 			$this->tokenData = $storageApiClient->getLogData();
 			$this->runId = $storageApiClient->getRunId();
@@ -62,17 +61,6 @@ class LogProcessor
 		$record['runId'] = $this->runId;
 		$record['pid'] = getmypid();
 		$record['priority'] = $record['level_name'];
-
-		switch($record['level']) {
-			case Logger::ERROR:
-				$record['error'] = 'User error';
-				break;
-			case Logger::CRITICAL:
-			case Logger::ALERT:
-			case Logger::EMERGENCY:
-				$record['error'] = 'Application error';
-				break;
-		}
 
 		if ($this->tokenData) {
 			$record['token'] = [
@@ -108,6 +96,9 @@ class LogProcessor
 			}
 		}
 
+		if (isset($record['context']['data']) && !count($record['context']['data'])) {
+			unset($record['context']['data']);
+		}
 		if (!count($record['context'])) {
 			unset($record['context']);
 		}

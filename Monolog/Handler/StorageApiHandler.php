@@ -44,7 +44,9 @@ class StorageApiHandler extends \Monolog\Handler\AbstractHandler
 		$event->setComponent($this->appName);
 		$event->setMessage($record['message']);
 		$event->setRunId($this->storageApiClient->getRunId());
-		$event->setParams($record['context']);
+		if (isset($record['context']) && count($record['context'])) {
+			$event->setParams($record['context']);
+		}
 
 		$results = [];
 		if (isset($record['exceptionId'])) {
