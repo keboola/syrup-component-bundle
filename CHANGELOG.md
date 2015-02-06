@@ -1,4 +1,6 @@
-## 1.12.1       
+All other releases are described directly on [GitHub Releases page](https://github.com/keboola/syrup-component-bundle/releases)
+
+## 1.12.1
  * [Chore]      Added HookExecutorInterface, method HookExecutorInterface::postExecution implemented in JobCommand (runs after job is executed)
 
 ## 1.12.0       
