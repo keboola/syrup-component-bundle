@@ -101,11 +101,16 @@ class SyslogProcessor
 		if (isset($record['context']['data']) && !count($record['context']['data'])) {
 			unset($record['context']['data']);
 		}
-		if (!count($record['context'])) {
-			unset($record['context']);
-		}
 		if (!count($record['extra'])) {
 			unset($record['extra']);
+		}
+		if (!count($record['context'])) {
+			unset($record['context']);
+		} else {
+			$json = json_encode($record['context']);
+			if (strlen($json) > 1024) {
+				$record['context'] = $this->s3Uploader->uploadString('context', $json, 'text/json');
+			}
 		}
 
 		return $record;
