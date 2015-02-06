@@ -8,58 +8,58 @@ use Syrup\ComponentBundle\Job\Metadata\JobManager;
 
 class HookExecutor extends \Syrup\ComponentBundle\Job\Executor implements HookExecutorInterface
 {
-	const HOOK_RESULT_KEY = 'postExecution';
-	const HOOK_RESULT_VALUE = 'done';
+    const HOOK_RESULT_KEY = 'postExecution';
+    const HOOK_RESULT_VALUE = 'done';
 
-	/**
-	 * @var Job
-	 */
-	private $job;
+    /**
+     * @var Job
+     */
+    private $job;
 
-	/**
-	 * @var JobManager
-	 */
-	private $jobManager;
+    /**
+     * @var JobManager
+     */
+    private $jobManager;
 
-	/**
-	 * @param JobManager $jobManager
-	 */
-	public function __construct(JobManager $jobManager)
-	{
-		$this->jobManager = $jobManager;
-	}
+    /**
+     * @param JobManager $jobManager
+     */
+    public function __construct(JobManager $jobManager)
+    {
+        $this->jobManager = $jobManager;
+    }
 
-	/**
-	 * @param Job $job
-	 * @return array
-	 */
-	public function execute(Job $job)
-	{
-		parent::execute($job);
+    /**
+     * @param Job $job
+     * @return array
+     */
+    public function execute(Job $job)
+    {
+        parent::execute($job);
 
-		$this->job = $job;
+        $this->job = $job;
 
-		return array('testing' => 'HookExecutor');
-	}
+        return array('testing' => 'HookExecutor');
+    }
 
-	/**
-	 * Hook for modify job after job execution
-	 *
-	 * @param Job $job
-	 * @return void
-	 */
-	public function postExecution(Job $job)
-	{
-		if ($job->getId() !== $this->job->getId()) {
-			throw new \InvalidArgumentException('Given job must be same as previous executed');
-		}
+    /**
+     * Hook for modify job after job execution
+     *
+     * @param Job $job
+     * @return void
+     */
+    public function postExecution(Job $job)
+    {
+        if ($job->getId() !== $this->job->getId()) {
+            throw new \InvalidArgumentException('Given job must be same as previous executed');
+        }
 
-		if ($job->getComponent() !== $this->job->getComponent()) {
-			throw new \InvalidArgumentException('Given job must be same as previous executed');
-		}
+        if ($job->getComponent() !== $this->job->getComponent()) {
+            throw new \InvalidArgumentException('Given job must be same as previous executed');
+        }
 
-		$job->setResult($job->getResult() + array(self::HOOK_RESULT_KEY => self::HOOK_RESULT_VALUE));
+        $job->setResult($job->getResult() + array(self::HOOK_RESULT_KEY => self::HOOK_RESULT_VALUE));
 
-		$this->jobManager->updateJob($job);
-	}
+        $this->jobManager->updateJob($job);
+    }
 }

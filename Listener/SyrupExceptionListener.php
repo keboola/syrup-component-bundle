@@ -19,111 +19,111 @@ use Syrup\ComponentBundle\Service\StorageApi\StorageApiService;
 
 class SyrupExceptionListener
 {
-	/**
-	 * @var \Monolog\Logger
-	 */
-	protected $logger;
+    /**
+     * @var \Monolog\Logger
+     */
+    protected $logger;
 
-	protected $appName;
-	protected $runId;
+    protected $appName;
+    protected $runId;
 
-	public function __construct($appName, StorageApiService $storageApiService, Logger $logger)
-	{
-		$this->appName = $appName;
-		try {
-			$storageApiClient = $storageApiService->getClient();
-			$this->runId = $storageApiClient->getRunId();
-		} catch (NoRequestException $e) {
-		} catch (UserException $e) {
-		}
-		$this->logger = $logger;
-	}
+    public function __construct($appName, StorageApiService $storageApiService, Logger $logger)
+    {
+        $this->appName = $appName;
+        try {
+            $storageApiClient = $storageApiService->getClient();
+            $this->runId = $storageApiClient->getRunId();
+        } catch (NoRequestException $e) {
+        } catch (UserException $e) {
+        }
+        $this->logger = $logger;
+    }
 
-	public function onConsoleException(ConsoleExceptionEvent $event)
-	{
-		$exception = $event->getException();
-		$exceptionId = $this->appName . '-' . md5(microtime());
+    public function onConsoleException(ConsoleExceptionEvent $event)
+    {
+        $exception = $event->getException();
+        $exceptionId = $this->appName . '-' . md5(microtime());
 
-		$logData = array(
-			'exception' => $exception,
-			'exceptionId' => $exceptionId,
-		);
+        $logData = array(
+            'exception' => $exception,
+            'exceptionId' => $exceptionId,
+        );
 
-		// SyrupExceptionInterface holds additional data
-		if ($exception instanceof SyrupExceptionInterface) {
-			$logData['data'] = $exception->getData();
-		}
+        // SyrupExceptionInterface holds additional data
+        if ($exception instanceof SyrupExceptionInterface) {
+            $logData['data'] = $exception->getData();
+        }
 
-		// Log exception
-		$method = ($exception instanceof UserException) ? 'error' : 'critical';
-		$this->logger->$method($exception->getMessage(), $logData);
-	}
+        // Log exception
+        $method = ($exception instanceof UserException) ? 'error' : 'critical';
+        $this->logger->$method($exception->getMessage(), $logData);
+    }
 
-	public function onKernelException(GetResponseForExceptionEvent $event)
-	{
-		$exception = $event->getException();
-		$exceptionId = $this->appName . '-' . md5(microtime());
+    public function onKernelException(GetResponseForExceptionEvent $event)
+    {
+        $exception = $event->getException();
+        $exceptionId = $this->appName . '-' . md5(microtime());
 
-		// Customize your response object to display the exception details
-		$response = new Response();
+        // Customize your response object to display the exception details
+        $response = new Response();
 
-		$code = ($exception->getCode() < 300 || $exception->getCode() >= 600) ? 500 : $exception->getCode();
+        $code = ($exception->getCode() < 300 || $exception->getCode() >= 600) ? 500 : $exception->getCode();
 
-		// exception is by default Application Exception
-		$isUserException = false;
+        // exception is by default Application Exception
+        $isUserException = false;
 
-		// HttpExceptionInterface is a special type of exception that
-		// holds status code and header details
-		if ($exception instanceof HttpExceptionInterface) {
-			$code = $exception->getStatusCode();
-			$response->headers->replace($exception->getHeaders());
+        // HttpExceptionInterface is a special type of exception that
+        // holds status code and header details
+        if ($exception instanceof HttpExceptionInterface) {
+            $code = $exception->getStatusCode();
+            $response->headers->replace($exception->getHeaders());
 
-			if ($code < 500) {
-				$isUserException = true;
-			}
-		}
+            if ($code < 500) {
+                $isUserException = true;
+            }
+        }
 
-		$content = array(
-			'status'  => 'error',
-			'error'  => 'Application error',
-			'code' => (int)$code,
-			'message' => 'Contact support@keboola.com and attach this exception id.',
-			'exceptionId' => $exceptionId,
-			'runId' => (int)$this->runId
-		);
+        $content = array(
+            'status'  => 'error',
+            'error'  => 'Application error',
+            'code' => (int)$code,
+            'message' => 'Contact support@keboola.com and attach this exception id.',
+            'exceptionId' => $exceptionId,
+            'runId' => (int)$this->runId
+        );
 
-		$method = 'critical';
-		if ($isUserException) {
-			$method = 'error';
-			$content['error'] = 'User error';
-			$content['message'] = $exception->getMessage();
-		}
+        $method = 'critical';
+        if ($isUserException) {
+            $method = 'error';
+            $content['error'] = 'User error';
+            $content['message'] = $exception->getMessage();
+        }
 
-		$logData = array(
-			'exception' => $exception,
-			'exceptionId' => $exceptionId,
-		);
+        $logData = array(
+            'exception' => $exception,
+            'exceptionId' => $exceptionId,
+        );
 
-		// SyrupExceptionInterface holds additional data
-		if ($exception instanceof SyrupExceptionInterface) {
-			$data = $exception->getData();
-			if ($data) {
-				$logData['data'] = $data;
-			}
-		}
+        // SyrupExceptionInterface holds additional data
+        if ($exception instanceof SyrupExceptionInterface) {
+            $data = $exception->getData();
+            if ($data) {
+                $logData['data'] = $data;
+            }
+        }
 
-		$response->setContent(json_encode($content));
-		$response->setStatusCode($code);
-		$response->headers->set('Content-Type', 'application/json');
-		$response->headers->set('Access-Control-Allow-Origin', '*');
-		$response->headers->set('Access-Control-Allow-Methods', '*');
-		$response->headers->set('Access-Control-Allow-Headers', '*');
-		$response->headers->set('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+        $response->setContent(json_encode($content));
+        $response->setStatusCode($code);
+        $response->headers->set('Content-Type', 'application/json');
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', '*');
+        $response->headers->set('Access-Control-Allow-Headers', '*');
+        $response->headers->set('Cache-Control', 'private, no-cache, no-store, must-revalidate');
 
-		// Send the modified response object to the event
-		$event->setResponse($response);
+        // Send the modified response object to the event
+        $event->setResponse($response);
 
-		// Log exception
-		$this->logger->$method($exception->getMessage(), $logData);
-	}
+        // Log exception
+        $this->logger->$method($exception->getMessage(), $logData);
+    }
 }

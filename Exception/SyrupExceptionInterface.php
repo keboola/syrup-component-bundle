@@ -8,17 +8,15 @@
 
 namespace Syrup\ComponentBundle\Exception;
 
-
 interface SyrupExceptionInterface
 {
-	/**
-	 * @return array
-	 */
-	public function getData();
+    /**
+     * @return array
+     */
+    public function getData();
 
-	/**
-	 * @param array $data
-	 */
-	public function setData(array $data);
-
+    /**
+     * @param array $data
+     */
+    public function setData(array $data);
 }

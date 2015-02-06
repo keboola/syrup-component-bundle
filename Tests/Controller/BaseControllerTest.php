@@ -7,7 +7,6 @@
 
 namespace Syrup\ComponentBundle\Tests\Controller;
 
-
 use Syrup\ComponentBundle\Controller\BaseController;
 use Syrup\ComponentBundle\Test\WebTestCase;
 
@@ -69,7 +68,7 @@ class BaseControllerTest extends WebTestCase
     }
 
     public function testCreateJsonResponse()
-	{
+    {
         $controller = new BaseController();
 
         $result = array('one' => uniqid(), 'two' => uniqid());
@@ -91,5 +90,5 @@ class BaseControllerTest extends WebTestCase
         $this->assertEquals(array('*'), $responseHeaders['access-control-allow-methods']);
         $this->assertArrayHasKey('access-control-allow-headers', $responseHeaders);
         $this->assertEquals(array('*'), $responseHeaders['access-control-allow-headers']);
-	}
+    }
 }

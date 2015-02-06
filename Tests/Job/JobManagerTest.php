@@ -1,4 +1,11 @@
 <?php
+/**
+ * Created by Miroslav Čillík <miro@keboola.com>
+ * Date: 11/06/14
+ * Time: 16:36
+ */
+namespace SyrupComponentBundle\Tests\Job;
+
 use Elasticsearch\Client as ElasticClient;
 use Keboola\Encryption\EncryptorInterface;
 use Keboola\StorageApi\Client as SapiClient;
@@ -6,193 +13,187 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Syrup\ComponentBundle\Job\Metadata\Job;
 use Syrup\ComponentBundle\Job\Metadata\JobManager;
 
-/**
- * Created by Miroslav Čillík <miro@keboola.com>
- * Date: 11/06/14
- * Time: 16:36
- */
-
 class JobManagerTest extends WebTestCase
 {
-	/** @var JobManager */
-	protected static $jobManager;
+    /** @var JobManager */
+    protected static $jobManager;
 
-	/** @var SapiClient */
-	protected static $sapiClient;
+    /** @var SapiClient */
+    protected static $sapiClient;
 
-	/** @var EncryptorInterface */
-	protected static $encryptor;
+    /** @var EncryptorInterface */
+    protected static $encryptor;
 
-	/** @var ElasticClient */
-	protected static $elasticClient;
+    /** @var ElasticClient */
+    protected static $elasticClient;
 
-	public static function setUpBeforeClass()
-	{
-		self::$kernel = static::createKernel();
-		self::$kernel->boot();
+    public static function setUpBeforeClass()
+    {
+        self::$kernel = static::createKernel();
+        self::$kernel->boot();
 
-		self::$elasticClient = self::$kernel->getContainer()->get('syrup.elasticsearch');
+        self::$elasticClient = self::$kernel->getContainer()->get('syrup.elasticsearch');
 
-		self::$jobManager = self::$kernel->getContainer()->get('syrup.job_manager');
+        self::$jobManager = self::$kernel->getContainer()->get('syrup.job_manager');
 
-		self::$sapiClient = new SapiClient([
-			'token' => self::$kernel->getContainer()->getParameter('storage_api.test.token'),
-			'url' => self::$kernel->getContainer()->getParameter('storage_api.test.url'),
-			'userAgent' => SYRUP_APP_NAME,
-		]);
+        self::$sapiClient = new SapiClient([
+            'token' => self::$kernel->getContainer()->getParameter('storage_api.test.token'),
+            'url' => self::$kernel->getContainer()->getParameter('storage_api.test.url'),
+            'userAgent' => SYRUP_APP_NAME,
+        ]);
 
-		self::$encryptor = self::$kernel->getContainer()->get('syrup.encryptor');
+        self::$encryptor = self::$kernel->getContainer()->get('syrup.encryptor');
 
-		// clear data
-		$sapiData = self::$sapiClient->getLogData();
-		$projectId = $sapiData['owner']['id'];
+        // clear data
+        $sapiData = self::$sapiClient->getLogData();
+        $projectId = $sapiData['owner']['id'];
 
-		$jobs = self::$jobManager->getJobs($projectId, SYRUP_APP_NAME);
-		foreach ($jobs as $job) {
-			self::$elasticClient->delete([
-				'index' => $job['_index'],
-				'type' => $job['_type'],
-				'id' => $job['id']
-			]);
-		}
-	}
+        $jobs = self::$jobManager->getJobs($projectId, SYRUP_APP_NAME);
+        foreach ($jobs as $job) {
+            self::$elasticClient->delete([
+                'index' => $job['_index'],
+                'type' => $job['_type'],
+                'id' => $job['id']
+            ]);
+        }
+    }
 
-	private function createJob()
-	{
-		$tokenData = self::$sapiClient->verifyToken();
+    private function createJob()
+    {
+        $tokenData = self::$sapiClient->verifyToken();
 
-		return new Job([
-			'id'        => self::$sapiClient->generateId(),
-			'runId'     => self::$sapiClient->generateId(),
-			'project'   => [
-				'id'        => $tokenData['owner']['id'],
-				'name'      => $tokenData['owner']['name']
-			],
-			'token'     => [
-				'id'            => $tokenData['id'],
-				'description'   => $tokenData['description'],
-				'token'         => self::$encryptor->encrypt(self::$sapiClient->getTokenString())
-			],
-			'component' => SYRUP_APP_NAME,
-			'command'   => 'run',
-			'process'   => [
-				'host'  => 'test',
-				'pid'   => posix_getpid()
-			],
-			'createdTime'   => date('c')
-		]);
-	}
+        return new Job([
+            'id'        => self::$sapiClient->generateId(),
+            'runId'     => self::$sapiClient->generateId(),
+            'project'   => [
+                'id'        => $tokenData['owner']['id'],
+                'name'      => $tokenData['owner']['name']
+            ],
+            'token'     => [
+                'id'            => $tokenData['id'],
+                'description'   => $tokenData['description'],
+                'token'         => self::$encryptor->encrypt(self::$sapiClient->getTokenString())
+            ],
+            'component' => SYRUP_APP_NAME,
+            'command'   => 'run',
+            'process'   => [
+                'host'  => 'test',
+                'pid'   => posix_getpid()
+            ],
+            'createdTime'   => date('c')
+        ]);
+    }
 
-	private function assertJob(Job $job, $resJob)
-	{
-		$this->assertEquals($job->getId(), $resJob['id']);
-		$this->assertEquals($job->getRunId(), $resJob['runId']);
-		$this->assertEquals($job->getLockName(), $resJob['lockName']);
+    private function assertJob(Job $job, $resJob)
+    {
+        $this->assertEquals($job->getId(), $resJob['id']);
+        $this->assertEquals($job->getRunId(), $resJob['runId']);
+        $this->assertEquals($job->getLockName(), $resJob['lockName']);
 
-		$this->assertEquals($job->getProject()['id'], $resJob['project']['id']);
-		$this->assertEquals($job->getProject()['name'], $resJob['project']['name']);
+        $this->assertEquals($job->getProject()['id'], $resJob['project']['id']);
+        $this->assertEquals($job->getProject()['name'], $resJob['project']['name']);
 
-		$this->assertEquals($job->getToken()['id'], $resJob['token']['id']);
-		$this->assertEquals($job->getToken()['description'], $resJob['token']['description']);
-		$this->assertEquals($job->getToken()['token'], $resJob['token']['token']);
+        $this->assertEquals($job->getToken()['id'], $resJob['token']['id']);
+        $this->assertEquals($job->getToken()['description'], $resJob['token']['description']);
+        $this->assertEquals($job->getToken()['token'], $resJob['token']['token']);
 
-		$this->assertEquals($job->getComponent(), $resJob['component']);
-		$this->assertEquals($job->getStatus(), $resJob['status']);
-	}
+        $this->assertEquals($job->getComponent(), $resJob['component']);
+        $this->assertEquals($job->getStatus(), $resJob['status']);
+    }
 
-	public function testIndexJob()
-	{
-		$job = $this->createJob();
-		$id = self::$jobManager->indexJob($job);
+    public function testIndexJob()
+    {
+        $job = $this->createJob();
+        $id = self::$jobManager->indexJob($job);
 
-		$res = self::$elasticClient->get(array(
-			'index' => self::$jobManager->getIndexCurrent(),
-			'type'  => 'jobs',
-			'id'    => $id
-		));
+        $res = self::$elasticClient->get(array(
+            'index' => self::$jobManager->getIndexCurrent(),
+            'type'  => 'jobs',
+            'id'    => $id
+        ));
 
-		$resJob = $res['_source'];
+        $resJob = $res['_source'];
 
-		$this->assertJob($job, $resJob);
-	}
+        $this->assertJob($job, $resJob);
+    }
 
-	public function testUpdateJob()
-	{
-		$newJob = $this->createJob();
+    public function testUpdateJob()
+    {
+        $newJob = $this->createJob();
 
-		$id = self::$jobManager->indexJob($newJob);
-
-
-		$job = self::$jobManager->getJob($id);
-
-		$job->setStatus(Job::STATUS_CANCELLED);
-
-		self::$jobManager->updateJob($job);
-
-		$job = self::$jobManager->getJob($id);
-
-		$this->assertEquals($job->getStatus(), Job::STATUS_CANCELLED);
+        $id = self::$jobManager->indexJob($newJob);
 
 
-		$job->setStatus(Job::STATUS_WARNING);
+        $job = self::$jobManager->getJob($id);
 
-		self::$jobManager->updateJob($job);
+        $job->setStatus(Job::STATUS_CANCELLED);
 
-		$job = self::$jobManager->getJob($id);
+        self::$jobManager->updateJob($job);
 
-		$this->assertEquals($job->getStatus(), Job::STATUS_WARNING);
-	}
+        $job = self::$jobManager->getJob($id);
 
-	public function testGetJob()
-	{
-		$job = $this->createJob();
-		$id = self::$jobManager->indexJob($job);
+        $this->assertEquals($job->getStatus(), Job::STATUS_CANCELLED);
 
-		$resJob = self::$jobManager->getJob($id);
 
-		$this->assertJob($job, $resJob->getData());
-	}
+        $job->setStatus(Job::STATUS_WARNING);
 
-	public function testGetJobs()
-	{
-		$job = $this->createJob();
-		self::$jobManager->indexJob($job);
+        self::$jobManager->updateJob($job);
 
-		$job2 = $this->createJob();
-		self::$jobManager->indexJob($job2);
+        $job = self::$jobManager->getJob($id);
 
-		$retries = 0;
+        $this->assertEquals($job->getStatus(), Job::STATUS_WARNING);
+    }
 
-		$res = [];
-		while ($retries < 7) {
-			$delaySecs = 2 * pow(2, $retries);
-			sleep($delaySecs);
-			$retries++;
+    public function testGetJob()
+    {
+        $job = $this->createJob();
+        $id = self::$jobManager->indexJob($job);
 
-			$projectId = $job->getProject()['id'];
+        $resJob = self::$jobManager->getJob($id);
 
-			$res = self::$jobManager->getJobs($projectId, SYRUP_APP_NAME, null, null, '-1 day', 'now');
+        $this->assertJob($job, $resJob->getData());
+    }
 
-			if (count($res) >= 2) {
-				break;
-			}
-		}
+    public function testGetJobs()
+    {
+        $job = $this->createJob();
+        self::$jobManager->indexJob($job);
 
-		$job1Asserted = false;
-		$job2Asserted = false;
+        $job2 = $this->createJob();
+        self::$jobManager->indexJob($job2);
 
-		foreach ($res as $r) {
-			if ($r['id'] == $job->getId()) {
-				$this->assertJob($job, $r);
-				$job1Asserted = true;
-			}
-			if ($r['id'] == $job2->getId()) {
-				$this->assertJob($job2, $r);
-				$job2Asserted = true;
-			}
-		}
+        $retries = 0;
 
-		$this->assertTrue($job1Asserted);
-		$this->assertTrue($job2Asserted);
-	}
+        $res = [];
+        while ($retries < 7) {
+            $delaySecs = 2 * pow(2, $retries);
+            sleep($delaySecs);
+            $retries++;
+
+            $projectId = $job->getProject()['id'];
+
+            $res = self::$jobManager->getJobs($projectId, SYRUP_APP_NAME, null, null, '-1 day', 'now');
+
+            if (count($res) >= 2) {
+                break;
+            }
+        }
+
+        $job1Asserted = false;
+        $job2Asserted = false;
+
+        foreach ($res as $r) {
+            if ($r['id'] == $job->getId()) {
+                $this->assertJob($job, $r);
+                $job1Asserted = true;
+            }
+            if ($r['id'] == $job2->getId()) {
+                $this->assertJob($job2, $r);
+                $job2Asserted = true;
+            }
+        }
+
+        $this->assertTrue($job1Asserted);
+        $this->assertTrue($job2Asserted);
+    }
 }

@@ -7,7 +7,6 @@
 
 namespace Syrup\ComponentBundle\Tests\Service\Encryptor;
 
-
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Syrup\ComponentBundle\Service\Encryption\Encryptor;
 use Syrup\ComponentBundle\Service\Encryption\EncryptorFactory;
@@ -15,15 +14,15 @@ use Syrup\ComponentBundle\Service\Encryption\EncryptorFactory;
 class EncryptorTest extends WebTestCase
 {
 
-	public function testEncryptor()
-	{
-		$client = static::createClient();
-		$container = $client->getContainer();
+    public function testEncryptor()
+    {
+        $client = static::createClient();
+        $container = $client->getContainer();
 
-		$encryptor = $container->get('syrup.encryptor');
+        $encryptor = $container->get('syrup.encryptor');
 
-		$encrypted = $encryptor->encrypt('secret');
+        $encrypted = $encryptor->encrypt('secret');
 
-		$this->assertEquals('secret', $encryptor->decrypt($encrypted));
-	}
+        $this->assertEquals('secret', $encryptor->decrypt($encrypted));
+    }
 }

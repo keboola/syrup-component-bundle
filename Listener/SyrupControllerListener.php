@@ -16,22 +16,18 @@ use Syrup\ComponentBundle\Exception\UserException;
 
 class SyrupControllerListener
 {
-	public function onKernelController(FilterControllerEvent $event)
-	{
-		if (HttpKernelInterface::MASTER_REQUEST === $event->getRequestType()) {
-			$controllers = $event->getController();
-			if (is_array($controllers)) {
-				$controller = $controllers[0];
+    public function onKernelController(FilterControllerEvent $event)
+    {
+        if (HttpKernelInterface::MASTER_REQUEST === $event->getRequestType()) {
+            $controllers = $event->getController();
+            if (is_array($controllers)) {
+                $controller = $controllers[0];
 
-				if (
-					is_object($controller)
-					&& method_exists($controller, 'preExecute')
-					&& $event->getRequest()->getMethod() != 'OPTIONS'
-				) {
-					$controller->preExecute($event->getRequest());
-				}
-			}
-		}
-	}
-
+                if (is_object($controller) && method_exists($controller, 'preExecute')
+                    && $event->getRequest()->getMethod() != 'OPTIONS') {
+                    $controller->preExecute($event->getRequest());
+                }
+            }
+        }
+    }
 }

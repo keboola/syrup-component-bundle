@@ -7,31 +7,30 @@
 
 namespace Syrup\ComponentBundle\Service\Queue;
 
-
 use Doctrine\DBAL\Connection;
 use Syrup\ComponentBundle\Exception\ApplicationException;
 
 class QueueFactory
 {
-	protected $db;
+    protected $db;
 
-	protected $dbTable;
+    protected $dbTable;
 
-	public function __construct(Connection $db, $queueParams)
-	{
-		$this->db = $db;
-		$this->dbTable = $queueParams['db_table'];
-	}
+    public function __construct(Connection $db, $queueParams)
+    {
+        $this->db = $db;
+        $this->dbTable = $queueParams['db_table'];
+    }
 
-	public function get($name)
-	{
-		$sql = "SELECT access_key, secret_key, region, url FROM {$this->dbTable} WHERE id = '{$name}'";
-		$queueConfig = $this->db->query($sql)->fetch();
+    public function get($name)
+    {
+        $sql = "SELECT access_key, secret_key, region, url FROM {$this->dbTable} WHERE id = '{$name}'";
+        $queueConfig = $this->db->query($sql)->fetch();
 
-		if (!$queueConfig) {
-			throw new ApplicationException('No queue configuration found in DB.');
-		}
+        if (!$queueConfig) {
+            throw new ApplicationException('No queue configuration found in DB.');
+        }
 
-		return new QueueService($queueConfig);
-	}
+        return new QueueService($queueConfig);
+    }
 }

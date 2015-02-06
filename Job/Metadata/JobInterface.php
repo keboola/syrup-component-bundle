@@ -7,80 +7,79 @@
 
 namespace Syrup\ComponentBundle\Job\Metadata;
 
-
 interface JobInterface
 {
-	public function validate();
+    public function validate();
 
-	public function getData();
+    public function getData();
 
-	public function getComponent();
+    public function getComponent();
 
-	public function setComponent($component);
+    public function setComponent($component);
 
-	public function getId();
+    public function getId();
 
-	public function setId($id);
+    public function setId($id);
 
-	public function getProject();
+    public function getProject();
 
-	public function setProject(array $project);
+    public function setProject(array $project);
 
-	public function getToken();
+    public function getToken();
 
-	public function setToken(array $token);
+    public function setToken(array $token);
 
-	public function getCommand();
+    public function getCommand();
 
-	public function setCommand($cmd);
+    public function setCommand($cmd);
 
-	public function getParams();
+    public function getParams();
 
-	public function setParams(array $params);
+    public function setParams(array $params);
 
-	public function getStatus();
+    public function getStatus();
 
-	public function setStatus($status);
+    public function setStatus($status);
 
-	public function setResult($result);
+    public function setResult($result);
 
-	public function getResult();
+    public function getResult();
 
-	public function setRunId($runId);
+    public function setRunId($runId);
 
-	public function getRunId();
+    public function getRunId();
 
-	public function setLockName($lockName);
+    public function setLockName($lockName);
 
-	public function getLockName();
+    public function getLockName();
 
-	public function getProcess();
+    public function getProcess();
 
-	public function setProcess(array $process);
+    public function setProcess(array $process);
 
-	public function setCreatedTime($datetime);
+    public function setCreatedTime($datetime);
 
-	public function getCreatedTime();
+    public function getCreatedTime();
 
-	public function getStartTime();
+    public function getStartTime();
 
-	public function setStartTime($time);
+    public function setStartTime($time);
 
-	public function getEndTime();
+    public function getEndTime();
 
-	public function setEndTime($time);
+    public function setEndTime($time);
 
-	public function setDurationSeconds($seconds);
+    public function setDurationSeconds($seconds);
 
-	public function getDurationSeconds();
+    public function getDurationSeconds();
 
-	public function setWaitSeconds($seconds);
+    public function setWaitSeconds($seconds);
 
-	public function getWaitSeconds();
+    public function getWaitSeconds();
 
-	public function getIndex();
+    public function getIndex();
 
-	public function getType();
+    public function getType();
 
-	public function getLogData();
+    public function getLogData();
 }

@@ -7,31 +7,30 @@
 
 namespace Syrup\ComponentBundle\Service\SharedSapi;
 
-
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Table;
 
 class SharedSapiService
 {
-	/** @var Client */
-	protected $client;
+    /** @var Client */
+    protected $client;
 
-	public function __construct(Client $client)
-	{
-		$this->client = $client;
-	}
+    public function __construct(Client $client)
+    {
+        $this->client = $client;
+    }
 
-	public function log(Event $event)
-	{
-		if ($event->getId() == null) {
-			$event->setId($this->client->generateId());
-		}
-		$table = new Table($this->client, 'in.c-syrup.' . $event->getTable(), '', 'id');
-		$table->setHeader($event->getHeader());
-		$table->setFromArray(array($event->toArray()));
-		$table->setIncremental(true);
-		$table->setPartial(true);
+    public function log(Event $event)
+    {
+        if ($event->getId() == null) {
+            $event->setId($this->client->generateId());
+        }
+        $table = new Table($this->client, 'in.c-syrup.' . $event->getTable(), '', 'id');
+        $table->setHeader($event->getHeader());
+        $table->setFromArray(array($event->toArray()));
+        $table->setIncremental(true);
+        $table->setPartial(true);
 
-		$table->save();
-	}
+        $table->save();
+    }
 }

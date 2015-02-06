@@ -7,34 +7,33 @@
 
 namespace Syrup\ComponentBundle\Service\SharedSapi;
 
-
 abstract class Event
 {
-	protected $id;
+    protected $id;
 
-	protected $table;
+    protected $table;
 
-	protected $header;
+    protected $header;
 
-	public function getTable()
-	{
-		return $this->table;
-	}
+    public function getTable()
+    {
+        return $this->table;
+    }
 
-	public function getHeader()
-	{
-		return $this->header;
-	}
+    public function getHeader()
+    {
+        return $this->header;
+    }
 
-	public function getId()
-	{
-		return $this->id;
-	}
+    public function getId()
+    {
+        return $this->id;
+    }
 
-	public function setId($id)
-	{
-		$this->id = $id;
-	}
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
 
-	public abstract function toArray();
-} 
+    abstract public function toArray();
+}

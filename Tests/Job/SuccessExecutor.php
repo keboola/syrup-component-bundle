@@ -6,15 +6,15 @@ use Syrup\ComponentBundle\Job\Metadata\Job;
 
 class SuccessExecutor extends \Syrup\ComponentBundle\Job\Executor
 {
-	public function execute(Job $job)
-	{
-		parent::execute($job);
+    public function execute(Job $job)
+    {
+        parent::execute($job);
 
-		$e = new JobException(200, 'All done');
-		$e
-			->setStatus(Job::STATUS_SUCCESS)
-			->setResult(array('testing' => 'value'));
+        $e = new JobException(200, 'All done');
+        $e
+            ->setStatus(Job::STATUS_SUCCESS)
+            ->setResult(array('testing' => 'value'));
 
-		throw $e;
-	}
+        throw $e;
+    }
 }

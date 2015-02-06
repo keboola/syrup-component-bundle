@@ -12,17 +12,17 @@ use Syrup\ComponentBundle\Job\Metadata\Job;
 
 class Executor implements ExecutorInterface
 {
-	/** @var SapiClient */
-	protected $storageApi;
+    /** @var SapiClient */
+    protected $storageApi;
 
-	public function setStorageApi(SapiClient $sapi)
-	{
-		$this->storageApi = $sapi;
-	}
+    public function setStorageApi(SapiClient $sapi)
+    {
+        $this->storageApi = $sapi;
+    }
 
 
-	public function execute(Job $job)
-	{
-		// do stuff
-	}
+    public function execute(Job $job)
+    {
+        // do stuff
+    }
 }
