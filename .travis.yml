@@ -13,6 +13,10 @@ before_script:
   - mysql -e 'create database syrup;'
   - composer self-update
   - composer install -n --no-scripts
+script:
+  - ./vendor/bin/phpcs --standard=psr2 --ignore=vendor -n .
+#  - ./vendor/bin/phpmd src/ text codesize,unusedcode,naming,phpmd.xml
+  - ./vendor/bin/phpunit
 after_script:
   - ./codeclimate.sh
 notifications:
