@@ -16,6 +16,11 @@
         <ini name="date.timezone" value="Europe/Prague"/>
     </php>
     <testsuites>
+        <testsuite name="unit">
+            <directory>Tests/Aws</directory>
+            <directory>Tests/Listener</directory>
+            <directory>Tests/Monolog</directory>
+        </testsuite>
         <testsuite name="Syrup Component Bundle Tests">
             <directory>Tests/Command</directory>
             <directory>Tests/Controller</directory>
@@ -23,11 +28,6 @@
             <directory>Tests/Job</directory>
             <directory>Tests/Logger</directory>
             <directory>Tests/Service</directory>
-        </testsuite>
-        <testsuite name="unit">
-            <directory>Tests/Aws</directory>
-            <directory>Tests/Listener</directory>
-            <directory>Tests/Monolog</directory>
         </testsuite>
     </testsuites>
     <filter>

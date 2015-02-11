@@ -27,7 +27,8 @@
 		"phpunit/phpunit": "3.7.*",
 		"squizlabs/php_codesniffer": "2.*",
 		"symfony/var-dumper": "~2.6",
-        "codeclimate/php-test-reporter": "dev-master"
+        "codeclimate/php-test-reporter": "dev-master",
+        "phpmd/phpmd" : "@stable"
 	},
 	"scripts": {
 		"post-install-cmd": [
