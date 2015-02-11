@@ -59,6 +59,9 @@ class SyslogProcessor
 
     public function processRecord(array $record)
     {
+        if (isset($record['message']) && strlen($record['message'])>1024) {
+            $record['message'] = $this->s3Uploader->uploadString('message', $record['message']);
+        }
         $record['component'] = $this->componentName;
         $record['runId'] = $this->runId;
         $record['pid'] = getmypid();
