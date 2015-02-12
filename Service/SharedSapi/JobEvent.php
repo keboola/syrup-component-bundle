@@ -7,6 +7,11 @@
 
 namespace Syrup\ComponentBundle\Service\SharedSapi;
 
+/**
+ * Class JobEvent
+ * @package Syrup\ComponentBundle\Service\SharedSapi
+ * @deprecated
+ */
 class JobEvent extends Event
 {
     protected $table = 'jobs';

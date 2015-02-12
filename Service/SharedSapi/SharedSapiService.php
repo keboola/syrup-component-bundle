@@ -10,6 +10,11 @@ namespace Syrup\ComponentBundle\Service\SharedSapi;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Table;
 
+/**
+ * Class SharedSapiService
+ * @package Syrup\ComponentBundle\Service\SharedSapi
+ * @deprecated
+ */
 class SharedSapiService
 {
     /** @var Client */

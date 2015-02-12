@@ -7,6 +7,11 @@
 
 namespace Syrup\ComponentBundle\Service\SharedSapi;
 
+/**
+ * Class Event
+ * @package Syrup\ComponentBundle\Service\SharedSapi
+ * @deprecated
+ */
 abstract class Event
 {
     protected $id;

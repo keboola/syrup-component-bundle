@@ -225,6 +225,7 @@ class ApiController extends BaseController
      * @param Int $startTime
      * @param Int $endTime
      * @param String $params
+     * @deprecated
      */
     protected function logToSharedSapi($actionName, $status, $startTime, $endTime, $params)
     {
@@ -255,6 +256,7 @@ class ApiController extends BaseController
     }
 
     /**
+     * @deprecated
      * @return SharedSapiService
      */
     protected function getSharedSapi()
