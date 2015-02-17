@@ -1,7 +1,4 @@
-syrup-component-bundle
-======================
-
-### This repository has been merged to [keboola/syrup](https://github.com/keboola/syrup) and is considered deprecated. Look to [upgrade instructions](https://github.com/keboola/syrup/wiki/Upgrade)
+### This repository has been merged to [keboola/syrup](https://github.com/keboola/syrup) and is considered deprecated. See [upgrade instructions](https://github.com/keboola/syrup/wiki/Upgrade)
 
 ---
 
