@@ -1,9 +1,9 @@
 syrup-component-bundle
 ======================
 
-**This repository has been merged to [keboola/syrup](https://github.com/keboola/syrup) v 2.0 and is considered deprecated.**
+### This repository has been merged to [keboola/syrup](https://github.com/keboola/syrup) and is considered deprecated. Look to [upgrade instructions](https://github.com/keboola/syrup/wiki/Upgrade)
 
-
+---
 
 [![Build Status](https://travis-ci.org/keboola/syrup-component-bundle.svg?branch=master)](https://travis-ci.org/keboola/syrup-component-bundle)
 [![Code Climate](https://codeclimate.com/github/keboola/syrup-component-bundle/badges/gpa.svg)](https://codeclimate.com/github/keboola/syrup-component-bundle)
