@@ -82,6 +82,10 @@ class JobCommand extends ContainerAwareCommand
         $storageApiService = $this->getContainer()->get('storage_api');
         $storageApiService->setClient($this->sapiClient);
 
+        /** @var \Syrup\ComponentBundle\Monolog\Handler\StorageApiHandler $logHandler */
+        $logHandler = $this->getContainer()->get('syrup.monolog.sapi_handler');
+        $logHandler->setStorageApiClient($this->sapiClient);
+
         /** @var \Syrup\ComponentBundle\Monolog\Processor\JobProcessor $logProcessor */
         $logProcessor = $this->getContainer()->get('syrup.monolog.job_processor');
         $logProcessor->setJob($this->job);
