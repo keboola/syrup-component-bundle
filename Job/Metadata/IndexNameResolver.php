@@ -21,7 +21,7 @@ class IndexNameResolver
      */
     public static function getLastIndexName(array $indexNames)
     {
-        usort($indexNames, function($a, $b) {
+        usort($indexNames, function ($a, $b) {
             $aYear = self::getYearFromIndexName($a);
             $bYear = self::getYearFromIndexName($b);
 

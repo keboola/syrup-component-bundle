@@ -65,7 +65,7 @@ class StorageApiHandler extends \Monolog\Handler\AbstractHandler
         }
         $event->setResults($results);
 
-        switch($record['level']) {
+        switch ($record['level']) {
             case Logger::ERROR:
                 $type = Event::TYPE_ERROR;
                 break;

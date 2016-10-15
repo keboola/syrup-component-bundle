@@ -271,7 +271,7 @@ class ApiController extends BaseController
         }
 
         $chunks = explode('-', $value);
-        $ucfirsted = array_map(function($s) {
+        $ucfirsted = array_map(function ($s) {
             return ucfirst($s);
         }, $chunks);
 

@@ -313,10 +313,8 @@ class JobManager
             ]);
 
             return IndexNameResolver::getLastIndexName(array_keys($indices));
-
         } catch (Missing404Exception $e) {
             return null;
-
         }
     }
 }

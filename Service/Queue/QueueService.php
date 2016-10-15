@@ -59,7 +59,7 @@ class QueueService
         ));
 
         $queueUrl = $this->queueUrl;
-        return array_map(function($message) use ($queueUrl) {
+        return array_map(function ($message) use ($queueUrl) {
             return new QueueMessage(
                 $message['MessageId'],
                 json_decode($message['Body']),

@@ -90,7 +90,7 @@ class SyrupJsonFormatter extends \Monolog\Formatter\JsonFormatter
         $record['pid']          = getmypid();
         $record['runId']        = $this->getRunId();
 
-        switch($record['level']) {
+        switch ($record['level']) {
             case Logger::ERROR:
                 $record['error'] = 'User error';
                 break;
@@ -181,7 +181,7 @@ class SyrupJsonFormatter extends \Monolog\Formatter\JsonFormatter
         }
         $sapiEvent->setResults($results);
 
-        switch($record['level']) {
+        switch ($record['level']) {
             case Logger::ERROR:
                 $type = Event::TYPE_ERROR;
                 break;

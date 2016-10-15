@@ -63,6 +63,5 @@ class ComponentGenerator extends Generator
         if ('annotation' != $format) {
             $this->renderFile('bundle/routing.'.$format.'.twig', $dir.'/Resources/config/routing.'.$format, $parameters);
         }
-
     }
 }

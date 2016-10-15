@@ -75,6 +75,5 @@ class CreateIndexCommand extends ContainerAwareCommand
             $index = $jobManager->createIndex($settings, $mappings);
             echo "Created new index '" . $index ."'" . PHP_EOL;
         }
-
     }
 }
