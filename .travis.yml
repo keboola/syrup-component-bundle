@@ -11,8 +11,8 @@ services:
   - elasticsearch
 before_script:
   - mysql -e 'create database syrup;'
-  - composer self-update
-  - php -d memory_limit=-1 /home/travis/.phpenv/versions/$TRAVIS_PHP_VERSION/bin/composer.phar install -n --no-scripts
+  - curl -sS --fail https://getcomposer.org/installer | php 
+  - php -d memory_limit=-1 composer.phar install -n --no-scripts
 script:
   - ./vendor/bin/phpcs --standard=psr2 --ignore=vendor -n .
 #  - ./vendor/bin/phpmd src/ text codesize,unusedcode,naming,phpmd.xml
