@@ -7,8 +7,7 @@
 
 namespace Syrup\ComponentBundle\Aws\S3;
 
-use Aws\S3\Enum\CannedAcl;
-use Keboola\StorageApi\Aws\S3\S3Client;
+use Aws\S3\S3Client;
 
 class Uploader
 {
@@ -43,8 +42,12 @@ class Uploader
     {
         if (!$this->client) {
             $this->client = S3Client::factory(array(
-                'key' => $this->awsKey,
-                'secret' => $this->awsSecret
+                'credentials' => [
+                    'key' => $this->awsKey,
+                    'secret' => $this->awsSecret,
+                ],
+                'region' => 'us-east-1',
+                'version' => 'latest'
             ));
         }
         return $this->client;
@@ -81,12 +84,14 @@ class Uploader
     public function uploadString($name, $content, $contentType = 'text/plain')
     {
         $s3FileName = sprintf('%s-%s-%s', date('Y/m/d/Y-m-d-H-i-s'), uniqid(), $name);
+        $s3Bucket = substr($this->s3Bucket, 0, strpos($this->s3Bucket, '/'));
+        $s3Path = substr($this->s3Bucket, strpos($this->s3Bucket, '/') + 1);
 
         $this->getClient()->putObject(array(
-            'Bucket' => $this->s3Bucket,
-            'Key' => $s3FileName,
+            'Bucket' => $s3Bucket,
+            'Key' => $s3Path . '/' . $s3FileName,
             'Body' => $content,
-            'ACL' => CannedAcl::PRIVATE_ACCESS,
+            'ACL' => 'private',
             'ContentType' => $contentType
         ));
 

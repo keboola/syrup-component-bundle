@@ -13,9 +13,9 @@
 	"repositories": [],
 	"require": {
 		"php": ">=5.4.0",
-		"keboola/storage-api-client": "~2.11.0",
+		"keboola/storage-api-client": "~3.3.0",
 		"keboola/csv": "1.1.*",
-		"aws/aws-sdk-php": "2.6.*",
+		"aws/aws-sdk-php": "~3.19.0",
 		"keboola/php-encryption": "~0.2.0",
 		"elasticsearch/elasticsearch": "~1.0",
 		"sensio/generator-bundle": "~2.3",

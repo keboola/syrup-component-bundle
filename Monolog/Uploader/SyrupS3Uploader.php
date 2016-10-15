@@ -8,11 +8,8 @@
 
 namespace Syrup\ComponentBundle\Monolog\Uploader;
 
-use Aws\Common\Enum\ClientOptions;
-use Aws\S3\Enum\CannedAcl;
 use Aws\S3\S3Client;
 use Guzzle\Http\Client;
-use Keboola\StorageApi\Aws\Plugin\Backoff\BackoffPlugin;
 
 /**
  * Class SyrupS3Uploader
@@ -67,13 +64,15 @@ class SyrupS3Uploader
      */
     public function uploadString($name, $content, $contentType = 'text/plain', $shortenUrl = true)
     {
-        $s3FileName = $this->fileUniquePrefix() . $name;
+        $s3Bucket = substr($this->config['s3-upload-path'], 0, strpos($this->config['s3-upload-path'], '/'));
+        $s3Path = substr($this->config['s3-upload-path'], strpos($this->config['s3-upload-path'], '/') + 1);
+        $s3FileName = $s3Path . '/' . $this->fileUniquePrefix() . $name;
 
         $this->s3->putObject(array(
-            'Bucket' => $this->config['s3-upload-path'],
+            'Bucket' => $s3Bucket,
             'Key'    => $s3FileName,
             'Body'   => $content,
-            'ACL'    => CannedAcl::PRIVATE_ACCESS,
+            'ACL'    => 'private',
             'ContentType'   => $contentType
         ));
 
@@ -122,9 +121,12 @@ class SyrupS3Uploader
     protected function getS3()
     {
         $s3 = S3Client::factory(array(
-            'key' => $this->config['aws-access-key'],
-            'secret' => $this->config['aws-secret-key'],
-            ClientOptions::BACKOFF => BackoffPlugin::factory()
+            'credentials' => [
+                'key' => $this->config['aws-access-key'],
+                'secret' => $this->config['aws-secret-key'],
+            ],
+            'region' => 'us-east-1',
+            'version' => 'latest',
         ));
 
         return $s3;

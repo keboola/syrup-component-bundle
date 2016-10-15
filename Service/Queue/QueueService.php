@@ -20,8 +20,11 @@ class QueueService
     public function __construct(array $config)
     {
         $this->client = SqsClient::factory(array(
-            'key'       => $config['access_key'],
-            'secret'    => $config['secret_key'],
+            'credentials' => [
+                'key'       => $config['access_key'],
+                'secret'    => $config['secret_key'],
+            ],
+            'version' => 'latest',
             'region'    => $config['region']
         ));
         $this->queueUrl = $config['url'];
