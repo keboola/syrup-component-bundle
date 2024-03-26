@@ -12,3 +12,7 @@ See [wiki for more information](https://github.com/keboola/syrup-component-bundl
 
 Syrup Component Bundle provides all basic functionality which is common to all Syrup Components like logging, routing,
 exception handling, providing services as Storage API, Shared Config, file handling and so on.
+
+## License
+
+MIT licensed, see [LICENSE](./LICENSE) file.
